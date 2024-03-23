@@ -13,16 +13,15 @@
     .
     ├── README.md
     ├── 1-proposal
-    │	├── data-report
-    │	└── pre-analysis-plan
+    │   ├── data-report
+    │   └── pre-analysis-plan
     ├── 2-lit-review
     ├── 3-data
-    │	├── Wikipedia
-    │	├── WHO
-    │	└── README.md
+    │   ├── mpox-cases
+    │   └── wikipedia
     ├── 4-code
-    │	├── scripts
-    │	└── funcs
+    │   ├── scripts
+    │   └── funcs
     ├── 5-visualization
     └── 6-paper
 
