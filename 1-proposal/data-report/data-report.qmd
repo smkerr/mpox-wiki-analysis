@@ -1,0 +1,625 @@
+---
+title: Data Report
+subtitle: "Assessing Public Attention Towards the 2022-2023 Mpox Outbreak Using Wikipedia"
+author: Steven Kerr
+date: 31 January 2024
+date-format: "D MMMM YYYY"
+format: 
+  html:
+    theme: flatly 
+    toc: true
+    toc-depth: 2
+    highlight-style: github
+    fontfamily: libertinus
+    colorlinks: true
+    keep-tex: true
+df-print: kable 
+editor: visual
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(tibble.print_max = 10)
+```
+
+# Overview
+
+My topic focuses on assessing public attention towards the 2022-2023 multi-country mpox outbreak using Wikipedia data. As such, this analysis relies on two main data sources. First, country-level data on the weekly number of mpox cases is sourced from the World Health Organization (WHO). Second, Wikipedia analytics data on page view volume is sourced directly from Wikipedia.
+
+Before exploring the data, I'll start by loading all dependencies.
+
+```{r dependencies, warning=FALSE}
+# install dependencies
+#remotes::install_github("wikimedia/waxer@main")
+
+# load dependencies
+pacman::p_load(
+  dplyr,      # wrangle data    
+  forcats,    # factors
+  ggplot2,    # visualize data     
+  glue,       # string literals
+  gt,         # formatting tables
+  here,       # file paths
+  janitor,    # tidy & explore data
+  lubridate,  # dates & times
+  purrr,      # vectorize operations
+  RccpRoll,   # time series
+  readr,      # import data  
+  scales,     # scaling plots
+  tidyr,      # tidy data
+  waxer       # wikipedia data
+)
+
+# load custom functions
+source(here("code/funcs/helpers.R"))
+```
+
+# Mpox Case Data
+
+Mpox case data can be further divided into two subgroups based on their level of granularity. First, aggregated case data consists of the daily number of new cases by the date they were reported to public health authorities. Second, detailed case data comprises the daily number of new cases by either date of onset, date of diagnosis, or date or report. While both types of data are reported with a daily frequency at the country-level, their respective advantages and disadvantages give good reason to include both in this analysis.
+
+## Aggregated case data
+
+Daily aggregated numbers of mpox cases by country correspond with the date on which cases were reported to public health authorities. One advantage of this dataset is that it is considered to be largely complete since it comprises every confirmed and probable case reported to the national public health authorities.[^1] While this still leaves room for cases to go underreported in instances where an individual does not seek medical attention (e.g., for fear of stygmatization) or for asymptomatic cases, it still represents the most comprehensive view of the outbreak's scale. Aggregated data is available for all reported cases as of 31 December 2023.
+
+[^1]: For more information on what constitutes a confirmed or probable case, please refer to WHO's mpox case definitions: <https://www.who.int/emergencies/outbreak-toolkit/disease-outbreak-toolboxes/mpox-outbreak-toolbox>
+
+The aggregated dataset consists of the following variables:
+
+-   `country`: The country, area, or territory in which a given case was reported. Note that this does not necessarily correspond with the location where the patient was infected.
+
+-   `iso3`: Three-letter country codes corresponding with a country, area, or territory.
+
+-   `who_region`: Regions into which each country, area, or territory has been assigned by WHO. There are six regions: African Region, Region of the Americas, Eastern Mediterranean Region, European Region, South-East Asian Region, and Western Pacific Region.[^2]
+
+-   `date`: The date on which cases were reported to public health authorities.
+
+-   `new_confirmed_cases`: The number of new confirmed cases reported to public health authorities on a given date.
+
+-   `new_probable_cases`: The number of new probable cases reported to public health authorities on a given date.
+
+-   `new_deaths`: The number of new deaths reported to public health authorities on a given date. This does not necessarily reflect the precise date on which a case died, just the date on which public health authorities were notified of the death.
+
+-   `total_confirmed_cases`: The cumulative number of confirmed cases reported to public health authorities by a given date.
+
+-   `total_probable_cases`: The cumulative number of probable cases reported to public health authorities by a given date.
+
+-   `total_deaths`: The cumulative number of deaths reported to public health authorities by a given date.
+
+[^2]: <https://en.wikipedia.org/wiki/List_of_WHO_regions>
+
+```{r agg-load, message=FALSE}
+# aggregate data
+agg <- read_csv(here("data/WHO/mpox cases by country as of 31 December 2023.csv")) 
+
+head(agg)
+```
+
+The total number of confirmed cases, probable cases, and deaths worldwide can easily be tabulated.
+
+```{r agg-global}
+# extract total cases by country
+agg_total <- agg |> 
+  group_by(country) |> 
+  slice_max(date) |> 
+  ungroup() |> 
+  select(country, iso3, who_region, starts_with("total")) |> 
+  arrange(desc(total_confirmed_cases))
+
+# calculate total cases, globally 
+agg_total |> 
+  summarize(
+    total_confirmed_cases = sum(total_confirmed_cases),
+    total_probable_cases = sum(total_probable_cases),
+    total_deaths = sum(total_deaths)
+  )
+```
+
+The top 10 countries by number of confirmed cases are the United States of America (31,246), Brazil (10,967), Spain (7,752), France (4,171), Colombia (4,090), Mexico (4,078), the United Kingdom (3,875), Peru (3,812), Germany (3,800), and China[^3] (2,025).
+
+[^3]: Cases shown include those reported in mainland China (1,611), Taiwan (333), Hong Kong (80), and Macao (1).
+
+```{r agg-top10}
+# total cases, top 10 countries
+head(agg_total, 10)
+```
+
+As of 31 December 2023, mpox cases have been reported by 117 WHO Member States across all six WHO regions. The dataset contains cases reported between 7 January 2022 to 31 December 2023.
+
+```{r agg-summary}
+# number of countries
+unique(agg$country) |> length()
+
+# number of WHO regions
+unique(agg$who_region) |> length()
+
+# date range
+range(agg$date)
+```
+
+For this analysis, I will only consider confirmed cases. However, I do not expect this decision to greatly impact the results considering that probable cases only make up 0.7% of overall cases (652/93,682) and only eight countries report any probable cases. While Puerto Rico reports the highest proportion of probable cases at 42% of total cases (150/361), probable cases make up less than 5% of the remaining countries' total cases.
+
+```{r agg-probable, echo=FALSE, message=FALSE}
+agg_probable <- agg_total |> 
+  filter(total_probable_cases > 0) |> 
+  group_by(country) |> 
+  mutate(
+    total_cases = sum(total_confirmed_cases, total_probable_cases),
+    pct_probable_cases = total_probable_cases / total_cases * 100) |> 
+  arrange(desc(pct_probable_cases)) 
+
+agg_probable |> 
+  ggplot(aes(x = reorder(country, pct_probable_cases), y = pct_probable_cases)) + 
+  geom_col() + 
+  labs(
+    title = "Percentage of probable cases, by country",
+    subtitle = "data as of 31 Dec 2023 17:00 CET",
+    x = "",
+    y = "Percentage of probable cases"
+  ) + 
+  coord_flip() + 
+  theme_minimal()
+
+# save plot 
+ggsave(here("proposal/data-report/img/agg-pct-probable.png"))
+```
+
+While WHO collects aggregated data on a daily basis, nearly all countries' public health authorities report cases at a weekly frequency. As a result, it is more useful to aggregate cases by epidemic week. The epidemic curve below depicts the aggregated weekly number of cases by week reported.
+
+```{r agg-epicurve-overall-weekly, echo=FALSE, message=FALSE, warning=FALSE}
+# convert aggregate case data to weekly level
+agg <- agg |>
+  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |>
+  rename(cases = new_confirmed_cases, deaths = new_deaths) |>
+  group_by(date, country, iso3, who_region) |>
+  reframe(across(c(cases, deaths), ~ sum(., na.rm = TRUE)))
+
+# plot epidemic curve by week
+vis_epicurve(
+  agg, 
+  frequency = "weekly",
+  title = "Mpox epidemic curve", 
+  subtitle = "data as of 31 Dec 2023 17:00 CET"
+  )
+
+# save plot 
+ggsave(here("proposal/data-report/img/agg-epicurve-overall.png"))
+```
+
+While the global trend appears to have been quite coherent with the number of weekly cases peaking in July 2022, this disguises the fact that the trends in cases looked quite distinct at the WHO region-level.
+
+```{r agg-epicurve-regions, echo=FALSE, message=FALSE, warning=FALSE, fig.height=7.5}
+# plot epidemic curves by WHO region
+vis_epicurve(
+  agg, 
+  frequency = "weekly",
+  fill_by = "who_region",
+  facet_by = "who_region",
+  title = "Mpox epidemic curve by WHO region", 
+  subtitle = "data as of 31 Dec 2023 17:00 CET"
+)
+
+# save plot 
+ggsave(here("proposal/data-report/img/agg-epicurve-regions.png"))
+```
+
+Here we observe that there is substantial variation between the six WHO regions, with the Eastern Mediterranean Region, European Region, and Region of the Americas following a similar trend with cases peaking in summer/fall 2022, while cases in the South-East Asia Region and Western Pacific Region peak in summer/fall 2023. In contrast, cases reported by the African Region appear to be more uniformly distributed, reflecting the fact that mpox is endemic to certain areas of western and central Africa.
+
+## Detailed case data
+
+In addition to aggregated case data, WHO also collects line list data where each row corresponds with an individual case and contains information on demographics, clinical presentation, epidemiological exposure factors, and laboratory testing.[^4] Due to privacy concerns, line list data is stripped of all personally identifiable information and aggregated by country and date before being made available by WHO.[^5] In contrast to aggregated case data, the `date` variable of the detailed case dataset corresponds with either the date of symptom onset, the date of diagnosis (if date of symptom onset is not available), or the date of reporting (if date of symptom onset and date of diagnosis are not available).[^6] This difference in how cases are assigned to a date grants us a much more granular view of countries' epidemic curves, as shown below. Dates are aggregated at the weekly level to further protect individual cases' privacy.
+
+[^4]: <https://www.who.int/publications/m/item/monkeypox-minimum-dataset-case-reporting-form-(crf)>
+
+[^5]: <https://worldhealthorg.shinyapps.io/mpx_global/>
+
+[^6]: <https://worldhealthorg.shinyapps.io/mpx_global/>
+
+The detailed dataset consists of the following variables:
+
+-   `country`: The country, area, or territory in which a given case was reported. Note that this does not necessarily correspond with the location where the patient was infected.
+
+-   `iso3`: Three-letter country codes corresponding with a country, area, or territory.
+
+-   `who_region`: Regions into which each country, area, or territory has been assigned by WHO. There are six regions: African Region, Region of the Americas, Eastern Mediterranean Region, European Region, South-East Asian Region, and Western Pacific Region.[^7]
+
+-   `date`: The date of symptom onset, the date of diagnosis (if date of symptom onset is not available), or the date of reporting (if date of symptom onset and date of diagnosis are not available).[^8]
+
+-   `date_type`: One of the following: "Onset", "Diagnosis", or "Reported".
+
+-   `cases`: The number of new confirmed cases on a given date.
+
+[^7]: <https://en.wikipedia.org/wiki/List_of_WHO_regions>
+
+[^8]: <https://worldhealthorg.shinyapps.io/mpx_global/>
+
+```{r linelist, message=FALSE, warning=FALSE}
+# line list data
+ll <- read_csv(here("data/WHO/Country data by date of symptom onset.csv")) |> 
+  select(-who_region) |> 
+  rename(
+    who_region = who_region_long, 
+    date = reference_date
+    ) |> 
+  filter(between(date, as_date("2022-01-01"), as_date("2023-12-31")) | is.na(date)) |>
+  mutate(date_type = factor(date_type, levels = c("Onset", "Diagnosis", "Reported")))
+
+head(ll)
+```
+
+A significant disadvantage of this detailed dataset is that it only contains information 63% for all reported mpox cases (58,883/93,030). This is driven almost entirely by the fact that WHO no longer includes cases from the United States in this dataset, despite the fact that the United States represents 34% of global cases (31,246/93,030). That said, this data can still be useful for analysis of other countries. As such, detailed dataset can complement the aggregated data presented above.
+
+```{r ll-global}
+# calculate total cases by country
+ll_total <- ll |> 
+  group_by(country) |> 
+  summarize(total_confirmed_cases = sum(cases)) |> 
+  ungroup() |> 
+  arrange(desc(total_confirmed_cases))
+
+# calculate total cases, globally
+ll_total |> 
+  summarize(total_confirmed_cases = sum(total_confirmed_cases)) |> 
+  pull(total_confirmed_cases)
+```
+
+As of 31 December 2023, detailed mpox case data has been provided by 101 WHO Member States across all six WHO regions. The dataset contains cases from the period of 6 January 2022 to 28 December 2023.
+
+```{r ll-summary}
+# countries
+unique(ll$country) |> length()
+
+# WHO regions
+unique(ll$who_region) |> length()
+
+# date range
+range(ll$date)
+```
+
+While WHO collects line list data on a daily basis, this data is aggregated by epidemic week to safeguard the privacy of individual cases. The epidemic curve below depicts the weekly number of cases. Compared to the epidemic curves produced using aggregated data, the detailed data allows us to plot much smoother curves which seem to adhere more closely to the trend we might expect of an infectious disease outbreak.
+
+```{r ll-epicurve-overall, echo=FALSE, message=FALSE, warning=FALSE}
+# convert line list data to weekly level
+ll <- ll |>
+  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |>
+  group_by(date, date_type, country, iso3, who_region) |>
+  reframe(cases = sum(cases, na.rm = TRUE))
+
+# plot  epidemic curve
+vis_epicurve(
+  ll, 
+  data_type = "ll", 
+  frequency = "weekly",
+  title = "Mpox epidemic curve", 
+  subtitle = "data as of 31 Dec 2023 17:00 CET"
+  )
+
+# save plot 
+ggsave(here("proposal/data-report/img/ll-epicurve-overall.png"))
+```
+
+Again, while the global trend appears to have been quite coherent with the number of weekly cases peaking in July 2022, the trends vary at the WHO region-level.
+
+```{r ll-epicurve-regions, echo=FALSE, message=FALSE, warning=FALSE, fig.height=7.5}
+# plot epidemic curves by WHO region
+vis_epicurve(
+  ll, 
+  data_type = "ll", 
+  fill_by = "who_region",
+  facet_by = "who_region",
+  title = "Mpox epidemic curve by WHO region", 
+  subtitle = "data as of 31 Dec 2023 17:00 CET"
+)
+
+# save plot 
+ggsave(here("proposal/data-report/img/ll-epicurve-regions.png"))
+```
+
+# Wikipedia Data
+
+The Wikimedia Foundation makes it straightforward to access various analytics data related to its projects, including Wikipedia, by providing the [Wikimedia Analytics Query Service (AQS)](https://wikitech.wikimedia.org/wiki/Data_Engineering/Systems/AQS) [REST API](https://wikimedia.org/api/rest_v1/). AQS offers a range of analytics data, such as page view statistics, editor activity levels, and other traffic data from as far back as 1 August 2015. The REST API facilitates the retrieval of analytics data from Wikipedia in a structured way. Given that Wikipedia data is abundant, publicly accessible, and commonly used, many resources exist to easily access this data.[^9] {[waxer](https://wikimedia.github.io/waxer/)} is one such package which serves as a Wikimedia API wrapper that facilitates querying for traffic (pageviews, unique devices), user (e.g. active editors), and content-based metrics (e.g. edits counts, pages counts) from Wikimedia Analytics Query Service with R.
+
+[^9]: Mikhail Popov, Data Science Manager in Product Analytics at the Wikimedia Foundation, has published a list of R packages related to or affiliated with the Wikimedia Foundation here: <https://people.wikimedia.org/~bearloga/notes/r-pkgs.html>
+
+The first step of working with the {waxer} package involves defining the exact Wikipedia projects we are interested in.[^10] I'll use English Wikipedia to illustrate how the next steps work.
+
+[^10]: A complete collection of Wikipedia projects is available here: <https://www.mediawiki.org/wiki/Special:SiteMatrix>
+
+```{r waxr-params}
+# define projects
+project <- c("en.wikipedia")
+
+# define page names
+page_names <- c("Monkeypox virus", "Mpox") 
+```
+
+## Page views
+
+Since this project is concerned with assessing public attention, Wikipedia page view statistics will serve as our primary measure for online information-seeking behavior. We query page view statistics from the AQS REST API using the following specifications:
+
+-   `project`: The name of any Wikimedia project, for example en.wikipedia.
+
+-   `page_name`: The title of any article in the specified project.
+
+-   `access_method`: The method used to access the article. Options: "desktop", "mobile app", "mobile web", or "all".
+
+-   `agent_type`: The type of agent accessing the article. Options: "user", "bot/spider", "automated", or "all".
+
+-   `granularity`: The time unit for the response data. Options: "daily" or "monthly".
+
+-   `start_date`: The date of the first day to include.
+
+-   `end_date`: The date of the last day to include.
+
+-   `include_redirects`: Whether instances in which a user was redirected to an article should count towards the total view count for the destination page. Redirects are usually created for common typos and aliases to make it easier for users to arrive at a single article.[^11]
+
+[^11]: <https://www.mediawiki.org/wiki/Help:Redirects>
+
+```{r pageviews}
+# query page views
+pageviews <- wx_page_views(
+  project = project,
+  page_name = page_names,
+  access_method = "all", # desktop + mobile 
+  agent_type = "user", # human users
+  granularity = "daily", 
+  start_date = "20220101", # 1 Jan 2022
+  end_date = "20231231", # 31 Dec 2023 
+  include_redirects = TRUE
+)
+
+head(pageviews)
+```
+
+We start exploring the dataset by examining the absolute and relative frequency of different values within the `project` and `page_name` variables. As expected, all page views are for the English Wikipedia project. Notably, the "Mpox" article has a substantially higher traffic volume than the "Monkeypox virus" article (71% vs. 29%).
+
+```{r pageviews-vars}
+# frequency of projects and page names
+pageviews[1:2] |> 
+  map(~ tabyl(.x)) |> 
+  set_names(names(pageviews[1:2]))
+```
+
+Next, we explore the missingness of each of variable in the `pageviews` dataset. We find that `redirect_name` is the only column missing values. For the specified Wikipedia project and articles, 27% of page views were redirected from other search terms.
+
+```{r pageviews-missing, warning=FALSE}
+# % missing by column
+pageviews |> 
+  map_df(~sum(is.na(.)/length(.)) * 100)
+```
+
+Seeing as a substantial number of page views are driven by redirects, it is important to understand whether it is valid to include these redirects in our analysis. If search terms appear related to mpox or the monkeypox virus, then it is safe to assume that this represents online information-seeking behavior towards our topic. Our table shows that all search appear to directly relate to mpox or the monkeypox virus, so we conclude that is valid to include redirects in this analysis. This will be reevaluated and handled as more projects and articles are added to the analysis.
+
+```{r pageviews-redirects, echo=FALSE, warning=FALSE}
+# calculate max redirects
+max_redirects <- pageviews |> 
+  tabyl(redirect_name, page_name, show_na = FALSE) |> 
+  select(where(is.numeric)) |> 
+  max()
+
+# redirects heat map
+pageviews_tbl <- pageviews |> 
+  tabyl(redirect_name, page_name, show_na = FALSE) |> 
+  gt() |> 
+  cols_label(
+    redirect_name = "Redirected search"
+    ) |> 
+  tab_header(
+    title = "Redirects for user views",
+    subtitle = "English Wikipedia"
+    ) |> 
+  tab_spanner(
+    label = "Articles",
+    columns  = !redirect_name
+    ) |>
+  data_color(
+    columns = !redirect_name,
+    colors = col_numeric(
+      palette = c("white", "red"),
+      domain = c(0, max_redirects))
+    ) 
+
+pageviews_tbl
+
+# save plot 
+gtsave(pageviews_tbl, here("proposal/data-report/img/wiki-redirects-en.html"))
+```
+
+Considering that mpox case data is available at a weekly level of granularity, we aggregate page view data by week and plot the results below. We observer two large spikes, with the first centered on May 2022 when non-endemic countries began reporting mpox cases[^12] and the second centered on late July 2022 when WHO declared mpox to be a Public Health Emergency of International Concern (PHEIC).[^13] Other smaller peaks can be observed, although the general trend indicates that public attention decreases over time.
+
+[^12]: <https://www.who.int/emergencies/situations/monkeypox-oubreak-2022>
+
+[^13]: <https://www.who.int/europe/news/item/23-07-2022-who-director-general-declares-the-ongoing-monkeypox-outbreak-a-public-health-event-of-international-concern>
+
+```{r pageviews-plot, echo=FALSE, message=FALSE, warning=FALSE}
+# calculate weekly pageviews
+pageviews_wk <- pageviews |> 
+  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> 
+  filter(date >= as_date("2022-01-01")) |> 
+  group_by(project, page_name, date) |> 
+  summarize(views = sum(views))
+
+# plot page views
+ggplot(pageviews_wk) +
+  geom_line(aes(x = date, y = views, color = page_name)) +
+  scale_x_date(
+    limits = c(min(pageviews_wk$date), max(pageviews_wk$date)), 
+    expand = expansion(mult = 0.05),
+    date_breaks = "120 days",
+    date_labels = "%d %b\n%Y" 
+  ) + 
+  scale_y_continuous(
+    limits = c(0, NA), 
+    expand = expansion(mult = c(0.02, 0.02)), 
+    breaks = pretty_breaks(),
+    labels = comma_format()
+  ) +
+  theme_minimal() +
+  labs(
+    title = "User views for English Wikipedia articles on mpox",
+    x = "", 
+    y = "Views per week", 
+    color = "Article",
+    caption = "Source: Wikimedia Foundation"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+# save plot 
+ggsave(here("proposal/data-report/img/wiki-pageviews-en.png"))
+```
+
+## Project views
+
+Another element of this project involves developing a baseline for what online information-seeking behavior may have looked like in the absence of the mpox outbreak, as measured by Wikipedia article access. For this, we will use overall project views for the respective Wikipedia projects to detect seasonality and long-term trends in Wikipedia search trends. To illustrate what this looks, we examine the Wikipedia projects corresponding with the most common languages in the top 10 countries by number of mpox cases.
+
+```{r project-views, warning=FALSE}
+# list of wikipedia projects for languages used in top 10 countries
+projects <- c(
+  "English" = "en.wikipedia", # USA, UK
+  "Portuguese" = "pt.wikipedia", # Brazil
+  "Spanish" = "es.wikipedia", # Spain, Colombia, Mexico, Peru
+  "French" = "fr.wikipedia", # France
+  "German" = "de.wikipedia", # Germany
+  "Chinese" = "zh.wikipedia" # China
+)
+
+# query page views for multiple projects
+project_views <- map_dfr(
+  projects, 
+  wx_project_views,
+  access_method = "all", # desktop + mobile
+  agent_type = "user", # human users
+  granularity = "daily",
+  start_date = "20220101", # 1 Jan 2022
+  end_date = "20231231", # 31 Dec 2023
+  .id = "language"
+)
+
+head(project_views)
+```
+
+The plot below shows that English Wikipedia predominates overall Wikipedia traffic, with weekly traffic levels for the other language projects clustered together well below.
+
+```{r project-views-plot, echo=FALSE, message=FALSE, warning=FALSE}
+# calculate weekly project views
+project_views_wk <- project_views |> 
+  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> 
+  filter(date >= as_date("2022-01-01")) |> 
+  group_by(language, project, date) |> 
+  summarize(views = sum(views))
+
+# plot project views for multiple projects
+ggplot(project_views_wk) +
+  geom_line(aes(x = date, y = views, color = language)) +
+  scale_x_date(
+    limits = c(min(project_views_wk$date), max(project_views_wk$date)), 
+    expand = expansion(mult = 0.05),
+    date_breaks = "3 months",
+    date_labels = "%b\n%Y" 
+  ) + 
+  scale_y_continuous(
+    limits = c(0, NA), 
+    expand = expansion(mult = c(0.02, 0.02)), 
+    breaks = pretty_breaks(),
+    labels = scales::label_number(scale = 1e-6, suffix = "M")
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Weekly Wikipedia user traffic, by language",
+    x = "", 
+    y = "Views per week", 
+    color = "Language",
+    caption = "Source: Wikimedia Foundation"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+# save plot 
+ggsave(here("proposal/data-report/img/wiki-project-views.png"))
+```
+
+# Appendix
+
+While this Data Report showcases the underlying data structure of Wikipedia page view statistics using as "Mpox" and "Monkeypox virus" articles as mere examples, there are many other articles related to mpox and its symptoms[^14] that may also contribute to this analysis. Supplemental article titles are listed below. Since article titles have been recorded in English, the next step would be to cross-reference them with their corresponding titles for other Wikipedia projects.
+
+[^14]: <https://www.who.int/news-room/fact-sheets/detail/monkeypox>
+
+```{r alt-wiki-articles}
+# mpox symptoms
+page_names_symptoms <- c(
+  "Back pain",
+  "Balanitis",
+  "Chills",
+  "Conjunctivitis",
+  "Cough",
+  "Diarrhea",
+  "Edema",
+  "Encephalitis",
+  "Fatigue",
+  "Fever",
+  "Genital herpes",
+  "Headache",
+  "Lesion",
+  "List of skin conditions",
+  "Lymphadenopathy",
+  "Myalgia",
+  "Myocarditis",
+  "Proctitis",
+  "Rash",
+  "Skin condition",
+  "Sore throat",
+  "Urethritis",
+  "Vomiting"
+)
+
+# 2022-2023 mpox outbreak
+page_names_mpox <- c(
+ "2003 Midwest monkeypox outbreak",
+ "2022–2023 mpox outbreak",
+ "2022–2023 mpox outbreak in Asia",
+ "2022–2023 mpox outbreak in Australia",
+ "2022–2023 mpox outbreak in Austria",
+ "2022–2023 mpox outbreak in Belgium",
+ "2022–2023 mpox outbreak in Brazil",
+ "2022–2023 mpox outbreak in Canada",
+ "2022–2023 mpox outbreak in Chile",
+ "2022–2023 mpox outbreak in Colombia",
+ "2022–2023 mpox outbreak in Europe",
+ "2022–2023 mpox outbreak in France",
+ "2022–2023 mpox outbreak in Germany",
+ "2022–2023 mpox outbreak in Ghana",
+ "2022–2023 mpox outbreak in India",
+ "2022–2023 mpox outbreak in Israel",
+ "2022–2023 mpox outbreak in Italy",
+ "2022–2023 mpox outbreak in Japan",
+ "2022–2023 mpox outbreak in Mexico",
+ "2022–2023 mpox outbreak in the Netherlands",
+ "2022–2023 mpox outbreak in North America",
+ "2022–2023 mpox outbreak in Peru",
+ "2022–2023 mpox outbreak in the Philippines",
+ "2022–2023 mpox outbreak in Portugal",
+ "2022–2023 mpox outbreak in the Republic of Ireland",
+ "2022–2023 mpox outbreak in Singapore",
+ "2022–2023 mpox outbreak in South Africa",
+ "2022–2023 mpox outbreak in South America",
+ "2022–2023 mpox outbreak in Spain",
+ "2022–2023 mpox outbreak in Switzerland",
+ "2022–2023 mpox outbreak in Taiwan",
+ "2022–2023 mpox outbreak in the United Kingdom",
+ "2022–2023 mpox outbreak in the United States",
+ "ACAM2000",
+ "Modified vaccinia Ankara",
+ "Monkeypox virus",
+ "Mpox",
+ "Mpox in Nigeria",
+ "Mpox in the Democratic Republic of the Congo",
+ "Orthopoxvirus",
+ "Poxviridae",
+ "Smallpox vaccine",
+ "Timeline of the 2022–2023 mpox outbreak"
+ )
+```
