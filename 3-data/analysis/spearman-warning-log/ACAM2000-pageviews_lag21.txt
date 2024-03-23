@@ -1,0 +1,2 @@
+Error in cor.test.default(df$cases, df[[var]], method = "spearman", use = "complete.obs") : 
+  not enough finite observations
