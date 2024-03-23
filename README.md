@@ -15,7 +15,7 @@
     ├── 1-proposal
     │   ├── data-report
     │   └── pre-analysis-plan
-    ├── 2-lit-review
+    ├── 2-literature
     ├── 3-data
     │   ├── mpox-cases
     │   └── wikipedia
