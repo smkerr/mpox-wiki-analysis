@@ -38,19 +38,19 @@ pacman::p_load(
 )
 
 # load custom functions
-source(here("code/funcs/helpers.R"))
+source(here("4-code/funcs/helpers.R"))
 
 # Define keywords --------------------------------------------------------------
-source(here("code/scripts/01-define-keywords.R"))
+#source(here("code/scripts/01-define-keywords.R")) # Simplify: "mpox" and "monkeypox virus"
 
 # Wikipedia data ---------------------------------------------------------------
-source(here("code/scripts/02-prepare-wiki-data.R"))
+source(here("4-code/scripts/2-prepare-wiki-data.R"))
 
 # Mpox case data ---------------------------------------------------------------
-source(here("code/scripts/03-prepare-mpox-data.R"))
+source(here("4-code/scripts/3-prepare-mpox-data.R"))
 
 # Quality checks ---------------------------------------------------------------
-#source(here("code/scripts/04-check_data_quality.R"))
+#source(here("4-code/scripts/4-check_data_quality.R"))
 
 # Data analysis ----------------------------------------------------------------
-source(here("code/scripts/05-analyze_data.R"))
+source(here("4-code/scripts/5-analyze_data.R"))
