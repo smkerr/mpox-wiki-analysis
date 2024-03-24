@@ -16,10 +16,10 @@ pacman::p_load(
   #haven
   here,         # file paths
   httr,         # API requests
+  ISOcodes,     # ISO country codes
   janitor,      # tidy & explore data
   jsonlite,     # parse JSON
   lubridate,    # dates & times
-  #pageviews
   purrr,        # vectorize operations
   #RColorBrewer
   readr,        # import data
@@ -32,7 +32,6 @@ pacman::p_load(
   vars,         # vector autoregressive models
   waxer,        # Wikipedia pageviews
   WikipediR,    # Wikipedia links
-  #wikipediatrend
   writexl,      # save excel files
   zoo           # rolling averages
 )

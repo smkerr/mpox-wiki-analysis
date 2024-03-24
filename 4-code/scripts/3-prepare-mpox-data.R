@@ -6,9 +6,8 @@
 
 # Load data --------------------------------------------------------------------
 # load mpox case data
-#cases_df <- read_csv(here("data/input/OWID/owid-monkeypox-data.csv"))
 cases_df <- read_csv("https://raw.githubusercontent.com/owid/monkeypox/main/owid-monkeypox-data.csv")
-write_csv(cases_df, here(glue("data/input/OWID/owid-monkeypox-data ({format(today(), '%d %b %Y')}).csv")))
+write_csv(cases_df, here(glue("3-data/mpox-cases/owid-monkeypox-data ({format(today(), '%Y-%m-%d')}).csv")))
 
 # Prepare data -----------------------------------------------------------------
 # daily region-level case data
@@ -39,6 +38,7 @@ cases_wk <- cases_df |>
   group_by(country, iso3, date) |> 
   summarize(cases = sum(cases, na.rm = TRUE), cases_moving_avg = sum(cases_moving_avg, na.rm = TRUE)) |>  ### TODO: Valid method for aggregating moving average?
   ungroup()
+
 
 # Explore data -----------------------------------------------------------------
 # plot daily cases
@@ -74,7 +74,7 @@ cases_df |>
   )
 
 # save plot
-ggsave(here("visualization/mpox-cases-daily.png"))
+ggsave(here("5-visualization/mpox-cases-daily.png"), height = 7.75, width = 10)
 
 
 # plot 7-day average cases
@@ -97,7 +97,6 @@ cases_df |>
   ) +
   labs(
     title = "Mpox epidemic curve, 7-day average cases",
-    #subtitle = "data as of 31 Jan 2024 17:00 CET",
     x = "Date reported",
     y = "Cases",
     caption = "Source: World Health Organization via Our World in Data",
@@ -110,7 +109,7 @@ cases_df |>
   )
 
 # save plot
-ggsave(here("visualization/mpox-cases-daily.png"))
+ggsave(here("5-visualization/mpox-cases-7day-avg.png"), height = 7.75, width = 10)
 
 
 # plot weekly cases
@@ -146,7 +145,7 @@ cases_wk |>
   )
 
 # save results
-ggsave(here("visualization/mpox-cases-weekly.png"))
+ggsave(here("5-visualization/mpox-cases-weekly.png"), height = 7.75, width = 10)
 
 
 # plot weekly cases by region 
@@ -183,7 +182,7 @@ cases_region_df |>
   )
 
 # save results
-ggsave(here("visualization/mpox-cases-weekly-region.png"))
+ggsave(here("5-visualization/mpox-cases-weekly-region.png"), height = 7.75, width = 14)
 
 
 # plot weekly cases by region 
@@ -221,4 +220,4 @@ cases_region_df |>
   )
 
 # save results
-ggsave(here("visualization/mpox-cases-weekly-region-facetted.png"))
+ggsave(here("5-visualization/mpox-cases-weekly-region-facetted.png"), height = 7.75, width = 10)

@@ -5,35 +5,53 @@
 
 
 # Prepare data -----------------------------------------------------------------
-cases_df <- cases_df |> filter(country == "United States") ###
+# create reference table for ISO country codes
+iso_ref <- ISOcodes::ISO_3166_1 |>
+  select(iso2 = Alpha_2, iso3 = Alpha_3)
 
-mpox_df <- full_join(cases_df, pageviews_agg, by = "date") |>
+# merge ISO codes 
+mpox_df <- left_join(cases_df, iso_ref, by = join_by(iso3)) |> 
+  relocate(iso2, .before = iso3) |> 
+  full_join(pageviews_mpox, by = join_by(iso2, date)) |>
   select(
-    country, country_long, iso2, iso3, project, date,
-    pageviews, cases, cases_moving_avg
-  ) |>
+    country, iso2, iso3, project, date, pageviews_est, cases, cases_moving_avg
+  ) |> 
+  group_by(iso2) |>
+  mutate(country = if_else(
+    is.na(country),
+    first(country[!is.na(country)]),
+    country
+  )) |> 
+  mutate(iso3 = if_else(
+    is.na(iso3),
+    first(iso3[!is.na(iso3)]),
+    iso3
+  )) |> 
+  ungroup() |> 
   complete(fill = list(
-    country = "United States", # fill missing info
-    country_long = "United States of America",
-    iso2 = "US",
-    iso3 = "USA",
-    project = "en.wikipedia",
-    cases = 0,
-    cases_moving_avg = 0
-  )) |> ###
+   project = "en.wikipedia", ###
+   cases = 0,
+   cases_moving_avg = 0
+  )) |>
   filter(
+    !is.na(pageviews_est), ### remove countries without enough English Wikipedia pageviews
     date >= as_date("2022-05-01"), ###
     date <= as_date("2022-09-30") ###
   )
 
+### test 
+mpox_df <- mpox_df |> 
+  filter(iso3 == "USA")
+
 
 # Explore data -----------------------------------------------------------------
 # plot mpox-related pageviews and mpox cases
-coeff <- 0.01 # value to transform scales
+coeff <- 0.0021 # value to transform scales
 p <- mpox_df |>
   ggplot(aes(x = date)) +
   geom_col(aes(y = cases_moving_avg / coeff, fill = "7-day average confirmed cases")) +
-  geom_line(aes(y = pageviews, color = "Mpox-related pageviews"), linewidth = 1) +
+  geom_line(aes(y = pageviews_est, color = "Mpox-related pageviews"), linewidth = 1) +
+  facet_wrap(~country) +
   scale_x_date(date_labels = "%b %Y") +
   scale_y_continuous(
     name = "Mpox-related pageviews", # first axis
@@ -42,7 +60,7 @@ p <- mpox_df |>
   ) +
   scale_fill_brewer(type = "qual", palette = 3) +
   labs(
-    title = country_name,
+    #title = country_name,
     x = NULL,
     fill = NULL,
     color = NULL,
@@ -53,7 +71,7 @@ p <- mpox_df |>
 p
 
 # save plot
-ggsave(here("visualization/mpox-cases-&-wiki-pageviews.png"))
+ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)
 
 
 # Test stationarity -----------------------------------------------------------
@@ -61,7 +79,7 @@ ggsave(here("visualization/mpox-cases-&-wiki-pageviews.png"))
 #> Non-stationary data can lead to spurious results in subsequent analyses.
 
 # check stationarity of pageviews time-series
-adf.test(mpox_df$pageviews, alternative = "stationary")
+adf.test(mpox_df$pageviews_est, alternative = "stationary")
 # p-value > significance level of 0.05, so non-stationary
 # still need to difference...
 
@@ -73,7 +91,7 @@ adf.test(mpox_df$cases_moving_avg, alternative = "stationary")
 # first-order differencing
 mpox_df <- mpox_df |>
   mutate(
-    pageviews_diff1 = c(NA, diff(pageviews, lag = 1, differences = 1)),
+    pageviews_diff1 = c(NA, diff(pageviews_est, lag = 1, differences = 1)),
     cases_moving_avg_diff1 = c(NA, diff(cases_moving_avg, lag = 1, differences = 1))
   )
 
@@ -151,3 +169,4 @@ granger_cases <- causality(var_model, cause = "cases_moving_avg_diff1")
 granger_cases
 
 #> The key aspect of the result to look at is the p-value. If the p-value is less than your significance level (commonly set at 0.05), you can conclude that there is evidence to suggest that the cause variable Granger-causes the other variable(s) in the VAR model
+
