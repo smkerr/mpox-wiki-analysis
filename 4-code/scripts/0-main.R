@@ -1,6 +1,10 @@
-# Script to perform data analysis for thesis topic 
+# ==============================================================================
+# Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
+# Steve Kerr
+# ==============================================================================
 
-# Setup ------------------------------------------------------------------------
+
+# Setup ========================================================================
 # install dependencies
 # remotes::install_github("wikimedia/waxer@main")
 
@@ -37,19 +41,24 @@ pacman::p_load(
 )
 
 # load custom functions
-source(here("4-code/funcs/helpers.R"))
+#source(here("4-code/funcs/helpers.R"))
 
-# Define keywords --------------------------------------------------------------
+# create reference table for ISO country codes
+iso_ref <- ISOcodes::ISO_3166_1 |>
+  select(iso2 = Alpha_2, iso3 = Alpha_3)
+save(iso_ref, file = here("3-data/ref/iso_codes.RData"))
+
+# Define keywords ==============================================================
 #source(here("code/scripts/01-define-keywords.R")) # Simplify: "mpox" and "monkeypox virus"
 
-# Wikipedia data ---------------------------------------------------------------
+# Wikipedia data ===============================================================
 source(here("4-code/scripts/2-prepare-wiki-data.R"))
 
-# Mpox case data ---------------------------------------------------------------
+# Mpox case data ===============================================================
 source(here("4-code/scripts/3-prepare-mpox-data.R"))
 
-# Quality checks ---------------------------------------------------------------
+# Quality checks ===============================================================
 #source(here("4-code/scripts/4-check_data_quality.R"))
 
-# Data analysis ----------------------------------------------------------------
+# Data analysis ================================================================
 source(here("4-code/scripts/5-analyze_data.R"))

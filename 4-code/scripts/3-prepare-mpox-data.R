@@ -4,12 +4,12 @@
 # ==============================================================================
 
 
-# Load data --------------------------------------------------------------------
+# Load data ====================================================================
 # load mpox case data
 cases_df <- read_csv("https://raw.githubusercontent.com/owid/monkeypox/main/owid-monkeypox-data.csv")
 write_csv(cases_df, here(glue("3-data/mpox-cases/owid-monkeypox-data ({format(today(), '%Y-%m-%d')}).csv")))
 
-# Prepare data -----------------------------------------------------------------
+# Prepare data =================================================================
 # daily region-level case data
 cases_region_df <- cases_df |> 
   select(region = location, iso3 = iso_code, date, cases = new_cases, cases_moving_avg = new_cases_smoothed) |> 
@@ -26,7 +26,6 @@ cases_region_ordered <- cases_region_df |>
 cases_region_df <- cases_region_df |> 
   mutate(region = factor(region, levels = cases_region_ordered$region))
 
-
 # daily country-level case data
 cases_df <- cases_df |> 
   select(country = location, iso3 = iso_code, date, cases = new_cases, cases_moving_avg = new_cases_smoothed) |> 
@@ -40,7 +39,7 @@ cases_wk <- cases_df |>
   ungroup()
 
 
-# Explore data -----------------------------------------------------------------
+# Explore data =================================================================
 # plot daily cases
 cases_df |> 
   reframe(cases = sum(cases), .by = date) |> 
@@ -221,3 +220,28 @@ cases_region_df |>
 
 # save results
 ggsave(here("5-visualization/mpox-cases-weekly-region-facetted.png"), height = 7.75, width = 10)
+
+
+# Map of cumulative cases
+library(ISOcodes)
+library(sf)
+library(spData)
+library(tmap)
+
+# get ISO2 <-> ISO3 conversions
+iso_ref <- ISOcodes::ISO_3166_1 |> select(iso2 = Alpha_2, iso3 = Alpha_3) 
+
+# calculate total cases by country 
+cases_totals <- cases_df |> 
+  reframe(cases = sum(cases), .by = c(country, iso3)) |> 
+  left_join(iso_ref, by = join_by(iso3))
+
+# set break values
+break_values <- c(0, 10, 100, 1000, 10000, Inf)
+left_join(world, cases_totals, by = join_by(iso_a2 == iso2)) |> # merge geometries with case data
+  tm_shape() + # create map
+  tm_polygons(fill = "cases", breaks = break_values, palette = "Blues", title = "Mpox cases")
+
+cases_totals |> 
+  arrange(-cases) |> 
+  head(20)

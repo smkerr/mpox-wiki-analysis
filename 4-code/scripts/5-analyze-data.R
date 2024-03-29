@@ -4,17 +4,16 @@
 # ==============================================================================
 
 
-# Prepare data -----------------------------------------------------------------
-# create reference table for ISO country codes
-iso_ref <- ISOcodes::ISO_3166_1 |>
-  select(iso2 = Alpha_2, iso3 = Alpha_3)
+# Prepare data =================================================================
+# load ISO code reference table
+load(here("3-data/ref/iso_codes.RData"))
 
 # merge ISO codes 
 mpox_df <- left_join(cases_df, iso_ref, by = join_by(iso3)) |> 
   relocate(iso2, .before = iso3) |> 
   full_join(pageviews_mpox, by = join_by(iso2, date)) |>
   select(
-    country, iso2, iso3, project, date, pageviews_est, cases, cases_moving_avg
+    country, iso2, iso3, date, pageviews_est, cases, cases_moving_avg
   ) |> 
   group_by(iso2) |>
   mutate(country = if_else(
@@ -36,7 +35,7 @@ mpox_df <- left_join(cases_df, iso_ref, by = join_by(iso3)) |>
   filter(
     !is.na(pageviews_est), ### remove countries without enough English Wikipedia pageviews
     date >= as_date("2022-05-01"), ###
-    date <= as_date("2022-09-30") ###
+    date <= as_date("2022-10-09") ###
   )
 
 ### test 
@@ -44,7 +43,7 @@ mpox_df <- mpox_df |>
   filter(iso3 == "USA")
 
 
-# Explore data -----------------------------------------------------------------
+# Explore data =================================================================
 # plot mpox-related pageviews and mpox cases
 coeff <- 0.0021 # value to transform scales
 p <- mpox_df |>
@@ -74,7 +73,121 @@ p
 ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)
 
 
-# Test stationarity -----------------------------------------------------------
+# Estimate effect of PHEIC declaration on mpox attention =======================
+library(nlme) # linear & nonlinear mixed-effects models
+DATE_PHEIC_DECLARATION <- as_date("2022-07-23")
+
+# visualize data
+mpox_df |> 
+  ggplot(aes(x = date, y = pageviews_est)) +
+  geom_line() +
+  geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
+  labs(title = "Interrupted Time-Series Analysis of PHEIC Declaration", x = "Time", y = "Outcome") + 
+  theme_minimal()
+
+# prepare data 
+its_df <- mpox_df |> 
+  select(country, iso2, iso3, project, date, pageviews_est) |> 
+  mutate(intervention = ifelse(date <= DATE_PHEIC_DECLARATION, "Pre", "Post"))
+  
+# Simple linear model approach
+lm_model <- lm(data = its_df, pageviews_est ~ date + intervention)
+summary(lm_model)
+
+# For more complex analysis, considering autocorrelation
+its_model <- lme(data = its_df, pageviews_est ~ date * intervention, random = ~1|date)
+summary(its_model)
+
+# visualize model results
+its_df |> 
+  add_column(fitted = fitted(its_model)) |> 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = pageviews_est), color = "grey") +
+  geom_line(aes(y = fitted), color = "blue") +
+  geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
+  labs(title = "ITS Analysis: Observed vs. Fitted", x = "Time", y = "Outcome")
+
+# Implement methodology used by Du et al. 
+du_df <- mpox_df |> 
+  select(country, iso2, iso3, project, date, Y = pageviews_est, cases, cases_moving_avg) |> 
+  arrange(date) |> 
+  mutate(
+    X1 = seq_along(unique(mpox_df$date)), # time variable 
+    # TODO: Could I just as easily use the date variable?
+    X2 = ifelse(date <= DATE_PHEIC_DECLARATION, 0, 1),
+    X3 = c(rep(0, which(date == DATE_PHEIC_DECLARATION)), 1:(length(date) - which(date == DATE_PHEIC_DECLARATION)))
+  ) 
+
+# Fitting the ITS model
+its_model <- lm(data = du_df, Y ~ X1 + X2 + X3)
+
+# Summarizing the model to inspect the coefficients
+summary(its_model) 
+
+# Extract coefficients
+beta1 <- coef(its_model)["X1"] # β1 (the slope before the PHEIC declaration)
+beta2 <- coef(its_model)["X2"] # β2 (the immediate change in level after the PHEIC declaration)
+beta3 <- coef(its_model)["X3"]
+
+# Calculate new slope after PHEIC declaration
+new_slope_after_PHEIC <- beta1 + beta3 # β1 + β3 (the new slope after the PHEIC declaration)
+
+# Visualize map of daily average change of pageviews after PHEIC declaration
+library(sf)
+library(spData)
+PHEIC_df <- world |> 
+  mutate(
+    beta1 = ifelse(iso_a2 == "US", beta1, NA),
+    beta3 = ifelse(iso_a2 == "US", beta3, NA),
+    new_slope_after_PHEIC = ifelse(iso_a2 == "US", new_slope_after_PHEIC, NA)
+    )
+
+library(tmap)
+qtm(PHEIC_df, fill = "beta1") # slope before PHEIC declaration
+qtm(PHEIC_df, fill = "beta3") # immediate change after PHEIC declaration
+qtm(PHEIC_df, fill = "new_slope_after_PHEIC") # slope after PHEIC declaration 
+
+  
+# Test time-lag correlations between online search activity & new cases ========
+# Function to calculate Spearman correlation with lag
+calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
+  # Shift the lagged variable manually
+  if (lag > 0) {
+    shifted_cases <- c(rep(NA, lag), data[[lagged_var]][1:(nrow(data) - lag)])
+  } else if (lag < 0) {
+    shifted_cases <- c(data[[lagged_var]][(-lag + 1):nrow(data)], rep(NA, -lag))
+  } else { # lag == 0
+    shifted_cases <- data[[lagged_var]]
+  }
+  
+  # Remove rows where either variable is NA to ensure proper comparison
+  clean_data <- data %>%
+    mutate(shifted_cases = shifted_cases) %>%
+    filter(!is.na(shifted_cases), !is.na(data[[outcome_var]]))
+  
+  # Perform the correlation test with the shifted data
+  cor.test(clean_data$shifted_cases, clean_data[[outcome_var]], method = "spearman") %>% 
+    tidy() %>% 
+    rename(rho = estimate, S = statistic)
+}
+
+# Assuming 'du_df' is your data frame, 'Y' is your outcome variable, and 'cases_moving_avg' is your lagged variable
+lags <- c(-21, -14, -7, 0, 7, 14, 21)
+results <- purrr::map(lags, ~ calculate_correlation_with_lag(data = du_df, outcome_var = "Y", lagged_var = "cases_moving_avg", .x))
+
+# Combine results into a single dataframe
+final_results <- bind_rows(results, .id = "lag") %>% 
+  mutate(lag = as.integer(lags[as.integer(lag)]))
+final_results
+
+# correlations will contain the Spearman correlation coefficients for each lag
+## negative lags correspond with the time-lag effect of new cases on pageviews
+## positive lags correspond with the time-lag effect of pageviews on new cases 
+
+
+
+
+# Test stationarity ============================================================
 #> Implement ADF test to check for stationarity in both cases and pageviews.
 #> Non-stationary data can lead to spurious results in subsequent analyses.
 
@@ -101,7 +214,7 @@ mpox_df |>
   geom_line() +
   labs(
     title = "Daily pageviews for mpox-related pages",
-    subtitle = country_name,
+    #subtitle = country_name,
     x = NULL,
     y = "Views",
     caption = "Source: World Health Organization via Our World in Data"
@@ -114,7 +227,7 @@ mpox_df |>
   geom_line() +
   labs(
     title = "Daily mpox cases",
-    subtitle = country_name,
+    #subtitle = country_name,
     x = NULL,
     y = "Cases",
     caption = "Source: Wikimedia Foundation"
@@ -136,7 +249,7 @@ mpox_df |>
 # p-value < significance level of 0.05, so stationary
 
 
-# Develop VAR model ------------------------------------------------------------
+# Develop VAR model ============================================================
 #> Develop a VAR model to understand the dynamic relationship between the two time series. This model will help in capturing the temporal interdependencies and feedback mechanisms between Wikipedia traffic and mpox cases.
 
 # convert to a time-series object
@@ -157,7 +270,7 @@ var_model
 summary(var_model)
 
 
-# Apply Granger causality test -------------------------------------------------
+# Apply Granger causality test =================================================
 #> Apply the Granger causality test within the VAR framework to assess whether Wikipedia traffic volumes can be considered a predictor of mpox case trajectories.
 
 # test if pageviews Granger-cause mpox cases
