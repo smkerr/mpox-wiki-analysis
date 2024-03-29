@@ -27,8 +27,8 @@
 
 <!-- ## Sources -->
 
-## Resources
+<!-- ## Resources
 
-- [ColorBrewer 2.0](https://colorbrewer2.org/)
+- [ColorBrewer 2.0](https://colorbrewer2.org/) --> 
 
 <!-- ## License --> 
