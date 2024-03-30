@@ -24,14 +24,18 @@ pacman::p_load(
   janitor,      # tidy & explore data
   jsonlite,     # parse JSON
   lubridate,    # dates & times
+  nlme,         # mixed-effects models
   purrr,        # vectorize operations
   #RColorBrewer
   readr,        # import data
   readxl,       # import excel files
   scales,       # scaling plots
+  sf,           # simple features
+  spData,       # spatial data
   stringr,      # strings
   tibble,       # tidy data frames
   tidyr,        # tidy data
+  tmap,         # map-making
   tseries,      # time-series
   vars,         # vector autoregressive models
   waxer,        # Wikipedia pageviews
@@ -45,7 +49,7 @@ pacman::p_load(
 
 # create reference table for ISO country codes
 iso_ref <- ISOcodes::ISO_3166_1 |>
-  select(iso2 = Alpha_2, iso3 = Alpha_3)
+  select(country_name = Name, iso2 = Alpha_2, iso3 = Alpha_3)
 save(iso_ref, file = here("3-data/ref/iso_codes.RData"))
 
 # Define keywords ==============================================================

@@ -9,34 +9,14 @@
 load(here("3-data/ref/iso_codes.RData"))
 
 # merge ISO codes 
-mpox_df <- left_join(cases_df, iso_ref, by = join_by(iso3)) |> 
-  relocate(iso2, .before = iso3) |> 
-  full_join(pageviews_mpox, by = join_by(iso2, date)) |>
-  select(
-    country, iso2, iso3, date, pageviews_est, cases, cases_moving_avg
-  ) |> 
-  group_by(iso2) |>
-  mutate(country = if_else(
-    is.na(country),
-    first(country[!is.na(country)]),
-    country
-  )) |> 
-  mutate(iso3 = if_else(
-    is.na(iso3),
-    first(iso3[!is.na(iso3)]),
-    iso3
-  )) |> 
-  ungroup() |> 
-  complete(fill = list(
-   project = "en.wikipedia", ###
-   cases = 0,
-   cases_moving_avg = 0
-  )) |>
-  filter(
-    !is.na(pageviews_est), ### remove countries without enough English Wikipedia pageviews
-    date >= as_date("2022-05-01"), ###
-    date <= as_date("2022-10-09") ###
-  )
+cases_iso <- left_join(cases_df, iso_ref, by = join_by(iso3))
+pageviews_iso <- left_join(pageviews_mpox, iso_ref, by = join_by(iso2))
+
+# merge mpox cases and Wikipedia pageview data
+mpox_df <- full_join(cases_iso, pageviews_iso, by = join_by(country_name, iso2, iso3, date)) |>
+  select(country = country_name, iso2, iso3, date, pageviews_est, cases, cases_moving_avg) |> 
+  complete(fill = list(cases = 0, cases_moving_avg = 0)) |>  # fill in missing zeros
+  filter(!is.na(pageviews_est)) # exclude insufficient pageview data
 
 ### test 
 mpox_df <- mpox_df |> 
@@ -45,7 +25,7 @@ mpox_df <- mpox_df |>
 
 # Explore data =================================================================
 # plot mpox-related pageviews and mpox cases
-coeff <- 0.0021 # value to transform scales
+coeff <- 0.000575 # value to transform scales
 p <- mpox_df |>
   ggplot(aes(x = date)) +
   geom_col(aes(y = cases_moving_avg / coeff, fill = "7-day average confirmed cases")) +
@@ -59,7 +39,6 @@ p <- mpox_df |>
   ) +
   scale_fill_brewer(type = "qual", palette = 3) +
   labs(
-    #title = country_name,
     x = NULL,
     fill = NULL,
     color = NULL,
@@ -72,80 +51,6 @@ p
 # save plot
 ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)
 
-
-# Estimate effect of PHEIC declaration on mpox attention =======================
-library(nlme) # linear & nonlinear mixed-effects models
-DATE_PHEIC_DECLARATION <- as_date("2022-07-23")
-
-# visualize data
-mpox_df |> 
-  ggplot(aes(x = date, y = pageviews_est)) +
-  geom_line() +
-  geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
-  labs(title = "Interrupted Time-Series Analysis of PHEIC Declaration", x = "Time", y = "Outcome") + 
-  theme_minimal()
-
-# prepare data 
-its_df <- mpox_df |> 
-  select(country, iso2, iso3, project, date, pageviews_est) |> 
-  mutate(intervention = ifelse(date <= DATE_PHEIC_DECLARATION, "Pre", "Post"))
-  
-# Simple linear model approach
-lm_model <- lm(data = its_df, pageviews_est ~ date + intervention)
-summary(lm_model)
-
-# For more complex analysis, considering autocorrelation
-its_model <- lme(data = its_df, pageviews_est ~ date * intervention, random = ~1|date)
-summary(its_model)
-
-# visualize model results
-its_df |> 
-  add_column(fitted = fitted(its_model)) |> 
-  ggplot(aes(x = date)) +
-  geom_line(aes(y = pageviews_est), color = "grey") +
-  geom_line(aes(y = fitted), color = "blue") +
-  geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
-  labs(title = "ITS Analysis: Observed vs. Fitted", x = "Time", y = "Outcome")
-
-# Implement methodology used by Du et al. 
-du_df <- mpox_df |> 
-  select(country, iso2, iso3, project, date, Y = pageviews_est, cases, cases_moving_avg) |> 
-  arrange(date) |> 
-  mutate(
-    X1 = seq_along(unique(mpox_df$date)), # time variable 
-    # TODO: Could I just as easily use the date variable?
-    X2 = ifelse(date <= DATE_PHEIC_DECLARATION, 0, 1),
-    X3 = c(rep(0, which(date == DATE_PHEIC_DECLARATION)), 1:(length(date) - which(date == DATE_PHEIC_DECLARATION)))
-  ) 
-
-# Fitting the ITS model
-its_model <- lm(data = du_df, Y ~ X1 + X2 + X3)
-
-# Summarizing the model to inspect the coefficients
-summary(its_model) 
-
-# Extract coefficients
-beta1 <- coef(its_model)["X1"] # β1 (the slope before the PHEIC declaration)
-beta2 <- coef(its_model)["X2"] # β2 (the immediate change in level after the PHEIC declaration)
-beta3 <- coef(its_model)["X3"]
-
-# Calculate new slope after PHEIC declaration
-new_slope_after_PHEIC <- beta1 + beta3 # β1 + β3 (the new slope after the PHEIC declaration)
-
-# Visualize map of daily average change of pageviews after PHEIC declaration
-library(sf)
-library(spData)
-PHEIC_df <- world |> 
-  mutate(
-    beta1 = ifelse(iso_a2 == "US", beta1, NA),
-    beta3 = ifelse(iso_a2 == "US", beta3, NA),
-    new_slope_after_PHEIC = ifelse(iso_a2 == "US", new_slope_after_PHEIC, NA)
-    )
-
-library(tmap)
-qtm(PHEIC_df, fill = "beta1") # slope before PHEIC declaration
-qtm(PHEIC_df, fill = "beta3") # immediate change after PHEIC declaration
-qtm(PHEIC_df, fill = "new_slope_after_PHEIC") # slope after PHEIC declaration 
 
   
 # Test time-lag correlations between online search activity & new cases ========
