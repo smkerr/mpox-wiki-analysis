@@ -17,7 +17,6 @@ pacman::p_load(
   ggplot2,      # visualize data
   glue,         # string literals
   gt,           # formatting tables
-  #haven
   here,         # file paths
   httr,         # API requests
   ISOcodes,     # ISO country codes
@@ -25,8 +24,8 @@ pacman::p_load(
   jsonlite,     # parse JSON
   lubridate,    # dates & times
   nlme,         # mixed-effects models
+  nortest,      # normality tests
   purrr,        # vectorize operations
-  #RColorBrewer
   readr,        # import data
   readxl,       # import excel files
   scales,       # scaling plots
@@ -62,7 +61,7 @@ source(here("4-code/scripts/2-prepare-wiki-data.R"))
 source(here("4-code/scripts/3-prepare-mpox-data.R"))
 
 # Quality checks ===============================================================
-#source(here("4-code/scripts/4-check_data_quality.R"))
+#source(here("4-code/scripts/4-check-data-quality.R"))
 
 # Data analysis ================================================================
-source(here("4-code/scripts/5-analyze_data.R"))
+#source(here("4-code/scripts/5-analyze-data.R"))

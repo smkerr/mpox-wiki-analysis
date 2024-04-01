@@ -6,6 +6,9 @@
 # TODO: It's hard to believe that the WHO PHEIC announcement caused public attention
 # to decrease in all countries but the US and the Philippines... Need to make sure 
 # the code is working as expected...
+# TODO: Could also implement the simpler version from Du et al. to possibly better 
+# capture overall trends
+# TODO: Intervention coefficients are wildly overblown... need to investigate
 
 # Estimate effect of PHEIC declaration on mpox attention =======================
 # WHO declared mpox PHEIC on 23 July 2022
@@ -23,11 +26,11 @@ mpox_df |>
 # prepare data 
 its_nested <- mpox_df |> 
   select(country, iso2, iso3, date, pageviews_est) |> 
-  mutate(intervention = ifelse(date <= DATE_PHEIC_DECLARATION, 0, 1)) |> 
+  mutate(intervention = ifelse(date < DATE_PHEIC_DECLARATION, 0, 1)) |> 
   group_by(country) |> 
   filter(n_distinct(intervention) == 2) |> # only countries with data before and after intervention
   ungroup() |>
-  nest(.by = c(iso2)) # nest data by country 
+  nest(.by = c(iso3)) # nest data by country 
 
 # write function to fit ITS model for a given country, adjusting for autocorrelation
 fit_its_model <- function(data) {
@@ -60,27 +63,28 @@ for (plot in its_plots) {
 }
 
 # Unique list of country ISO3 codes
-country_codes <- unique(its_df$iso2)
+country_codes <- unique(its_df$iso3)
 
 # Extract coefficients by country
-coefficients_list <- map(country_codes, function(iso2_code) {
+coefficients_list <- map(country_codes, function(iso3_code) {
   # Filter data for the country
-  its_model <- its_df |> filter(iso2 == iso2_code) |> pull(model) |> pluck(1)
+  its_model <- its_df |> filter(iso3 == iso3_code) |> pull(model) |> pluck(1)
   
   # Extract coefficients
   beta1 <- its_model$coefficients$fixed["date"] # slope before PHEIC declaration
   beta2 <- its_model$coefficients$fixed["intervention"] # immediate change in level
   beta3 <- its_model$coefficients$fixed["date:intervention"] # new slope after
   
-  return(c(iso2 = iso2_code, beta1, beta2, beta3))
+  return(c(iso3 = iso3_code, beta1, beta2, beta3))
 })
 
 # Convert the list to a dataframe
 coefficients_df <- bind_rows(coefficients_list) |> 
-  mutate(across(-iso2, as.numeric))
+  mutate(across(-iso3, as.numeric))
 
 # Merge with world map data
-PHEIC_df <- left_join(world, coefficients_df, by = c("iso_a2" = "iso2"))
+data(World)
+PHEIC_df <- left_join(World, coefficients_df, by = c("iso_a3" = "iso3"))
 
 # Visualize 
 qtm(PHEIC_df, fill = "date") # slope before PHEIC declaration

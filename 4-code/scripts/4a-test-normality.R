@@ -1,9 +1,8 @@
 # Script to determine whether data is normally distributed =====================
 
 # Setup ------------------------------------------------------------------------
-library(nortest) # normality tests
 
-# TODO: modify code that plots and tests are applied to eahc country's distribution
+# TODO: modify code that plots and tests are applied to each country's distribution
 
 # Pageviews --------------------------------------------------------------------
 # histogram
