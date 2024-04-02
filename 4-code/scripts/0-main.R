@@ -60,6 +60,9 @@ source(here("4-code/scripts/2a-prepare-wiki-data.R"))
 # Mpox case data ===============================================================
 source(here("4-code/scripts/2b-prepare-mpox-data-v1.R"))
 
+# Merge data ===============================================================
+source(here("4-code/scripts/2c-merge-data.R"))
+
 # Quality checks ===============================================================
 #source(here("4-code/scripts/4-check-data-quality.R"))
 

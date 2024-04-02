@@ -183,13 +183,6 @@ pageviews_wk <- pageviews_df |>
     ) |>
   relocate(date, .before = est_pageviews)
 
-# TODO: Where are the NAs in the weekly data coming from?
-pageviews_df |> 
-  filter(is.na(est_pct_pageviews))
-
-pageviews_wk |> 
-  filter(is.na(est_pct_pageviews))
-
 
 ## Implement inclusion criteria ------------------------------------------------
 # TODO: consider whether this step is even necessary .... 

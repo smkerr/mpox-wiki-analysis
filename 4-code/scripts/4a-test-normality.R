@@ -1,123 +1,145 @@
-# Script to determine whether data is normally distributed =====================
+# ==============================================================================
+# Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
+# Steve Kerr
+# ==============================================================================
 
-# Setup ------------------------------------------------------------------------
 
-# TODO: modify code that plots and tests are applied to each country's distribution
-
-# Pageviews --------------------------------------------------------------------
-# histogram
+# Determine whether pageview data is normally distributed  =====================
+## Histograms -------------------------------------------------------------------
+# pageviews
 mpox_df |> 
-  ggplot(aes(x = pageviews_est)) + 
-  geom_histogram(bins = 30, fill = "blue", color = "white") +
+  filter(est_pct_pageviews > 0) |> 
+  ggplot(aes(x = est_pct_pageviews)) + 
+  geom_histogram(bins = 30, color = "black") +
+  facet_wrap(~country, scale = "free") +
+  scale_x_continuous(labels = label_percent()) +
   theme_minimal()
 
-# histogram (logged)
+# pageviews (logged)
 mpox_df |> 
-  ggplot(aes(x = log(pageviews_est))) +  # logged
-  geom_histogram(bins = 30, fill = "blue", color = "white") +
+  filter(est_pct_pageviews > 0) |> 
+  ggplot(aes(x = log(est_pct_pageviews))) +  # logged
+  geom_histogram(bins = 30, color = "black") +
+  facet_wrap(~country, scale = "free") +
   theme_minimal()
 
-# Q-Q plot 
+## Q-Q plots -------------------------------------------------------------------
+# pageviews
 mpox_df |>  
-  ggplot(aes(sample = pageviews_est)) + 
+  filter(est_pct_pageviews > 0) |> 
+  ggplot(aes(sample = est_pct_pageviews)) + 
   geom_qq() + 
   geom_qq_line() +
+  facet_wrap(~country, scale = "free") +
+  scale_x_continuous(labels = label_percent()) +
   theme_minimal()
 
-# Q-Q plot (logged)
+# pageviews (logged)
 mpox_df |> 
-  ggplot(aes(sample = log(pageviews_est))) + 
+  filter(est_pct_pageviews > 0) |> 
+  ggplot(aes(sample = log(est_pct_pageviews))) + 
   geom_qq() + 
   geom_qq_line() +
+  facet_wrap(~country, scale = "free") +
   theme_minimal()
 
-# Anderson-Darling Test
+## Normality tests -------------------------------------------------------------
+# write function to apply normality tests
+test_normality <- function(data, var) {
+  # Anderson-Darling Test 
+  ad_result <- ad.test(data[[var]])
+  ad_logged_result <- ad.test(log(data[[var]] + 1)) # add 1 to avoid log(0)
+  # Lilliefors (Kolmogorov-Smirnov Test) 
+  lilliefors_result <- lillie.test(data[[var]])
+  lilliefors_logged_result <- lillie.test(log(data[[var]] + 1)) # add 1 to avoid log(0)
+  # Shapiro-Wilk Test
+  shapiro_result <- shapiro.test(data[[var]])
+  shapiro_logged_result <- shapiro.test(log(data[[var]] + 1)) # add 1 to avoid log(0)
+  
+  # Create a data frame from the results
+  tibble(
+    ad_p_value = ad_result$p.value,
+    ad_logged_p_value = ad_logged_result$p.value,
+    lilliefors_p_value = lilliefors_result$p.value,
+    lilliefors_logged_p_value = lilliefors_logged_result$p.value,
+    shapiro_p_value = shapiro_result$p.value,
+    shapiro_logged_p_value = shapiro_logged_result$p.value
+  )
+}
+
+# Apply normality tests to each country
+pageviews_results <- mpox_df |> 
+  filter(est_pct_pageviews > 0) |> 
+  group_by(country) |> 
+  group_modify(~test_normality(data = .x, var = "est_pct_pageviews")) |> 
+  ungroup()
+
+# No p-values are >0.01, therefore we can conclude that our data does is not 
+# normally distributed
+pageviews_results |> 
+  filter(if_any(where(is.numeric), ~ . > 0.01))
+
+
+# Determine whether mpox case data is normally distributed =====================
+## Histograms -------------------------------------------------------------------
+# mpox cases
 mpox_df |> 
-  filter(country == "United States") |> 
-  mutate(pageviews_logged = log(pageviews_est)) |> 
-  pull(pageviews_logged) |> 
-  ad.test()
-
-# Anderson-Darling Test (logged)
-ad.test(log(mpox_df$pageviews_est))
-
-# Lilliefors (Kolmogorov-Smirnov Test) 
-lillie.test(mpox_df$pageviews_est)
-
-# Lilliefors (Kolmogorov-Smirnov Test) (logged)
-lillie.test(log(mpox_df$pageviews_est))
-
-# Shapiro-Wilk Test
-shapiro.test(mpox_df$pageviews_est)
-
-# Shapiro-Wilk Test (logged)
-shapiro.test(log(mpox_df$pageviews_est))
-
-
-# Mpox cases -------------------------------------------------------------------
-# histogram
-mpox_df |> 
+  group_by(country) |> 
+  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  ungroup() |> 
   ggplot(aes(x = cases_moving_avg)) + 
-  geom_histogram(bins = 30, fill = "blue", color = "white") +
+  geom_histogram(bins = 30, color = "black") +
+  facet_wrap(~country, scale = "free") +
   theme_minimal()
 
-# histogram (logged)
+# mpox cases (logged)
 mpox_df |> 
-  filter(cases_moving_avg >= 1) |> 
-  ggplot(aes(x = log(cases_moving_avg))) +  # logged
-  geom_histogram(bins = 30, fill = "blue", color = "white") +
+  group_by(country) |> 
+  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  ungroup() |> 
+  ggplot(aes(x = log(cases))) +  # logged
+  geom_histogram(bins = 30, color = "black") +
+  facet_wrap(~country, scale = "free") +
   theme_minimal()
 
-# Q-Q plot 
+## Q-Q plots -------------------------------------------------------------------
+# mpox cases
 mpox_df |>  
+  group_by(country) |> 
+  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  ungroup() |> 
   ggplot(aes(sample = cases_moving_avg)) + 
   geom_qq() + 
   geom_qq_line() +
+  facet_wrap(~country, scale = "free") +
   theme_minimal()
 
-# Q-Q plot (logged)
+# mpox cases (logged)
 mpox_df |> 
+  group_by(country) |> 
+  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  ungroup() |> 
   ggplot(aes(sample = log(cases_moving_avg))) + 
   geom_qq() + 
   geom_qq_line() +
+  facet_wrap(~country, scale = "free") +
   theme_minimal()
 
+## Normality tests -------------------------------------------------------------
+# Apply normality tests to each country
+cases_results <- mpox_df |> 
+  group_by(country) |> 
+  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  group_modify(~test_normality(data = .x, var = "cases_moving_avg")) |> 
+  ungroup()
 
-# Anderson-Darling Test 
-mpox_df |> 
-  filter(cases_moving_avg > 0) |> 
-  pull(cases_moving_avg) |> 
-  ad.test()
-
-# Anderson-Darling Test (logged)
-mpox_df |> 
-  filter(cases_moving_avg > 0) |> 
-  mutate(cases_moving_avg_logged = log(cases_moving_avg)) |> 
-  pull(cases_moving_avg_logged) |> 
-  ad.test()
-
-# Lilliefors (Kolmogorov-Smirnov Test) 
-lillie.test(mpox_df$cases_moving_avg)
-
-# Lilliefors (Kolmogorov-Smirnov Test) (logged)
-mpox_df |> 
-  filter(cases_moving_avg > 0) |> 
-  mutate(cases_moving_avg_logged = log(cases_moving_avg)) |> 
-  pull(cases_moving_avg_logged) |> 
-  lillie.test()
-
-# Shapiro-Wilk Test
-shapiro.test(mpox_df$cases_moving_avg)
-
-# Shapiro-Wilk Test (logged)
-mpox_df |> 
-  filter(cases_moving_avg > 0) |> 
-  mutate(cases_moving_avg_logged = log(cases_moving_avg)) |> 
-  pull(cases_moving_avg_logged) |> 
-  shapiro.test()
+# No p-values are >0.01, therefore we can conclude that our data does is not 
+# normally distributed
+cases_results |> 
+  filter(if_any(where(is.numeric), ~ . > 0.01))
 
 # Conclusion -------------------------------------------------------------------
-#> According to all normality performed, the data fails to meet the assumption
-#> that they are normally distribution, therefore the Pearson correlation 
-#> coefficient is not appropriate for this case. Instead, the Spearman correlation
+#> According to all normality tests performed, the data fails to meet the
+#> assumption that they are normally distributed, therefore the Pearson correlation 
+#> coefficient is not appropriate for this context. Instead, the Spearman correlation
 #> can be used.
