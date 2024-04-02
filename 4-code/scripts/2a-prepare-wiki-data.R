@@ -17,6 +17,9 @@ mpox_pages  <- c("Mpox", "Monkeypox", "Monkeypox virus")
 # load(here("3-data/output/mpox_pages_extended.RData"))
 # mpox_pages_extended
 
+# load ISO reference table
+load(here("3-data/ref/iso_codes.RData"))
+
 
 # Get page titles for other languages ==========================================
 # write function to query page titles for other languages
@@ -79,36 +82,6 @@ if (!file.exists(here("3-data/wikipedia/pageviews.csv"))) {
 # inclusion criteria...
 
 
-# Get daily project views ======================================================
-# # write function to query pageviews for a given project and page title
-# get_daily_project_views <- function(project_code) {
-#   url <- glue("https://wikimedia.org/api/rest_v1/metrics/pageviews/aggregate/{paste0(project_code, '.wikipedia')}/all-access/user/daily/{str_remove_all(start_date, '-')}/{str_remove_all(end_date, '-')}") # endpoint
-#   
-#   response <- GET(url) # API request
-#   
-#   if (status_code(response) == 200) {
-#     data <- content(response, "parsed", type = "application/json") # parse JSON
-#     project_views_df <- map_dfr(data$items, ~as_tibble(.x)) |> 
-#       mutate(date = as_date(ymd_h(timestamp))) |> # timestamp to date type
-#       select(project, date, pageviews = views) |> 
-#       arrange(project, date)
-#   } else {
-#     return(NULL) # if fails, return NULL
-#   }
-#   write_csv(project_views_df, here(glue("3-data/wikipedia/project-views/project-views-{project_code}.csv")))
-# }
-# 
-# # combine project view data for all language projects 
-# if (!file.exists(here("3-data/wikipedia/project-views.csv"))) {
-#   map_df(page_title_df$lang, get_daily_project_views)
-#   file_paths <- list.files(here("3-data/wikipedia/project-views"), full.names = TRUE)
-#   project_views <- map_dfr(file_paths, read_csv)
-#   write_csv(project_views, here("3-data/wikipedia/project-views.csv"))
-# } else {
-#   project_views <- read_csv(here("3-data/wikipedia/project-views.csv"))
-# }
-
-
 # Get monthly project views by country =========================================
 # write function to query and parse data for a given project and month
 get_monthly_project_views <- function(project_code, yyyy_mm) {
@@ -161,9 +134,12 @@ complete_df <- tibble(
   month = month(date)
 )
 
+# remove missing data
+country_project_views_clean <- country_project_views |> 
+  filter(!is.na(iso2), iso2 != "--")  
+
 # calculate total monthly project view for each country 
-country_project_views_total <- country_project_views |> 
-  filter(!is.na(iso2), iso2 != "--") |>  # remove missing data
+country_project_views_total <- country_project_views_clean |> 
   reframe(.by = c(iso2, year, month), pageviews_ceil = sum(pageviews_ceil)) |> 
   right_join(complete_df, by = join_by(year, month), relationship = "many-to-many") |> 
   select(-year, -month) |> 
@@ -171,52 +147,48 @@ country_project_views_total <- country_project_views |>
   arrange(iso2, date)
 
 # calculate share of monthly project views for each country
-country_project_views_share <- country_project_views |> 
-  filter(!is.na(iso2), iso2 != "--") |>  # remove missing data
+country_project_views_share <- country_project_views_clean |> 
   reframe(.by = c(project, year, month), iso2, pageviews_ceil, pct_pageviews_ceil = pageviews_ceil / sum(pageviews_ceil)) |> 
-  reframe(.by = c(project, year, month), iso2, pct_pageviews_ceil = pageviews_ceil / sum(pageviews_ceil)) |> # recalculate share
   right_join(complete_df, by = join_by(year, month), relationship = "many-to-many") |> 
   select(-year, -month) |> 
   relocate(date, .after = project) |> 
   arrange(project, date)
 
 # estimate mpox pageviews by country  
-pageviews_df <- left_join(country_project_views_share, pageviews, by = join_by(project, date)) |> 
+pageviews_df <- country_project_views_share |> 
+  left_join(pageviews, by = join_by(project, date)) |> 
   filter(!is.na(page_title), !is.na(pageviews)) |> # remove missing data
   mutate(est_pageviews = round(pct_pageviews_ceil * pageviews)) |> 
   reframe(.by = c(iso2, page_title, date), est_pageviews = sum(est_pageviews)) |> 
-  arrange(iso2, page_title, date)
-
-# load ISO reference table
-load(here("3-data/ref/iso_codes.RData"))
-
-# append country names 
-pageviews_df <- left_join(pageviews_df, iso_ref, by = join_by(iso2)) |> 
+  arrange(iso2, page_title, date) |> 
+  left_join(iso_ref, by = join_by(iso2)) |> 
   relocate(c(country = country_name, iso2, iso3), .before = page_title)
 
 
-## Normalize daily pageviews ---------------------------------------------------
-# express daily pageviews as a percentage of total monthly pageviews
-pageviews_df <- left_join(pageviews_df, country_project_views_total, by = join_by(iso2, date)) |> 
+# Normalize daily pageviews ====================================================
+# express as a percentage of total monthly pageviews
+pageviews_df <- pageviews_df |> 
+  left_join(country_project_views_total, by = join_by(iso2, date)) |> 
   mutate(est_pct_pageviews = est_pageviews / pageviews_ceil)
 
 
-## Aggregate weekly mpox-related pageviews by country ==========================
+# Aggregate weekly mpox-related pageviews by country ===========================
 pageviews_wk <- pageviews_df |>
   mutate(date = ceiling_date(date, unit = "weeks", week_start = 3)) |>
   reframe(
+    .by = c(country, iso2, iso3, page_title, date), 
+    pageviews_ceil,
     est_pageviews = sum(est_pageviews),
-    pageviews_ceil = sum(pageviews_ceil),
-    est_pct_pageviews = est_pageviews / pageviews_ceil,
-    .by = c("country", "iso2", "iso3", "page_title", "date")
+    est_pct_pageviews = est_pageviews / pageviews_ceil
     ) |>
-  relocate(date, .before = est_pageviews) |> 
-  select(-pageviews_ceil)
+  relocate(date, .before = est_pageviews)
 
 # TODO: Where are the NAs in the weekly data coming from?
+pageviews_df |> 
+  filter(is.na(est_pct_pageviews))
 
-
-pageviews_df <- pageviews_df |> select(-pageviews_ceil)
+pageviews_wk |> 
+  filter(is.na(est_pct_pageviews))
 
 
 ## Implement inclusion criteria ------------------------------------------------
@@ -227,9 +199,10 @@ included_countries <- pageviews_df |>
   head(21) |> 
   pull(country)
 pageviews_df <- pageviews_df |> filter(country %in% included_countries)
+pageviews_wk <- pageviews_wk |> filter(country %in% included_countries)
 
 
-# Explore data =================================================================
+# Visualize data ===============================================================
 # plot daily pageviews
 pageviews_df |>
   mutate(country = factor(country, levels = included_countries)) |> 
@@ -289,4 +262,4 @@ pageviews_wk |>
   theme(legend.position = "none")
 
 # save plot
-ggsave(here("5-visualization/wiki-pageviews-weekly.png"))
+ggsave(here("5-visualization/wiki-pageviews-weekly-pct.png"))

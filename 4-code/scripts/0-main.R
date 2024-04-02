@@ -55,10 +55,10 @@ save(iso_ref, file = here("3-data/ref/iso_codes.RData"))
 #source(here("code/scripts/01-define-keywords.R")) # Simplify: "mpox" and "monkeypox virus"
 
 # Wikipedia data ===============================================================
-source(here("4-code/scripts/2-prepare-wiki-data.R"))
+source(here("4-code/scripts/2a-prepare-wiki-data.R"))
 
 # Mpox case data ===============================================================
-source(here("4-code/scripts/3-prepare-mpox-data.R"))
+source(here("4-code/scripts/2b-prepare-mpox-data-v1.R"))
 
 # Quality checks ===============================================================
 #source(here("4-code/scripts/4-check-data-quality.R"))
