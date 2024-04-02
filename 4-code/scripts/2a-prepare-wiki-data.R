@@ -171,6 +171,8 @@ pageviews_df <- pageviews_df |>
   left_join(country_project_views_total, by = join_by(iso2, date)) |> 
   mutate(est_pct_pageviews = est_pageviews / pageviews_ceil)
 
+# TODO: Why is there still missing value in the country col?
+
 
 # Aggregate weekly mpox-related pageviews by country ===========================
 pageviews_wk <- pageviews_df |>
@@ -182,77 +184,3 @@ pageviews_wk <- pageviews_df |>
     est_pct_pageviews = est_pageviews / pageviews_ceil
     ) |>
   relocate(date, .before = est_pageviews)
-
-
-## Implement inclusion criteria ------------------------------------------------
-# TODO: consider whether this step is even necessary .... 
-included_countries <- pageviews_df |>
-  reframe(est_pageviews = max(est_pageviews), .by = country) |>
-  arrange(-est_pageviews) |> 
-  head(21) |> 
-  pull(country)
-pageviews_df <- pageviews_df |> filter(country %in% included_countries)
-pageviews_wk <- pageviews_wk |> filter(country %in% included_countries)
-
-
-# Visualize data ===============================================================
-# plot daily pageviews
-pageviews_df |>
-  mutate(country = factor(country, levels = included_countries)) |> 
-  ggplot(aes(x = date, y = est_pct_pageviews, fill = country)) +
-  geom_col() +
-  scale_x_date(
-    limits = c(min(pageviews_df$date), max(pageviews_df$date)),
-    expand = expansion(mult = 0.05),
-    date_labels = "%b\n%Y"
-  ) +
-  scale_y_continuous(
-    limits = c(0, NA),
-    expand = expansion(mult = c(0.02, 0.02)),
-    breaks = pretty_breaks(),
-    labels = label_percent()
-  ) +
-  labs(
-    title = "Daily views of mpox-related Wikipedia pages",
-    x = NULL,
-    y = "Percentage of monthly views",
-    color = NULL,
-    caption = "Source: Wikimedia Foundation"
-  ) +
-  facet_wrap(~country, ncol = 3, scales = "free_y") +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-# save plot
-ggsave(here("5-visualization/wiki-pageviews-daily-pct.png"))
-
-
-# plot weekly pageviews
-pageviews_wk |>
-  mutate(country = factor(country, levels = included_countries)) |> 
-  ggplot(aes(x = date, y = est_pct_pageviews, fill = country)) +
-  geom_col(alpha = 0.75) +
-  scale_x_date(
-    limits = c(min(pageviews_wk$date), max(pageviews_wk$date)),
-    expand = expansion(mult = 0.05),
-    date_labels = "%b %Y"
-  ) +
-  scale_y_continuous(
-    limits = c(0, NA),
-    expand = expansion(mult = c(0.02, 0.02)),
-    breaks = pretty_breaks(),
-    labels = comma_format()
-  ) +
-  labs(
-    title = "Weekly pageviews of mpox-related Wikipedia pages",
-    x = NULL,
-    y = "Views",
-    color = NULL,
-    caption = "Source: Wikimedia Foundation"
-  ) +
-  facet_wrap(~country, ncol = 3, scales = "free_y") +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-# save plot
-ggsave(here("5-visualization/wiki-pageviews-weekly-pct.png"))
