@@ -3,29 +3,42 @@
 # Steve Kerr
 # ==============================================================================
 
-# TODO: It's hard to believe that the WHO PHEIC announcement caused public attention
-# to decrease in all countries but the US and the Philippines... Need to make sure 
-# the code is working as expected...
 # TODO: Could also implement the simpler version from Du et al. to possibly better 
 # capture overall trends
-# TODO: Intervention coefficients are wildly overblown... need to investigate
 
 # Estimate effect of PHEIC declaration on mpox attention =======================
+
 # WHO declared mpox PHEIC on 23 July 2022
 DATE_PHEIC_DECLARATION <- as_date("2022-07-23")
 
+# top 20 countries by total pageviews 
+top_20_pageviews <- pageviews_df |> 
+  reframe(.by = country, total_pageviews = sum(est_pageviews)) |> 
+  arrange(-total_pageviews) |> 
+  pull(country) |> 
+  head(20)
+
 # visualize data
-mpox_df |> 
-  ggplot(aes(x = date, y = pageviews_est)) +
+pageviews_df |> 
+  filter(country %in% top_20_pageviews) |> 
+  mutate(country = factor(country, levels = top_20_pageviews)) |> 
+  ggplot(aes(x = date, y = est_pct_pageviews)) +
   geom_line() +
   geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
   facet_wrap(~country, scale = "free_y") +
+  scale_x_date(date_labels = "%b\n%Y") +
+  scale_y_continuous(labels = label_comma()) +
   labs(title = "Interrupted Time-Series Analysis of PHEIC Declaration", x = "Time", y = "Outcome") + 
   theme_minimal()
 
+ggsave(filename = here("5-visualization/wiki-pageviews-ITS-top-20.png"), height = 7.75, width = 10)
+
 # prepare data 
-its_nested <- mpox_df |> 
-  select(country, iso2, iso3, date, pageviews_est) |> 
+its_nested <- pageviews_df |> 
+  group_by(country) |> 
+  filter(sum(est_pct_pageviews > 0) >= 30) |> # at least 30 days of pageviews data
+  ungroup() |> 
+  select(country, iso2, iso3, date, est_pct_pageviews) |> 
   mutate(intervention = ifelse(date < DATE_PHEIC_DECLARATION, 0, 1)) |> 
   group_by(country) |> 
   filter(n_distinct(intervention) == 2) |> # only countries with data before and after intervention
@@ -34,7 +47,7 @@ its_nested <- mpox_df |>
 
 # write function to fit ITS model for a given country, adjusting for autocorrelation
 fit_its_model <- function(data) {
-  its_model <- lme(pageviews_est ~ date * intervention, random = ~1|date, data = data)
+  its_model <- lme(est_pct_pageviews ~ date * intervention, random = ~1|date, data = data)
   return(its_model)
 }
 
@@ -43,11 +56,12 @@ viz_its_model <- function(data, model) {
   p <- data |> 
     add_column(fitted = fitted(model)) |> 
     ggplot(aes(x = date)) +
-    geom_line(aes(y = pageviews_est), color = "grey") +
+    geom_line(aes(y = est_pct_pageviews), color = "grey") +
     geom_line(aes(y = fitted), color = "blue") +
     geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
     facet_wrap(~country) +
-    scale_y_continuous(labels = scales::comma_format()) +
+    scale_x_date(date_labels = "%b\n%Y") +
+    scale_y_continuous(labels = label_percent()) +
     labs(title = "ITS Analysis: Observed vs. Fitted", x = NULL, y = "Pageviews") + 
     theme_minimal()
   return(p)
@@ -62,11 +76,8 @@ for (plot in its_plots) {
   print(plot)
 }
 
-# Unique list of country ISO3 codes
-country_codes <- unique(its_df$iso3)
-
 # Extract coefficients by country
-coefficients_list <- map(country_codes, function(iso3_code) {
+coefficients_list <- map(unique(its_df$iso3), function(iso3_code) {
   # Filter data for the country
   its_model <- its_df |> filter(iso3 == iso3_code) |> pull(model) |> pluck(1)
   

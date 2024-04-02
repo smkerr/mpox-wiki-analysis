@@ -77,7 +77,7 @@ mpox_df |>
   theme(legend.position = "none")
 
 # save plot
-ggsave(here("5-visualization/wiki-pageviews-daily-pct.png"))
+ggsave(here("5-visualization/wiki-pageviews-daily-pct.png"), height = 7.75, width = 10)
 
 
 # plot weekly pageviews
@@ -107,4 +107,4 @@ mpox_wk |>
   theme(legend.position = "none")
 
 # save plot
-ggsave(here("5-visualization/wiki-pageviews-weekly-pct.png"))
+ggsave(here("5-visualization/wiki-pageviews-weekly-pct.png"), height = 7.75, width = 10)
