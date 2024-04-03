@@ -35,7 +35,10 @@ cases_df <- cases_df |>
 cases_wk <- cases_df |> 
   mutate(date = ceiling_date(date, unit = "weeks", week_start = 3)) |> # calculate weekly cases
   group_by(country, iso3, date) |> 
-  summarize(cases = sum(cases, na.rm = TRUE), cases_moving_avg = sum(cases_moving_avg, na.rm = TRUE)) |>  ### TODO: Valid method for aggregating moving average?
+  summarize(
+    cases = sum(cases, na.rm = TRUE), 
+    #cases_moving_avg = sum(cases_moving_avg, na.rm = TRUE) ### TODO: Valid method for aggregating moving average?
+  ) |> 
   ungroup()
 
 

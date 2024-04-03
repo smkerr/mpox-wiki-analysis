@@ -222,6 +222,6 @@ pageviews_wk <- pageviews_df |>
     .by = c(country, iso2, iso3, page_title, date), 
     pageviews_ceil,
     est_pageviews = sum(est_pageviews),
-    est_pct_pageviews = est_pageviews / pageviews_ceil # normalize weekly pageviews
+    pct_est_pageviews = est_pageviews / pageviews_ceil # normalize weekly pageviews
     ) |>
   relocate(date, .before = est_pageviews)
