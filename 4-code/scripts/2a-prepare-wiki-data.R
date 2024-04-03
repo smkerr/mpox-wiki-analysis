@@ -4,21 +4,20 @@
 # ==============================================================================
 
 
-# Key parameters ===============================================================
+# Setup ========================================================================
 # define time period
 start_date <- ymd("2022-01-01") ### try out with first year of outbreak
-end_date <- ymd("2022-12-31") ###
+end_date <- ymd("2022-12-31")
 date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
-
-# define mpox-specific pages
-mpox_pages  <- c("Mpox", "Monkeypox", "Monkeypox virus")
-
-# # load relevant mpox pages
-# load(here("3-data/output/mpox_pages_extended.RData"))
-# mpox_pages_extended
 
 # load ISO reference table
 load(here("3-data/ref/iso_codes.RData"))
+
+# define mpox-specific pages
+#mpox_pages  <- c("Mpox", "Monkeypox", "Monkeypox virus")
+
+# load relevant mpox pages
+load(here("3-data/output/mpox_pages_extended.RData"))
 
 
 # Get page titles for other languages ==========================================
@@ -40,42 +39,60 @@ get_alt_page_titles <- function(mpox_page) {
 }
 
 # combine all alternate page titles
-page_title_df <- map_df(str_replace_all(mpox_pages, " ", "_"), get_alt_page_titles) |>
+alt_page_title_df <- map_df(str_replace_all(mpox_pages_extended, " ", "_"), get_alt_page_titles) |>
   rename(page_title = `*`) |> 
   bind_rows(tibble( # append mpox-related pages for English-language Wikipedia
-    lang = rep("en", length(mpox_pages)),
-    page_title = mpox_pages
+    lang = rep("en", length(mpox_pages_extended)),
+    page_title = mpox_pages_extended,
+    page_title_en = mpox_pages_extended
     ))
 
 
 # Get daily pageviews by project ===============================================
-# write function to query pageviews for a given project and page title
-get_daily_pageviews <- function(project_code, page_name) {
-  url <- glue("https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{paste0(project_code, '.wikipedia')}/all-access/user/{str_replace_all(page_name, ' ', '_')}/daily/{str_remove_all(start_date, '-')}/{str_remove_all(end_date, '-')}") # endpoint
+# write function to query mpox-related pageviews for a given project
+get_daily_pageviews <- function(data, project_code) {
   
-  response <- GET(url) # API request
+  data <- data |> filter(lang == project_code) 
   
-  if (status_code(response) == 200) {
-    data <- content(response, "parsed", type = "application/json") # parse JSON
-    pageviews_df <- map_dfr(data$items, ~as_tibble(.x)) |> 
-      mutate(date = as_date(ymd_h(timestamp))) |> # timestamp to date type
-      select(project, page_title = article, date, pageviews = views) |> 
-      arrange(project, date, page_title)
-  } else {
-    return(NULL) # if fails, return NULL
+  pageviews_df <- data.frame() # initialize df to store project-level pageview data
+  
+  for (page in data$page_title) {
+    
+    url <- glue("https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{paste0(project_code, '.wikipedia')}/all-access/user/{str_replace_all(page, ' ', '_')}/daily/{str_remove_all(start_date, '-')}/{str_remove_all(end_date, '-')}") # endpoint
+    
+    response <- GET(url) # API request
+    
+    if (status_code(response) == 200) {
+      df <- content(response, "parsed", type = "application/json") # parse JSON
+      pageviews <- map_dfr(df$items, ~as_tibble(.x)) |> 
+        mutate(date = as_date(ymd_h(timestamp))) |> # timestamp to date type
+        select(project, page_title = article, date, pageviews = views) |> 
+        arrange(project, date, page_title)
+      pageviews_df <- bind_rows(pageviews_df, pageviews)  
+    } else {
+      next # if fails, move on to next
+    }
   }
   write_csv(pageviews_df, here(glue("3-data/wikipedia/pageviews/pageviews-{project_code}.csv")))
 }
 
 # combine pageview data for all language projects 
 if (!file.exists(here("3-data/wikipedia/pageviews.csv"))) {
-  map2_df(page_title_df$lang, page_title_df$page_title, get_daily_pageviews)
+  map_df(unique(alt_page_title_df$lang), ~ get_daily_pageviews(data = alt_page_title_df, project_code = .x))
   file_paths <- list.files(here("3-data/wikipedia/pageviews"), full.names = TRUE)
   pageviews <- map_dfr(file_paths, read_csv)
   write_csv(pageviews, here("3-data/wikipedia/pageviews.csv"))
 } else {
   pageviews <- read_csv(here("3-data/wikipedia/pageviews.csv"))
 }
+
+# Translate page names to English
+pageviews <- alt_page_title_df |> 
+  mutate(project = paste0(lang, ".wikipedia")) |> 
+  distinct(project, page_title, page_title_en) |> 
+  right_join(pageviews, by = join_by(project, page_title)) |> 
+  select(-page_title) |> 
+  rename(page_title = page_title_en)
 
 # TODO: Need to take into account that many of these pages were created after the 
 # outbreak started. Possibly exclude articles less than X days old when implementing
@@ -84,31 +101,38 @@ if (!file.exists(here("3-data/wikipedia/pageviews.csv"))) {
 
 # Get monthly project views by country =========================================
 # write function to query and parse data for a given project and month
-get_monthly_project_views <- function(project_code, yyyy_mm) {
-  year <- str_extract(yyyy_mm, "^\\d{4}")
-  month <- str_extract(yyyy_mm, "\\d{2}$")
+get_monthly_project_views <- function(project_code, yyyy_mm_sequence) {
   
-  url <- glue("https://wikimedia.org/api/rest_v1/metrics/pageviews/top-by-country/{paste0(project_code, '.wikipedia')}/all-access/{year}/{month}")
+  project_views_df <- data.frame() # initialize df to store project view data
   
-  response <- GET(url) # API request
+  for (yyyy_mm in yyyy_mm_sequence) {
+    
+    year <- str_extract(yyyy_mm, "^\\d{4}")
+    month <- str_extract(yyyy_mm, "\\d{2}$")
+    
+    url <- glue("https://wikimedia.org/api/rest_v1/metrics/pageviews/top-by-country/{paste0(project_code, '.wikipedia')}/all-access/{year}/{month}") # endpoint
   
-  if (status_code(response) == 200) {
-    data <- content(response, "parsed", type = "application/json") # parse JSON
-    countries_list <- data$items[[1]]$countries
-    countries_df <- map_dfr(countries_list, ~ as_tibble(.x)) |>
-      mutate(year = as.numeric(year), month = as.numeric(month), project = paste0(project_code, ".wikipedia")) |> 
-      select(project, iso2 = country, year, month, pageviews_ceil = views_ceil) |> 
-      arrange(project, year, month, -pageviews_ceil)
-  } else {
-    return(NULL) # if fails, return NULL
+    response <- GET(url) # API request
+    
+    if (status_code(response) == 200) {
+      data <- content(response, "parsed", type = "application/json") # parse JSON
+      projet_views_list <- data$items[[1]]$countries
+      project_views <- map_dfr(projet_views_list, ~ as_tibble(.x)) |>
+        mutate(year = as.numeric(year), month = as.numeric(month), project = paste0(project_code, ".wikipedia")) |> 
+        select(project, iso2 = country, year, month, pageviews_ceil = views_ceil) |> 
+        arrange(project, year, month, -pageviews_ceil)
+      project_views_df <- bind_rows(pageviews_df, pageviews)  
+    } else {
+      next # if fails, move on to next
+    }
   }
-  return(countries_df)
+  write_csv(pageviews_df, here(glue("3-data/wikipedia/project-views/project-views-{project_code}.csv")))
 }
 
 # combine & save monthly project views
 if (!file.exists(here("3-data/wikipedia/project-views-by-country.csv"))) {
   month_sequence <- date_sequence |> str_remove("-\\d\\d$") |> unique()
-  combination_df <- crossing(project_code = page_title_df$lang, month = month_sequence)
+  combination_df <- crossing(project_code = alt_page_title_df$lang, month = month_sequence)
   country_project_views <- map2_df(combination_df$project_code, combination_df$month, get_monthly_project_views)
   write_csv(country_project_views, here("3-data/wikipedia/project-views-by-country.csv"))
 } else {
