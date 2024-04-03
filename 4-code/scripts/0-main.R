@@ -52,7 +52,7 @@ iso_ref <- ISOcodes::ISO_3166_1 |>
 save(iso_ref, file = here("3-data/ref/iso_codes.RData"))
 
 # Define keywords ==============================================================
-#source(here("code/scripts/01-define-keywords.R")) # Simplify: "mpox" and "monkeypox virus"
+source(here("4-code/scripts/1-identify-mpox-pages.R")) 
 
 # Wikipedia data ===============================================================
 source(here("4-code/scripts/2a-prepare-wiki-data.R"))

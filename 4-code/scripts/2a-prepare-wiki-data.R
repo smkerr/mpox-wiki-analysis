@@ -94,6 +94,16 @@ pageviews <- alt_page_title_df |>
   select(-page_title) |> 
   rename(page_title = page_title_en)
 
+# check distribution of the number of mpox-related pages by language project
+pageviews |> 
+  distinct(project, page_title) |> 
+  group_by(project) |> 
+  summarize(n_pages = n()) |> 
+  ggplot(aes(x = n_pages)) +
+  geom_histogram() +
+  theme_minimal()
+  
+
 # TODO: Need to take into account that many of these pages were created after the 
 # outbreak started. Possibly exclude articles less than X days old when implementing
 # inclusion criteria...
@@ -101,9 +111,9 @@ pageviews <- alt_page_title_df |>
 
 # Get monthly project views by country =========================================
 # write function to query and parse data for a given project and month
-get_monthly_project_views <- function(project_code, yyyy_mm_sequence) {
+get_monthly_project_views_by_country <- function(project_code, yyyy_mm_sequence) {
   
-  project_views_df <- data.frame() # initialize df to store project view data
+  country_project_views_df <- data.frame() # initialize df to store project view data
   
   for (yyyy_mm in yyyy_mm_sequence) {
     
@@ -116,38 +126,43 @@ get_monthly_project_views <- function(project_code, yyyy_mm_sequence) {
     
     if (status_code(response) == 200) {
       data <- content(response, "parsed", type = "application/json") # parse JSON
-      projet_views_list <- data$items[[1]]$countries
-      project_views <- map_dfr(projet_views_list, ~ as_tibble(.x)) |>
+      country_projet_views_list <- data$items[[1]]$countries
+      country_project_views <- map_dfr(country_projet_views_list, ~ as_tibble(.x)) |>
         mutate(year = as.numeric(year), month = as.numeric(month), project = paste0(project_code, ".wikipedia")) |> 
         select(project, iso2 = country, year, month, pageviews_ceil = views_ceil) |> 
         arrange(project, year, month, -pageviews_ceil)
-      project_views_df <- bind_rows(pageviews_df, pageviews)  
+      country_project_views_df <- bind_rows(country_project_views_df, country_project_views)  
     } else {
       next # if fails, move on to next
     }
   }
-  write_csv(pageviews_df, here(glue("3-data/wikipedia/project-views/project-views-{project_code}.csv")))
+  write_csv(country_project_views_df, here(glue("3-data/wikipedia/project-views/project-views-{project_code}.csv")))
 }
 
 # combine & save monthly project views
-if (!file.exists(here("3-data/wikipedia/project-views-by-country.csv"))) {
+if (!file.exists(here("3-data/wikipedia/project-views.csv"))) {
   month_sequence <- date_sequence |> str_remove("-\\d\\d$") |> unique()
-  combination_df <- crossing(project_code = alt_page_title_df$lang, month = month_sequence)
-  country_project_views <- map2_df(combination_df$project_code, combination_df$month, get_monthly_project_views)
-  write_csv(country_project_views, here("3-data/wikipedia/project-views-by-country.csv"))
+  map_df(unique(alt_page_title_df$lang), ~get_monthly_project_views_by_country(project_code = .x, month_sequence))
+  file_paths <- list.files(here("3-data/wikipedia/project-views"), full.names = TRUE)
+  country_project_views <- map_dfr(file_paths, read_csv)
+  write_csv(country_project_views, here("3-data/wikipedia/project-views.csv"))
 } else {
-  country_project_views <- read_csv(here("3-data/wikipedia/project-views-by-country.csv"))
+  country_project_views <- read_csv(here("3-data/wikipedia/project-views.csv"))
 }
 
 
 # Prepare data =================================================================
 ## Prepare pageviews -----------------------------------------------------------
-# aggregate mpox-related pageviews by project
+# combine "Monkeypox" and "Mpox" pages to account for name change
+# TODO: move elsewhere
 pageviews <- pageviews |>
-  reframe(pageviews = sum(pageviews, na.rm = TRUE), .by = c(project, date)) |>
-  mutate(page_title = "Mpox/Monkeypox virus") |> ### TODO: Need to adapt this if more types of pages are included
-  relocate(page_title, .after = project) |>
-  arrange(project, page_title, date)
+  mutate(page_title = ifelse(page_title == "Monkeypox", "Mpox", page_title)) 
+  # TODO: Combine with "Monkeypox virus" ?
+
+
+  #reframe(.by = c(project, date), pageviews = sum(pageviews, na.rm = TRUE)) |>
+  #relocate(page_title, .after = project) |>
+  #arrange(project, page_title, date)
 
 
 ## Prepare project views by country --------------------------------------------
@@ -180,22 +195,24 @@ country_project_views_share <- country_project_views_clean |>
 
 # estimate mpox pageviews by country  
 pageviews_df <- country_project_views_share |> 
-  left_join(pageviews, by = join_by(project, date)) |> 
+  left_join(pageviews, by = join_by(project, date), relationship = "many-to-many") |> 
   filter(!is.na(page_title), !is.na(pageviews)) |> # remove missing data
   mutate(est_pageviews = round(pct_pageviews_ceil * pageviews)) |> 
-  reframe(.by = c(iso2, page_title, date), est_pageviews = sum(est_pageviews)) |> 
+  reframe(.by = c(iso2, page_title, date), est_pageviews = sum(est_pageviews)) |> # estimate pageviews attributable to a given country
   arrange(iso2, page_title, date) |> 
   left_join(iso_ref, by = join_by(iso2)) |> 
-  relocate(c(country = country_name, iso2, iso3), .before = page_title)
+  relocate(c(country = country_name, iso2, iso3), .before = page_title) |> 
+  mutate( # fill in missing info for Kosovo
+    country = ifelse(iso2 == "XK", "Kosovo", country),
+    iso3 = ifelse(iso2 == "XK", "XKX", iso3)
+    ) 
 
 
 # Normalize daily pageviews ====================================================
 # express as a percentage of total monthly pageviews
 pageviews_df <- pageviews_df |> 
   left_join(country_project_views_total, by = join_by(iso2, date)) |> 
-  mutate(est_pct_pageviews = est_pageviews / pageviews_ceil)
-
-# TODO: Why is there still missing value in the country col?
+  mutate(pct_est_pageviews = est_pageviews / pageviews_ceil)
 
 
 # Aggregate weekly mpox-related pageviews by country ===========================
@@ -205,6 +222,6 @@ pageviews_wk <- pageviews_df |>
     .by = c(country, iso2, iso3, page_title, date), 
     pageviews_ceil,
     est_pageviews = sum(est_pageviews),
-    est_pct_pageviews = est_pageviews / pageviews_ceil
+    est_pct_pageviews = est_pageviews / pageviews_ceil # normalize weekly pageviews
     ) |>
   relocate(date, .before = est_pageviews)
