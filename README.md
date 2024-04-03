@@ -1,4 +1,4 @@
-# Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
+# From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence
 
 <!-- inspo from https://github.com/davidpomerenke/protest-impact -->
 
