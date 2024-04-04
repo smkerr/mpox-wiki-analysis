@@ -62,4 +62,4 @@ mpox_relevant_pages_manual <- c(
 mpox_pages_extended <- c(mpox_pages, mpox_relevant_pages, mpox_relevant_pages_manual) |> unique()
 
 # save keywords
-save(mpox_pages_extended, file = here("3-data/output/mpox_pages_extended.RData"))
+save(mpox_pages_extended, file = here("3-data/output/mpox-pages-extended.RData"))
