@@ -22,7 +22,7 @@ top_20_pageviews <- pageviews_df |>
 pageviews_df |> 
   filter(country %in% top_20_pageviews) |> 
   mutate(country = factor(country, levels = top_20_pageviews)) |> 
-  ggplot(aes(x = date, y = est_pct_pageviews)) +
+  ggplot(aes(x = date, y = pct_est_pageviews)) +
   geom_line() +
   geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
   facet_wrap(~country, scale = "free_y") +
@@ -36,9 +36,9 @@ ggsave(filename = here("5-visualization/wiki-pageviews-ITS-top-20.png"), height 
 # prepare data 
 its_nested <- pageviews_df |> 
   group_by(country) |> 
-  filter(sum(est_pct_pageviews > 0) >= 30) |> # at least 30 days of pageviews data
+  filter(sum(pct_est_pageviews > 0) >= 30) |> # at least 30 days of pageviews data
   ungroup() |> 
-  select(country, iso2, iso3, date, est_pct_pageviews) |> 
+  select(country, iso2, iso3, date, pct_est_pageviews) |> 
   mutate(intervention = ifelse(date < DATE_PHEIC_DECLARATION, 0, 1)) |> 
   group_by(country) |> 
   filter(n_distinct(intervention) == 2) |> # only countries with data before and after intervention
@@ -47,7 +47,7 @@ its_nested <- pageviews_df |>
 
 # write function to fit ITS model for a given country, adjusting for autocorrelation
 fit_its_model <- function(data) {
-  its_model <- lme(est_pct_pageviews ~ date * intervention, random = ~1|date, data = data)
+  its_model <- lme(pct_est_pageviews ~ date * intervention, random = ~1|date, data = data)
   return(its_model)
 }
 
@@ -56,7 +56,7 @@ viz_its_model <- function(data, model) {
   p <- data |> 
     add_column(fitted = fitted(model)) |> 
     ggplot(aes(x = date)) +
-    geom_line(aes(y = est_pct_pageviews), color = "grey") +
+    geom_line(aes(y = pct_est_pageviews), color = "grey") +
     geom_line(aes(y = fitted), color = "blue") +
     geom_vline(xintercept = DATE_PHEIC_DECLARATION, linetype = "dashed", color = "red") +
     facet_wrap(~country) +

@@ -17,7 +17,7 @@ load(here("3-data/ref/iso_codes.RData"))
 #mpox_pages  <- c("Mpox", "Monkeypox", "Monkeypox virus")
 
 # load relevant mpox pages
-load(here("3-data/output/mpox_pages_extended.RData"))
+load(here("3-data/output/mpox-pages-extended.RData"))
 
 
 # Get page titles for other languages ==========================================
