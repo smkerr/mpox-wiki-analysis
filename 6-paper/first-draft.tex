@@ -127,7 +127,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia},
+  pdftitle={From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence},
   pdfauthor={Steven Kerr},
   colorlinks=true,
   linkcolor={blue},
@@ -136,10 +136,10 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
-\title{Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using
-Wikipedia}
+\title{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews
+for Mpox Incidence}
 \author{Steven Kerr}
-\date{15 February 2024}
+\date{5 April 2024}
 
 \begin{document}
 \maketitle
@@ -150,11 +150,13 @@ Wikipedia}
 \setcounter{tocdepth}{3}
 \tableofcontents
 }
-\section{Abstract (7)}\label{abstract-7}
+\section{Abstract (7) (350 words)}\label{abstract-7-350-words}
 
 {[}To be added last{]}
 
-\section{Introduction (6)}\label{introduction-6}
+\section{Introduction (6) (700 words)}\label{introduction-6-700-words}
+
+\subsection{Background and Context}\label{background-and-context}
 
 As the world becomes increasingly interconnected and climate change
 elevates the risk of zoonotic spillover events, the public becomes ever
@@ -165,24 +167,59 @@ emerging diseases with low case numbers and less understood
 epidemiological parameters. Critically, public attention plays a pivotal
 role in disease detection and response.
 
+\subsection{Problem Definition}\label{problem-definition}
+
+A key to outbreak prevention and response is surveillance and detection.
+Disease surveillance methodologies encompass a wide range of techniques
+used to monitor disease incidence, varying from more traditional
+approaches, which often rely on healthcare system reporting, to more
+innovative techniques that leverage new technologies and data sources.
+The most common form of surveillance relies on healthcare providers
+reporting cases of notifiable diseases to public health authorities
+{[}SOURCE{]}. Such methods are cost-effective but can suffer from
+under-reporting and delays. The problem with these historical methods is
+that they require significant time before data become available. This
+lag in obtaining accurate and timely data poses a considerable challenge
+for policymakers who are tasked with making swift, informed decisions
+critical to outbreak containment. The urgency for real-time information
+becomes paramount in situations where delays in decision-making can lead
+to escalated public health crises. In the face of these challenges, the
+vast and continually expanding reservoir of online data presents an
+underutilized opportunity for gaining timely insights into disease
+dynamics.
+
+\subsection{Proposed Solution}\label{proposed-solution}
+
 The advent of digital tools allows for the real-time tracking of this
 attention, offering a valuable complement to established disease
-surveillance methods. This is where public attention can serve as an
+surveillance methods. This is where online attention can serve as an
 innovative proxy for tracking disease spread. In this regard, the
 2022-2023 multi-country mpox outbreak presents a recent case study,
 allowing us to examine the efficacy of real-time data in monitoring a
-relatively novel disease. By thoroughly exploring these non-traditional
-methods, we can more fully understand their advantages and limitations,
-thus providing crucial insights for decision-makers. This research not
-only enhances our understanding of digital epidemiology but also
-contributes to shaping more effective and timely responses to future
-infectious disease outbreaks.
+relatively under-studied disease. By thoroughly exploring these
+non-traditional methods, we can more fully understand their advantages
+and limitations, thus providing crucial insights for decision-makers.
+This research not only enhances our understanding of digital
+epidemiology but also contributes to shaping more effective and timely
+responses to future infectious disease outbreaks.
 
-This project\footnote{Project GitHub:
-  \url{https://github.com/smkerr/Thesis_WorkInProgress}} explores the
-potential for Wikipedia data to be utilized as an alternative metric for
-gauging public attention towards public health emergencies, specifically
-by focusing on the 2022-2023 multi-country mpox outbreak. The primary
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Background on the Subject Matter}: While you briefly touch on
+  the importance of new disease surveillance methods in the context of
+  global interconnectivity and climate change, providing a bit more
+  background on traditional vs.~digital epidemiology techniques could
+  help set the stage for your study's focus on Wikipedia data.
+\end{itemize}
+
+\subsection{Research Questions or
+Hypthesis}\label{research-questions-or-hypthesis}
+
+This paper\footnote{Project GitHub repository:
+  \url{https://github.com/smkerr/mpox-wiki-analysis}} investigates
+whether Wikipedia pageviews can serve as a reliable proxy for public
+interest during the 2022-2023 multi-country mpox outbreak. The primary
 goal is to assess whether Wikipedia, with its vast user base and
 granular data, can effectively serve as a proxy for measuring public
 attention and information-seeking behavior in the context of global
@@ -193,15 +230,26 @@ as measured by digital resources like Wikipedia, could provide early
 indicators of disease outbreaks, thus aiding in more timely and
 effective public health interventions.
 
-Data on the number of confirmed mpox cases is obtained from the World
-Health Organization (WHO), while page view statistics for Wikipedia
-articles related to mpox are sourced directly from Wikipedia. The
-analysis is restricted to the 10 countries most affected by the
-outbreak, using time series analysis and lag-correlation methods to
-examine the relationship between Wikipedia page views and mpox case
-numbers. The study aims to identify patterns and correlations that could
-support the use of Wikipedia data as a predictive tool for public health
-surveillance.
+\subsection{Theoretical Framework}\label{theoretical-framework}
+
+\begin{itemize}
+\item
+  \textbf{Theoretical Framework}: If there's a theoretical framework
+  guiding your research, briefly mentioning it in the introduction can
+  help readers understand the lens through which you're examining the
+  data.
+
+  \begin{itemize}
+  \item
+    Health Belief Model (HBM)
+  \item
+    Infodemiology and Infoveillance
+  \item
+    The Framework of Risk Information Seeking and Processing (RISP)
+  \end{itemize}
+\end{itemize}
+
+\subsection{Outlook}\label{outlook}
 
 This work contributes to the broader academic discourse by exploring the
 potential of open-source data for enhancing disease surveillance and
@@ -211,7 +259,81 @@ policymakers during public health emergencies. In doing so, this work
 addresses gaps in the literature regarding the effectiveness of digital
 tools in enhancing disease surveillance.
 
-\section{Literature Review (5)}\label{literature-review-5}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Significance of the Study}: Briefly highlight why this
+  research is important. You've mentioned how it contributes to
+  understanding digital epidemiology, but expanding on the implications
+  for public health policy and emergency response could make a stronger
+  case for the study's relevance.
+\end{itemize}
+
+\section{Literature Review (5) (1,000
+words)}\label{literature-review-5-1000-words}
+
+\begin{itemize}
+\item
+  \textbf{Objective}: Clearly state the purpose of the Literature Review
+  within the context of your thesis.
+\item
+  \textbf{Scope}: Define the scope of the review, including the time
+  frame, geographic focus, and types of sources considered.
+\item
+  \textbf{Definitions and Concepts}: Introduce and define key theories,
+  models, or conceptual frameworks that underpin your research area.
+\item
+  \textbf{Relevance}: Discuss how these theoretical foundations inform
+  the existing research and your study.
+\item
+  \textbf{Thematic Organization}: Divide the literature into themes or
+  categories relevant to your research question. For each theme:
+
+  \begin{itemize}
+  \item
+    \textbf{Summary}: Provide an overview of the key findings,
+    methodologies, and conclusions.
+  \item
+    \textbf{Critical Analysis}: Evaluate the methodologies used, discuss
+    the findings, and note any inconsistencies or debates within the
+    theme.
+  \item
+    \textbf{Connection to Your Research}: Explain how each theme relates
+    to your research question or objectives.
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+\item
+  \textbf{Overview of Methods}: If relevant, discuss the different
+  methodologies employed in the literature, highlighting the evolution
+  of research techniques over time.
+\item
+  \textbf{Strengths and Limitations}: Critically assess the strengths
+  and limitations of various approaches.
+\item
+  \textbf{Identification of Gaps}: Identify areas that have not been
+  thoroughly explored or questions that remain unanswered.
+\item
+  \textbf{Opportunities for Further Research}: Explain how your research
+  aims to address these gaps or contribute new insights.
+\item
+  \textbf{Recent Developments}: Highlight recent studies or emerging
+  trends in the field.
+\item
+  \textbf{Theoretical or Methodological Innovations}: Discuss any new
+  theories or methodologies that are gaining traction.
+\item
+  \textbf{Synthesis}: Summarize the key findings and debates covered in
+  the review.
+\item
+  \textbf{Relevance to Your Study}: Reiterate how the reviewed
+  literature supports, contradicts, or informs your research.
+\item
+  \textbf{Research Question/Hypothesis Revisited}: Optionally, refine or
+  reaffirm your research question or hypothesis based on the literature
+  review.
+\end{itemize}
 
 Several key academic papers lay the groundwork for this approach. In
 \href{https://doi.org/10.2196/26331}{``Assessing Public Interest Based
@@ -361,8 +483,84 @@ Trends data for mpox, this thesis represents the first attempt, as far
 as I am aware, to explore the relationship between Wikipedia page view
 statistics and mpox cases.
 
-\section{Theory / Research Questions and Hypotheses
-(1)}\label{theory-research-questions-and-hypotheses-1}
+\section{Theory / Research Questions and Hypotheses (1) (1,000
+words)}\label{theory-research-questions-and-hypotheses-1-1000-words}
+
+\begin{itemize}
+\item
+  \textbf{Rationale}: Begin by explaining why the chosen theoretical
+  framework is suitable for your research, linking it to the gaps or
+  issues identified in the literature review.
+\item
+  \textbf{Description}: Provide a detailed description of the
+  theoretical framework or models you'll be using, including key
+  concepts, variables, and the relationships between them.
+\item
+  \textbf{Relevance}: Discuss how this framework has been applied in
+  previous research and its significance in addressing your research
+  problem.
+\item
+  \textbf{Definitions}: Clearly define the main constructs or variables
+  within your theoretical framework, ensuring they are specific to your
+  study's context.
+\item
+  \textbf{Operationalization}: Explain how you will measure these
+  constructs or variables in your research, making theoretical concepts
+  tangible and researchable.
+\item
+  \textbf{Research Questions}:
+
+  \begin{itemize}
+  \item
+    If your study is more exploratory or qualitative, list the research
+    questions that guide your investigation. Each question should be
+    clearly formulated to explore the relationships or phenomena
+    described by your theoretical framework.
+  \item
+    \textbf{Purpose}: Clarify what each question aims to discover or
+    understand about the relationship between variables or concepts.
+  \end{itemize}
+\item
+  \textbf{Hypotheses}:
+
+  \begin{itemize}
+  \item
+    For more quantitative or confirmatory studies, formulate specific
+    hypotheses. These are predictive statements about the expected
+    relationships between variables based on your theoretical framework.
+  \item
+    \textbf{Directionality}: Indicate whether each hypothesis is
+    directional (specifying the nature of the relationship) or
+    non-directional (simply stating that a relationship exists).
+  \end{itemize}
+\item
+  \textbf{Theoretical Justification}: Provide a rationale for each
+  research question or hypothesis, drawing on your theoretical framework
+  and findings from the literature review.
+\item
+  \textbf{Research Gap}: Demonstrate how your questions or hypotheses
+  address a gap in the existing literature or contribute to a deeper
+  understanding of the topic.
+\end{itemize}
+
+\begin{itemize}
+\item
+  \textbf{Methodological Implications}: Briefly discuss how your
+  research questions or hypotheses will influence your choice of
+  research design, methods of data collection, and analysis techniques.
+\item
+  \textbf{Feasibility and Limitations}: Acknowledge any limitations that
+  your theoretical framework or hypotheses may impose on your study and
+  how you plan to address them.
+\item
+  \textbf{Summary}: Conclude by summarizing the key points made in this
+  section, reinforcing the importance of your theoretical framework and
+  research questions/hypotheses in guiding your study.
+\item
+  \textbf{Transition}: Provide a smooth transition to the next section
+  of your thesis, typically the methodology, indicating how the theory
+  will be applied to empirical research.
+\end{itemize}
 
 To what extent can Wikipedia data be effectively utilized as an
 alternative method for measuring public attention and
@@ -409,7 +607,37 @@ support of the main research question:
 
 \section{Data and Methods (2)}\label{data-and-methods-2}
 
-\subsection{Data sources}\label{data-sources}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Overview}: Start with a brief introduction that outlines the
+  purpose of this section, connecting it back to your research questions
+  or hypotheses.
+\end{itemize}
+
+\subsection{Data sources (700 words)}\label{data-sources-700-words}
+
+\begin{itemize}
+\item
+  \textbf{Data Source(s)}: Describe where your data comes from. For
+  example, mention if you used datasets from public repositories,
+  conducted surveys, or collected observational data. Provide the
+  context and justification for choosing these sources.
+\item
+  \textbf{Sample Selection}: Detail how you selected your sample.
+  Include information on the population of interest, sampling frame, and
+  any sampling techniques used (e.g., random sampling, stratified
+  sampling).
+\item
+  \textbf{Data Collection Procedures}: Explain how the data were
+  collected, including any instruments or tools used (e.g., survey
+  questionnaires, interview guides).
+\item
+  \textbf{Data Description}: Provide a descriptive overview of your
+  data, including the size of the dataset, key variables, and any
+  pertinent characteristics of the data relevant to your research
+  questions.
+\end{itemize}
 
 To answer my research question, I will rely on two main data sources.
 First, country-level data on the weekly number of mpox cases is sourced
@@ -424,7 +652,38 @@ number of mpox cases is sourced from the World Health Organization
 (WHO). Second, Wikipedia analytics data on page view volume is sourced
 directly from Wikipedia.
 
+Data on the number of confirmed mpox cases is obtained from the World
+Health Organization (WHO), while page view statistics for Wikipedia
+articles related to mpox are sourced directly from Wikipedia. The
+analysis is restricted to the 10 countries most affected by the
+outbreak, using time series analysis and lag-correlation methods to
+examine the relationship between Wikipedia page views and mpox case
+numbers. The study aims to identify patterns and correlations that could
+support the use of Wikipedia data as a predictive tool for public health
+surveillance.
+
 \subsubsection{Mpox case data}\label{mpox-case-data}
+
+\begin{itemize}
+\item
+  \textbf{Methodological Approach}: Outline the methodological approach
+  or approaches you used in your study (e.g., qualitative, quantitative,
+  mixed methods). Explain why this approach is suitable for addressing
+  your research questions or testing your hypotheses.
+\item
+  \textbf{Data Preparation}: Describe any procedures used to prepare the
+  data for analysis, such as data cleaning, coding, or the handling of
+  missing data.
+\item
+  \textbf{Analytical Techniques}: Detail the specific analytical
+  techniques or statistical methods used to analyze the data. Include
+  information on any software or tools used in the analysis.
+\item
+  \textbf{Validation Methods}: If applicable, discuss how you validated
+  your findings. This might involve techniques such as cross-validation,
+  reliability and validity testing of instruments, or triangulation of
+  data sources.
+\end{itemize}
 
 Daily aggregated numbers of mpox cases by country correspond with the
 date on which cases were reported to public health authorities. One
@@ -597,7 +856,7 @@ are listed below. Since article titles have been recorded in English,
 the next step would be to cross-reference them with their corresponding
 titles for other Wikipedia projects.
 
-\subsection{Methods}\label{methods}
+\subsection{Methods (1,000 words)}\label{methods-1000-words}
 
 While mpox case data is available for 117 WHO Member States and
 Wikipedia page view statistics exist for nearly 300 languages, I will
@@ -767,19 +1026,242 @@ cases.
   \end{itemize}
 \end{enumerate}
 
-\section{Analysis (3)}\label{analysis-3}
+\subsection{Ethical considerations}\label{ethical-considerations}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Data Privacy}: Discuss measures taken to ensure the privacy
+  and confidentiality of participant data.
+\end{itemize}
+
+\subsection{Limitations of Data and
+Methods}\label{limitations-of-data-and-methods}
+
+\begin{itemize}
+\item
+  \textbf{Acknowledgment of Limitations}: Clearly outline any
+  limitations or biases inherent in your data or methodological approach
+  that could affect your results or the generalizability of your
+  findings.
+\item
+  \textbf{Mitigation Strategies}: Describe any steps taken to mitigate
+  the impact of these limitations.
+\end{itemize}
+
+\subsection{Conclusion}\label{conclusion}
+
+\begin{itemize}
+\item
+  \textbf{Summary}: Conclude this section by summarizing the key points
+  about your data and methods, emphasizing their appropriateness and
+  robustness in addressing your research questions.
+\item
+  \textbf{Transition to Results}: Provide a smooth transition to the
+  next section of your thesis, which will typically present the results
+  of your analysis.
+\end{itemize}
+
+\section{Analysis (3) (1,400 words)}\label{analysis-3-1400-words}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Brief Overview}: Start with a short paragraph introducing the
+  Analysis section. Highlight the analytical methods used (descriptive
+  analysis and regression models) and their relevance to your research
+  question
+\end{itemize}
 
 \subsection{Descriptive analysis}\label{descriptive-analysis}
 
+\begin{itemize}
+\item
+  \textbf{Purpose and Overview}: State the purpose of conducting a
+  descriptive analysis. This may involve summarizing the main
+  characteristics of the data, establishing patterns, or identifying
+  trends.
+\item
+  \textbf{Presentation of Findings}:
+
+  \begin{itemize}
+  \item
+    Use tables, charts, and graphs to present key statistics such as
+    means, medians, modes, ranges, and standard deviations.
+  \item
+    Describe significant findings from these visual and statistical
+    summaries, referring to the variables of interest in your study.
+  \end{itemize}
+\item
+  \textbf{Interpretation}: Provide a narrative interpretation of the
+  descriptive statistics and what they reveal about the dataset's
+  underlying patterns or trends.
+\item
+  \textbf{Link to Research Questions}: Explain how the descriptive
+  analysis contributes to answering your research questions or setting
+  the stage for further analysis.
+\end{itemize}
+
 \subsection{Regression models}\label{regression-models}
 
-\section{Conclusion (4)}\label{conclusion-4}
+\begin{itemize}
+\item
+  \textbf{Rationale for Using Regression Models}: Explain why regression
+  models are appropriate for your study. Discuss how they can help
+  explore the relationships between variables or predict outcomes based
+  on your theoretical framework.
+\item
+  \textbf{Model Specification}:
+
+  \begin{itemize}
+  \item
+    Describe the type(s) of regression model(s) used (e.g., linear
+    regression, logistic regression) and why they were chosen.
+  \item
+    Detail the dependent and independent variables, including any
+    control variables, and the rationale for their selection.
+  \end{itemize}
+\item
+  \textbf{Assumptions and Preliminary Tests}: Briefly mention any
+  assumptions underlying the regression models and describe any
+  preliminary tests conducted to ensure these assumptions were met
+  (e.g., tests for multicollinearity, normality, homoscedasticity).
+\item
+  \textbf{Presentation of Regression Results}:
+
+  \begin{itemize}
+  \item
+    Present the results of the regression analysis in a clear and
+    organized manner, using tables to summarize the model coefficients,
+    significance levels, and fit statistics (e.g., R-squared, AIC).
+  \item
+    Highlight key findings from the regression analysis, focusing on the
+    relationship and significance of the independent variables in
+    predicting the dependent variable(s).
+  \end{itemize}
+\item
+  \textbf{Interpretation of Results}:
+
+  \begin{itemize}
+  \item
+    Interpret the coefficients, explaining the meaning of the
+    significant predictors in the context of your research questions.
+  \item
+    Discuss the implications of the findings, considering the strength,
+    direction, and significance of the relationships found.
+  \end{itemize}
+\item
+  \textbf{Model Fit and Validation}: Comment on the overall fit and
+  robustness of the regression models. Mention any model validation
+  techniques used (e.g., cross-validation, out-of-sample prediction).
+\end{itemize}
+
+\subsection{Synthesis and link to Hypothesis / Research
+Questions}\label{synthesis-and-link-to-hypothesis-research-questions}
+
+\begin{itemize}
+\item
+  \textbf{Synthesizing Findings}: Draw connections between the
+  descriptive analyses and regression model outcomes. Discuss how these
+  analyses collectively address your research questions or
+  support/refute your hypotheses.
+\item
+  \textbf{Insights and Implications}: Provide insights gained from the
+  analysis, emphasizing their implications for the theoretical
+  framework, existing literature, and practical applications.
+\item
+  \textbf{Summary of Key Findings}: Summarize the most important
+  findings from your analysis, highlighting their relevance and
+  contribution to the field.
+\item
+  \textbf{Transition to the Next Section}: Conclude with a transition to
+  the following section of your thesis, typically the Discussion or
+  Conclusions, where you will elaborate on the broader implications of
+  your research.
+\end{itemize}
+
+\section{Conclusion (4) (700 words)}\label{conclusion-4-700-words}
+
+\subsection{Summary of key findings}\label{summary-of-key-findings}
+
+\begin{itemize}
+\item
+  \textbf{Recap of Research Objective}: Start with a brief reminder of
+  the study's primary aim or research questions.
+\item
+  \textbf{Highlight Major Findings}: Summarize the main findings from
+  your analysis, emphasizing how they contribute to the existing body of
+  knowledge. Ensure this summary directly relates to your research
+  questions or hypothese
+\end{itemize}
 
 \subsection{Discussion}\label{discussion}
 
+\begin{itemize}
+\item
+  \textbf{Interpretation of Findings}: Offer a deeper interpretation of
+  your key findings, discussing their significance in the broader
+  context of the field. How do these findings contribute to our
+  understanding of the problem?
+\item
+  \textbf{Integration with Literature}: Briefly compare and contrast
+  your results with relevant studies mentioned in the Literature Review.
+  Highlight any agreements or discrepancies, providing possible
+  explanations for the latter.
+\end{itemize}
+
 \subsection{Limitations}\label{limitations}
 
-\subsection{Policy Recommendations}\label{policy-recommendations}
+\begin{itemize}
+\item
+  \textbf{Acknowledgment of Limitations}: Concisely outline the
+  limitations encountered in your study. This might include
+  methodological constraints, data limitations, or generalizability of
+  the findings.
+\item
+  \textbf{Impact on Research}: Discuss the potential impact of these
+  limitations on the interpretation of your results and the conclusions
+  drawn from your study.
+\end{itemize}
+
+\subsection{Policy recommendations}\label{policy-recommendations}
+
+\begin{itemize}
+\item
+  \textbf{Based on Findings}: Provide specific, actionable policy
+  recommendations based on the key findings of your research. These
+  should be directly linked to the evidence provided by your study.
+\item
+  \textbf{Practical Implications}: Highlight how these recommendations
+  can be implemented in practice, considering the context of your
+  research. Discuss the potential benefits and any challenges that might
+  need to be addressed.
+\end{itemize}
+
+\subsection{Future research areas}\label{future-research-areas}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Gaps and Opportunities}: Briefly suggest areas for future
+  research that emerge from your study's limitations and findings.
+  Highlight how future work can address unanswered questions or test the
+  policy recommendations you've proposed.
+\end{itemize}
+
+\subsection{Concluding statement}\label{concluding-statement}
+
+\begin{itemize}
+\item
+  \textbf{Final Reflections}: End with a strong closing paragraph that
+  reflects on the importance of your work. Reiterate the value of your
+  findings and recommendations in advancing the field and contributing
+  to policy debates.
+\item
+  \textbf{Closing Message}: Leave the reader with a final thought on the
+  significance of addressing the issue you've researched, emphasizing
+  the potential for positive change through informed policy-making.
+\end{itemize}
 
 \section{References (8)}\label{references-8}
 

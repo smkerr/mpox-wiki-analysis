@@ -1,5 +1,5 @@
 ---
-title: "Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia"
+title: "From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence"
 #subtitle:
 author: "Steven Kerr"
 date: "today"
@@ -35,27 +35,88 @@ figure-caption: true
 # more info here: https://quarto.org/docs/reference/formats/pdf.html
 ---
 
-# Abstract (7)
+# Abstract (7) (350 words)
 
 \[To be added last\]
 
-# Introduction (6)
+# Introduction (6) (700 words)
+
+## Background and Context
 
 As the world becomes increasingly interconnected and climate change elevates the risk of zoonotic spillover events, the public becomes ever more susceptible to global-scale outbreaks.[^1] In this context, traditional disease modeling techniques, while effective for well-documented diseases, may not be as applicable for emerging diseases with low case numbers and less understood epidemiological parameters. Critically, public attention plays a pivotal role in disease detection and response.
 
 [^1]: <https://www.nature.com/articles/s41579-021-00639-z>
 
-The advent of digital tools allows for the real-time tracking of this attention, offering a valuable complement to established disease surveillance methods. This is where public attention can serve as an innovative proxy for tracking disease spread. In this regard, the 2022-2023 multi-country mpox outbreak presents a recent case study, allowing us to examine the efficacy of real-time data in monitoring a relatively novel disease. By thoroughly exploring these non-traditional methods, we can more fully understand their advantages and limitations, thus providing crucial insights for decision-makers. This research not only enhances our understanding of digital epidemiology but also contributes to shaping more effective and timely responses to future infectious disease outbreaks.
+## Problem Definition
 
-This project[^2] explores the potential for Wikipedia data to be utilized as an alternative metric for gauging public attention towards public health emergencies, specifically by focusing on the 2022-2023 multi-country mpox outbreak. The primary goal is to assess whether Wikipedia, with its vast user base and granular data, can effectively serve as a proxy for measuring public attention and information-seeking behavior in the context of global health crises. This work is motivated by the limitations of existing disease modeling techniques for emerging diseases, which may lack sufficient historical data for accurate forecasting. Public attention, as measured by digital resources like Wikipedia, could provide early indicators of disease outbreaks, thus aiding in more timely and effective public health interventions.
+A key to outbreak prevention and response is surveillance and detection. Disease surveillance methodologies encompass a wide range of techniques used to monitor disease incidence, varying from more traditional approaches, which often rely on healthcare system reporting, to more innovative techniques that leverage new technologies and data sources. The most common form of surveillance relies on healthcare providers reporting cases of notifiable diseases to public health authorities \[SOURCE\]. Such methods are cost-effective but can suffer from under-reporting and delays. The problem with these historical methods is that they require significant time before data become available. This lag in obtaining accurate and timely data poses a considerable challenge for policymakers who are tasked with making swift, informed decisions critical to outbreak containment. The urgency for real-time information becomes paramount in situations where delays in decision-making can lead to escalated public health crises. In the face of these challenges, the vast and continually expanding reservoir of online data presents an underutilized opportunity for gaining timely insights into disease dynamics.
 
-[^2]: Project GitHub: <https://github.com/smkerr/Thesis_WorkInProgress>
+## Proposed Solution
 
-Data on the number of confirmed mpox cases is obtained from the World Health Organization (WHO), while page view statistics for Wikipedia articles related to mpox are sourced directly from Wikipedia. The analysis is restricted to the 10 countries most affected by the outbreak, using time series analysis and lag-correlation methods to examine the relationship between Wikipedia page views and mpox case numbers. The study aims to identify patterns and correlations that could support the use of Wikipedia data as a predictive tool for public health surveillance.
+The advent of digital tools allows for the real-time tracking of this attention, offering a valuable complement to established disease surveillance methods. This is where online attention can serve as an innovative proxy for tracking disease spread. In this regard, the 2022-2023 multi-country mpox outbreak presents a recent case study, allowing us to examine the efficacy of real-time data in monitoring a relatively under-studied disease. By thoroughly exploring these non-traditional methods, we can more fully understand their advantages and limitations, thus providing crucial insights for decision-makers. This research not only enhances our understanding of digital epidemiology but also contributes to shaping more effective and timely responses to future infectious disease outbreaks.
+
+-   **Background on the Subject Matter**: While you briefly touch on the importance of new disease surveillance methods in the context of global interconnectivity and climate change, providing a bit more background on traditional vs. digital epidemiology techniques could help set the stage for your study's focus on Wikipedia data.
+
+## Research Questions or Hypthesis
+
+This paper[^2] investigates whether Wikipedia pageviews can serve as a reliable proxy for public interest during the 2022-2023 multi-country mpox outbreak. The primary goal is to assess whether Wikipedia, with its vast user base and granular data, can effectively serve as a proxy for measuring public attention and information-seeking behavior in the context of global health crises. This work is motivated by the limitations of existing disease modeling techniques for emerging diseases, which may lack sufficient historical data for accurate forecasting. Public attention, as measured by digital resources like Wikipedia, could provide early indicators of disease outbreaks, thus aiding in more timely and effective public health interventions.
+
+[^2]: Project GitHub repository: <https://github.com/smkerr/mpox-wiki-analysis>
+
+## Theoretical Framework
+
+-   **Theoretical Framework**: If there's a theoretical framework guiding your research, briefly mentioning it in the introduction can help readers understand the lens through which you're examining the data.
+
+    -   Health Belief Model (HBM)
+
+    -   Infodemiology and Infoveillance
+
+    -   The Framework of Risk Information Seeking and Processing (RISP)
+
+## Outlook
 
 This work contributes to the broader academic discourse by exploring the potential of open-source data for enhancing disease surveillance and response strategies. It seeks to validate the efficacy of Wikipedia, as a non-traditional data source, in providing actionable insights to policymakers during public health emergencies. In doing so, this work addresses gaps in the literature regarding the effectiveness of digital tools in enhancing disease surveillance.
 
-# Literature Review (5)
+-   **Significance of the Study**: Briefly highlight why this research is important. You’ve mentioned how it contributes to understanding digital epidemiology, but expanding on the implications for public health policy and emergency response could make a stronger case for the study's relevance.
+
+# Literature Review (5) (1,000 words)
+
+-   **Objective**: Clearly state the purpose of the Literature Review within the context of your thesis.
+
+-   **Scope**: Define the scope of the review, including the time frame, geographic focus, and types of sources considered.
+
+-   **Definitions and Concepts**: Introduce and define key theories, models, or conceptual frameworks that underpin your research area.
+
+-   **Relevance**: Discuss how these theoretical foundations inform the existing research and your study.
+
+-   **Thematic Organization**: Divide the literature into themes or categories relevant to your research question. For each theme:
+
+    -   **Summary**: Provide an overview of the key findings, methodologies, and conclusions.
+
+    -   **Critical Analysis**: Evaluate the methodologies used, discuss the findings, and note any inconsistencies or debates within the theme.
+
+    -   **Connection to Your Research**: Explain how each theme relates to your research question or objectives.
+
+```{=html}
+<!-- -->
+```
+-   **Overview of Methods**: If relevant, discuss the different methodologies employed in the literature, highlighting the evolution of research techniques over time.
+
+-   **Strengths and Limitations**: Critically assess the strengths and limitations of various approaches.
+
+-   **Identification of Gaps**: Identify areas that have not been thoroughly explored or questions that remain unanswered.
+
+-   **Opportunities for Further Research**: Explain how your research aims to address these gaps or contribute new insights.
+
+-   **Recent Developments**: Highlight recent studies or emerging trends in the field.
+
+-   **Theoretical or Methodological Innovations**: Discuss any new theories or methodologies that are gaining traction.
+
+-   **Synthesis**: Summarize the key findings and debates covered in the review.
+
+-   **Relevance to Your Study**: Reiterate how the reviewed literature supports, contradicts, or informs your research.
+
+-   **Research Question/Hypothesis Revisited**: Optionally, refine or reaffirm your research question or hypothesis based on the literature review.
 
 Several key academic papers lay the groundwork for this approach. In ["Assessing Public Interest Based on Wikipedia’s Most Visited Medical Articles During the SARS-CoV-2 Outbreak: Search Trends Analysis"](https://doi.org/10.2196/26331) by Chrzanowski et al. (2021), the authors investigates how public interest in medical topics changed during the COVID-19 pandemic, as reflected by Wikipedia pageviews. The study conducted a retrospective analysis of access to medical articles across nine language versions of Wikipedia and correlated these patterns with global and regional COVID-19 deaths, comparing observed data to a forecast model trained on data from 2015-2019. This involved collecting daily page view statistics for 37,880 articles curated by the English Wikipedia Medicine Project from 1 July 2015 to 13 September 2020. The authors sourced page view statistics using ToolForge, a page view analytics tool) and sourced COVID-19 death statistics from Our World in Data. It found a correlation between the pandemic's severity and pageviews for COVID-19–related Wikipedia articles, concluding that changes in article popularity could serve as a method for epidemiological surveillance by reflecting public attention during disease outbreaks. Furthermore, it demonstrates the potential for using Wikipedia data for epidemiological surveillance and understanding public information-seeking behavior during disease outbreaks. While the paper focuses on the COVID-19 pandemic, similar methodologies can be applied to provide insights into public attention and information-seeking behavior during the Mpox outbreak.
 
@@ -81,7 +142,44 @@ Beyond these studies, several other academic papers have contributed analysis to
 
 Given the existing literature, this thesis aims to fill the research gap by investigating whether Wikipedia can be predictive of mpox cases during the 2022-2023 multi-country outbreak. While previous studies have evaluated Wikipedia data for COVID-19 and others have utilized Google Trends data for mpox, this thesis represents the first attempt, as far as I am aware, to explore the relationship between Wikipedia page view statistics and mpox cases.
 
-# Theory / Research Questions and Hypotheses (1)
+# Theory / Research Questions and Hypotheses (1) (1,000 words)
+
+-   **Rationale**: Begin by explaining why the chosen theoretical framework is suitable for your research, linking it to the gaps or issues identified in the literature review.
+
+-   **Description**: Provide a detailed description of the theoretical framework or models you'll be using, including key concepts, variables, and the relationships between them.
+
+-   **Relevance**: Discuss how this framework has been applied in previous research and its significance in addressing your research problem.
+
+-   **Definitions**: Clearly define the main constructs or variables within your theoretical framework, ensuring they are specific to your study's context.
+
+-   **Operationalization**: Explain how you will measure these constructs or variables in your research, making theoretical concepts tangible and researchable.
+
+-   **Research Questions**:
+
+    -   If your study is more exploratory or qualitative, list the research questions that guide your investigation. Each question should be clearly formulated to explore the relationships or phenomena described by your theoretical framework.
+
+    -   **Purpose**: Clarify what each question aims to discover or understand about the relationship between variables or concepts.
+
+-   **Hypotheses**:
+
+    -   For more quantitative or confirmatory studies, formulate specific hypotheses. These are predictive statements about the expected relationships between variables based on your theoretical framework.
+
+    -   **Directionality**: Indicate whether each hypothesis is directional (specifying the nature of the relationship) or non-directional (simply stating that a relationship exists).
+
+-   **Theoretical Justification**: Provide a rationale for each research question or hypothesis, drawing on your theoretical framework and findings from the literature review.
+
+-   **Research Gap**: Demonstrate how your questions or hypotheses address a gap in the existing literature or contribute to a deeper understanding of the topic.
+
+```{=html}
+<!-- -->
+```
+-   **Methodological Implications**: Briefly discuss how your research questions or hypotheses will influence your choice of research design, methods of data collection, and analysis techniques.
+
+-   **Feasibility and Limitations**: Acknowledge any limitations that your theoretical framework or hypotheses may impose on your study and how you plan to address them.
+
+-   **Summary**: Conclude by summarizing the key points made in this section, reinforcing the importance of your theoretical framework and research questions/hypotheses in guiding your study.
+
+-   **Transition**: Provide a smooth transition to the next section of your thesis, typically the methodology, indicating how the theory will be applied to empirical research.
 
 To what extent can Wikipedia data be effectively utilized as an alternative method for measuring public attention and information-seeking behavior during the 2022-2023 multi-country mpox outbreak?
 
@@ -103,7 +201,17 @@ My thesis also contains several sub-questions to be investigated in support of t
 
 # Data and Methods (2)
 
-## Data sources
+-   **Overview**: Start with a brief introduction that outlines the purpose of this section, connecting it back to your research questions or hypotheses.
+
+## Data sources (700 words)
+
+-   **Data Source(s)**: Describe where your data comes from. For example, mention if you used datasets from public repositories, conducted surveys, or collected observational data. Provide the context and justification for choosing these sources.
+
+-   **Sample Selection**: Detail how you selected your sample. Include information on the population of interest, sampling frame, and any sampling techniques used (e.g., random sampling, stratified sampling).
+
+-   **Data Collection Procedures**: Explain how the data were collected, including any instruments or tools used (e.g., survey questionnaires, interview guides).
+
+-   **Data Description**: Provide a descriptive overview of your data, including the size of the dataset, key variables, and any pertinent characteristics of the data relevant to your research questions.
 
 To answer my research question, I will rely on two main data sources. First, country-level data on the weekly number of mpox cases is sourced from WHO.[^4] Second, Wikipedia analytics data on daily page view volume by article is sourced directly from Wikipedia.[^5]
 
@@ -113,7 +221,17 @@ To answer my research question, I will rely on two main data sources. First, cou
 
 My topic focuses on assessing public attention towards the 2022-2023 multi-country mpox outbreak using Wikipedia data. As such, this analysis relies on two main data sources. First, country-level data on the weekly number of mpox cases is sourced from the World Health Organization (WHO). Second, Wikipedia analytics data on page view volume is sourced directly from Wikipedia.
 
+Data on the number of confirmed mpox cases is obtained from the World Health Organization (WHO), while page view statistics for Wikipedia articles related to mpox are sourced directly from Wikipedia. The analysis is restricted to the 10 countries most affected by the outbreak, using time series analysis and lag-correlation methods to examine the relationship between Wikipedia page views and mpox case numbers. The study aims to identify patterns and correlations that could support the use of Wikipedia data as a predictive tool for public health surveillance.
+
 ### Mpox case data
+
+-   **Methodological Approach**: Outline the methodological approach or approaches you used in your study (e.g., qualitative, quantitative, mixed methods). Explain why this approach is suitable for addressing your research questions or testing your hypotheses.
+
+-   **Data Preparation**: Describe any procedures used to prepare the data for analysis, such as data cleaning, coding, or the handling of missing data.
+
+-   **Analytical Techniques**: Detail the specific analytical techniques or statistical methods used to analyze the data. Include information on any software or tools used in the analysis.
+
+-   **Validation Methods**: If applicable, discuss how you validated your findings. This might involve techniques such as cross-validation, reliability and validity testing of instruments, or triangulation of data sources.
 
 Daily aggregated numbers of mpox cases by country correspond with the date on which cases were reported to public health authorities. One advantage of this dataset is that it is considered to be largely complete since it comprises every confirmed and probable case reported to the national public health authorities.[^6] While this still leaves room for cases to go underreported in instances where an individual does not seek medical attention (e.g., for fear of stygmatization) or for asymptomatic cases, it still represents the most comprehensive view of the outbreak's scale. Aggregated data is available for all reported cases as of 31 December 2023.
 
@@ -175,7 +293,7 @@ While this Data Report showcases the underlying data structure of Wikipedia page
 
 [^14]: <https://www.who.int/news-room/fact-sheets/detail/monkeypox>
 
-## Methods
+## Methods (1,000 words)
 
 While mpox case data is available for 117 WHO Member States and Wikipedia page view statistics exist for nearly 300 languages, I will limit the scope of this analysis to the 10 countries with the most cumulative cases, including the United States of America (31,246), Brazil (10,967), Spain (7,752), France (4,171), Colombia (4,090), Mexico (4,078), the United Kingdom (3,875), Peru (3,812), Germany (3,800), and China[^15] (2,025). Accordingly, I will limit the analysis to the Wikipedia projects for the languages that prominently feature in these countries, including English (the United States of America and the United Kingdom), Portuguese (Brazil), Spanish (Spain, Mexico, and Peru), French (France), German (Germany), Chinese (China). I will examine the time period from 1 January 2022 to 31 December 2023.
 
@@ -225,19 +343,111 @@ My proposed methodology takes inspiration from th work of [Yan et al.](https://d
 
 [^16]: An assessment would need to be made to determine that the increase in traffic volume of certain medical articles following the start of the outbreak is not spurious but substantial.
 
-# Analysis (3)
+## Ethical considerations
+
+-   **Data Privacy**: Discuss measures taken to ensure the privacy and confidentiality of participant data.
+
+## Limitations of Data and Methods
+
+-   **Acknowledgment of Limitations**: Clearly outline any limitations or biases inherent in your data or methodological approach that could affect your results or the generalizability of your findings.
+
+-   **Mitigation Strategies**: Describe any steps taken to mitigate the impact of these limitations.
+
+## Conclusion
+
+-   **Summary**: Conclude this section by summarizing the key points about your data and methods, emphasizing their appropriateness and robustness in addressing your research questions.
+
+-   **Transition to Results**: Provide a smooth transition to the next section of your thesis, which will typically present the results of your analysis.
+
+# Analysis (3) (1,400 words)
+
+-   **Brief Overview**: Start with a short paragraph introducing the Analysis section. Highlight the analytical methods used (descriptive analysis and regression models) and their relevance to your research question
 
 ## Descriptive analysis
 
+-   **Purpose and Overview**: State the purpose of conducting a descriptive analysis. This may involve summarizing the main characteristics of the data, establishing patterns, or identifying trends.
+
+-   **Presentation of Findings**:
+
+    -   Use tables, charts, and graphs to present key statistics such as means, medians, modes, ranges, and standard deviations.
+
+    -   Describe significant findings from these visual and statistical summaries, referring to the variables of interest in your study.
+
+-   **Interpretation**: Provide a narrative interpretation of the descriptive statistics and what they reveal about the dataset's underlying patterns or trends.
+
+-   **Link to Research Questions**: Explain how the descriptive analysis contributes to answering your research questions or setting the stage for further analysis.
+
 ## Regression models
 
-# Conclusion (4)
+-   **Rationale for Using Regression Models**: Explain why regression models are appropriate for your study. Discuss how they can help explore the relationships between variables or predict outcomes based on your theoretical framework.
+
+-   **Model Specification**:
+
+    -   Describe the type(s) of regression model(s) used (e.g., linear regression, logistic regression) and why they were chosen.
+
+    -   Detail the dependent and independent variables, including any control variables, and the rationale for their selection.
+
+-   **Assumptions and Preliminary Tests**: Briefly mention any assumptions underlying the regression models and describe any preliminary tests conducted to ensure these assumptions were met (e.g., tests for multicollinearity, normality, homoscedasticity).
+
+-   **Presentation of Regression Results**:
+
+    -   Present the results of the regression analysis in a clear and organized manner, using tables to summarize the model coefficients, significance levels, and fit statistics (e.g., R-squared, AIC).
+
+    -   Highlight key findings from the regression analysis, focusing on the relationship and significance of the independent variables in predicting the dependent variable(s).
+
+-   **Interpretation of Results**:
+
+    -   Interpret the coefficients, explaining the meaning of the significant predictors in the context of your research questions.
+
+    -   Discuss the implications of the findings, considering the strength, direction, and significance of the relationships found.
+
+-   **Model Fit and Validation**: Comment on the overall fit and robustness of the regression models. Mention any model validation techniques used (e.g., cross-validation, out-of-sample prediction).
+
+## Synthesis and link to Hypothesis / Research Questions
+
+-   **Synthesizing Findings**: Draw connections between the descriptive analyses and regression model outcomes. Discuss how these analyses collectively address your research questions or support/refute your hypotheses.
+
+-   **Insights and Implications**: Provide insights gained from the analysis, emphasizing their implications for the theoretical framework, existing literature, and practical applications.
+
+-   **Summary of Key Findings**: Summarize the most important findings from your analysis, highlighting their relevance and contribution to the field.
+
+-   **Transition to the Next Section**: Conclude with a transition to the following section of your thesis, typically the Discussion or Conclusions, where you will elaborate on the broader implications of your research.
+
+# Conclusion (4) (700 words)
+
+## Summary of key findings
+
+-   **Recap of Research Objective**: Start with a brief reminder of the study's primary aim or research questions.
+
+-   **Highlight Major Findings**: Summarize the main findings from your analysis, emphasizing how they contribute to the existing body of knowledge. Ensure this summary directly relates to your research questions or hypothese
 
 ## Discussion
 
+-   **Interpretation of Findings**: Offer a deeper interpretation of your key findings, discussing their significance in the broader context of the field. How do these findings contribute to our understanding of the problem?
+
+-   **Integration with Literature**: Briefly compare and contrast your results with relevant studies mentioned in the Literature Review. Highlight any agreements or discrepancies, providing possible explanations for the latter.
+
 ## Limitations
 
-## Policy Recommendations
+-   **Acknowledgment of Limitations**: Concisely outline the limitations encountered in your study. This might include methodological constraints, data limitations, or generalizability of the findings.
+
+-   **Impact on Research**: Discuss the potential impact of these limitations on the interpretation of your results and the conclusions drawn from your study.
+
+## Policy recommendations
+
+-   **Based on Findings**: Provide specific, actionable policy recommendations based on the key findings of your research. These should be directly linked to the evidence provided by your study.
+
+-   **Practical Implications**: Highlight how these recommendations can be implemented in practice, considering the context of your research. Discuss the potential benefits and any challenges that might need to be addressed.
+
+## Future research areas
+
+-   **Gaps and Opportunities**: Briefly suggest areas for future research that emerge from your study's limitations and findings. Highlight how future work can address unanswered questions or test the policy recommendations you've proposed.
+
+## Concluding statement 
+
+-   **Final Reflections**: End with a strong closing paragraph that reflects on the importance of your work. Reiterate the value of your findings and recommendations in advancing the field and contributing to policy debates.
+
+-   **Closing Message**: Leave the reader with a final thought on the significance of addressing the issue you've researched, emphasizing the potential for positive change through informed policy-making.
 
 # References (8)
 
