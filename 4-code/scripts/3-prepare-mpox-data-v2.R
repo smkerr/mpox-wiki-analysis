@@ -41,6 +41,63 @@ cases_wk <- cases_df |>
   ungroup()
 
 # Impute missing data ==========================================================
+
+# Fit a density curve
+# Ensure area under the density curve corresponds to number of weekly cases
+# Estimate daily cases
+
+cases_wk <- cases_wk |>
+  mutate(date = as.Date(date)) |>
+  arrange(date)
+
+# Assuming you're looking at one country, or you've filtered the data already
+cases <- rep(cases_wk$date, cases_wk$cases)
+
+# Perform KDE
+case_density <- density(as.numeric(cases))
+
+# Plotting the density
+plot(case_density, main="Kernel Density of Weekly Cases")
+
+
+#Normalize the KDE to Weekly Cases: Scale the KDE output by the total number of cases.
+#Estimate Daily Cases: The density at a given point can give you a probability that corresponds to the relative number of cases for that day. Multiply this by the total number of cases to get an estimated number of daily cases.
+
+
+
+# Convert weekly data to daily using some form of interpolation or curve fitting
+# This is a simplified example; you might need a more sophisticated method
+daily_case_data <- cases_wk |>
+  mutate(end_date = lead(date, default = last(date) + weeks(1))) |>
+  rowwise() |>
+  do({
+    data.frame(date = seq.Date(.$date, .$end_date - days(1), by = "day"))
+  }) |>
+  ungroup() |>
+  left_join(cases_wk, by = "date") |>
+  # Apply your method to estimate daily cases based on weekly data
+  
+  # Here you'd implement the fitting of a density curve and normalize it to estimate daily cases
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### test 
 cases_wk <- cases_wk |> filter(iso3 == "USA")
 date_sequence <- seq.Date(from = min(cases_wk$date), to = max(cases_wk$date), by = "day")

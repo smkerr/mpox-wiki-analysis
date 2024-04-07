@@ -3,10 +3,6 @@
 # Steve Kerr
 # ==============================================================================
 
-# TODO: Could also implement the simpler version from Du et al. to possibly better 
-# capture overall trends
-# TODO: Impement the global version
-
 # TODO: Should I also model this for initial news of outbreak?
 
 # Estimate effect of PHEIC declaration on mpox attention =======================

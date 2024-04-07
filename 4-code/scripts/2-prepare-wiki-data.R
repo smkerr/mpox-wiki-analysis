@@ -13,11 +13,11 @@ date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
 # load ISO reference table
 load(here("3-data/ref/iso_codes.RData"))
 
-# define mpox-specific pages
-#mpox_pages  <- c("Mpox", "Monkeypox", "Monkeypox virus")
-
 # load relevant mpox pages
 load(here("3-data/output/mpox-pages-extended.RData"))
+
+# define mpox-specific pages
+mpox_pages  <- c("Mpox", "Monkeypox", "Monkeypox virus")
 
 
 # Get page titles for other languages ==========================================
@@ -39,12 +39,12 @@ get_alt_page_titles <- function(mpox_page) {
 }
 
 # combine all alternate page titles
-alt_page_title_df <- map_df(str_replace_all(mpox_pages_extended, " ", "_"), get_alt_page_titles) |>
+alt_page_title_df <- map_df(str_replace_all(mpox_pages, " ", "_"), get_alt_page_titles) |>
   rename(page_title = `*`) |> 
   bind_rows(tibble( # append mpox-related pages for English-language Wikipedia
-    lang = rep("en", length(mpox_pages_extended)),
-    page_title = mpox_pages_extended,
-    page_title_en = mpox_pages_extended
+    lang = rep("en", length(mpox_pages)),
+    page_title = mpox_pages,
+    page_title_en = mpox_pages
     ))
 
 
