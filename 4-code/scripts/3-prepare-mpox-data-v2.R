@@ -29,13 +29,13 @@ cases_region_df <- cases_region_df |>
          )
 
 # daily country-level case data
-cases_df <- cases_df |> 
+cases_daily <- cases_df |> 
   select(country = location, iso3 = iso_code, date, cases = new_cases, cases_moving_avg = new_cases_smoothed) |> 
   filter(!str_detect(iso3, "OWID")) # remove region-level counts
 
 # weekly country-level case data 
-cases_wk <- cases_df |> 
-  mutate(date = ceiling_date(date, unit = "weeks", week_start = 3)) |> # calculate weekly cases
+cases_weekly <- cases_daily |> 
+  mutate(date = ceiling_date(date, unit = "weeks", week_start = 1)) |> # ##
   group_by(country, iso3, date) |> 
   reframe(cases = sum(cases, na.rm = TRUE)) |>
   ungroup()

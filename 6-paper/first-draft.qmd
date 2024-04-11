@@ -97,9 +97,8 @@ This work contributes to the broader academic discourse by exploring the potenti
 
     -   **Connection to Your Research**: Explain how each theme relates to your research question or objectives.
 
-```{=html}
 <!-- -->
-```
+
 -   **Overview of Methods**: If relevant, discuss the different methodologies employed in the literature, highlighting the evolution of research techniques over time.
 
 -   **Strengths and Limitations**: Critically assess the strengths and limitations of various approaches.
@@ -170,9 +169,8 @@ Given the existing literature, this thesis aims to fill the research gap by inve
 
 -   **Research Gap**: Demonstrate how your questions or hypotheses address a gap in the existing literature or contribute to a deeper understanding of the topic.
 
-```{=html}
 <!-- -->
-```
+
 -   **Methodological Implications**: Briefly discuss how your research questions or hypotheses will influence your choice of research design, methods of data collection, and analysis techniques.
 
 -   **Feasibility and Limitations**: Acknowledge any limitations that your theoretical framework or hypotheses may impose on your study and how you plan to address them.
@@ -443,11 +441,13 @@ My proposed methodology takes inspiration from th work of [Yan et al.](https://d
 
 -   **Gaps and Opportunities**: Briefly suggest areas for future research that emerge from your study's limitations and findings. Highlight how future work can address unanswered questions or test the policy recommendations you've proposed.
 
-## Concluding statement 
+## Concluding statement
 
 -   **Final Reflections**: End with a strong closing paragraph that reflects on the importance of your work. Reiterate the value of your findings and recommendations in advancing the field and contributing to policy debates.
 
 -   **Closing Message**: Leave the reader with a final thought on the significance of addressing the issue you've researched, emphasizing the potential for positive change through informed policy-making.
+
+# Acronyms
 
 # References (8)
 
