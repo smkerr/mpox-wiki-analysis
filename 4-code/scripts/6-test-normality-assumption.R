@@ -4,21 +4,36 @@
 # ==============================================================================
 
 
+# Setup ========================================================================
+# load Wikipedia pageview data
+pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
+pageviews_weekly <- read_csv("3-data/wikipedia/pageviews-weekly.csv")
+
+# load mpox case data 
+cases_weekly <- read_csv("3-data/mpox-cases/mpox-cases-weekly.csv")
+
+# load ISO code reference table
+load(here("3-data/ref/iso_codes.RData"))
+
+# load mpox cases & pageviews 
+mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
+
+
 # Determine whether pageview data is normally distributed  =====================
 ## Histograms -------------------------------------------------------------------
 # pageviews
 mpox_df |> 
-  filter(est_pct_pageviews > 0) |> 
-  ggplot(aes(x = est_pct_pageviews)) + 
+  filter(pct_pageviews > 0) |> 
+  ggplot(aes(x = pct_pageviews)) + 
   geom_histogram(bins = 30, color = "black") +
-  facet_wrap(~country, scale = "free") +
+  facet_wrap(~country, scale = "free_y") +
   scale_x_continuous(labels = label_percent()) +
-  theme_minimal()
+  theme_minimal() 
 
 # pageviews (logged)
 mpox_df |> 
-  filter(est_pct_pageviews > 0) |> 
-  ggplot(aes(x = log(est_pct_pageviews))) +  # logged
+  filter(pct_pageviews > 0) |> 
+  ggplot(aes(x = log(pct_pageviews))) +  # logged
   geom_histogram(bins = 30, color = "black") +
   facet_wrap(~country, scale = "free") +
   theme_minimal()
@@ -26,8 +41,8 @@ mpox_df |>
 ## Q-Q plots -------------------------------------------------------------------
 # pageviews
 mpox_df |>  
-  filter(est_pct_pageviews > 0) |> 
-  ggplot(aes(sample = est_pct_pageviews)) + 
+  filter(pct_pageviews > 0) |> 
+  ggplot(aes(sample = pct_pageviews)) + 
   geom_qq() + 
   geom_qq_line() +
   facet_wrap(~country, scale = "free") +
@@ -36,8 +51,8 @@ mpox_df |>
 
 # pageviews (logged)
 mpox_df |> 
-  filter(est_pct_pageviews > 0) |> 
-  ggplot(aes(sample = log(est_pct_pageviews))) + 
+  filter(pct_pageviews > 0) |> 
+  ggplot(aes(sample = log(pct_pageviews))) + 
   geom_qq() + 
   geom_qq_line() +
   facet_wrap(~country, scale = "free") +
@@ -69,9 +84,9 @@ test_normality <- function(data, var) {
 
 # Apply normality tests to each country
 pageviews_results <- mpox_df |> 
-  filter(est_pct_pageviews > 0) |> 
+  filter(pct_pageviews > 0) |> 
   group_by(country) |> 
-  group_modify(~test_normality(data = .x, var = "est_pct_pageviews")) |> 
+  group_modify(~test_normality(data = .x, var = "pct_pageviews")) |> 
   ungroup()
 
 # No p-values are >0.01, therefore we can conclude that our data does is not 
@@ -85,9 +100,9 @@ pageviews_results |>
 # mpox cases
 mpox_df |> 
   group_by(country) |> 
-  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  filter(sum(cases) > 30, cases > 0) |> 
   ungroup() |> 
-  ggplot(aes(x = cases_moving_avg)) + 
+  ggplot(aes(x = cases)) + 
   geom_histogram(bins = 30, color = "black") +
   facet_wrap(~country, scale = "free") +
   theme_minimal()
@@ -95,7 +110,7 @@ mpox_df |>
 # mpox cases (logged)
 mpox_df |> 
   group_by(country) |> 
-  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  filter(sum(cases) > 30, cases > 0) |> 
   ungroup() |> 
   ggplot(aes(x = log(cases))) +  # logged
   geom_histogram(bins = 30, color = "black") +
@@ -106,9 +121,9 @@ mpox_df |>
 # mpox cases
 mpox_df |>  
   group_by(country) |> 
-  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  filter(sum(cases) > 30, cases > 0) |> 
   ungroup() |> 
-  ggplot(aes(sample = cases_moving_avg)) + 
+  ggplot(aes(sample = cases)) + 
   geom_qq() + 
   geom_qq_line() +
   facet_wrap(~country, scale = "free") +
@@ -117,9 +132,9 @@ mpox_df |>
 # mpox cases (logged)
 mpox_df |> 
   group_by(country) |> 
-  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
+  filter(sum(cases) > 30, cases > 0) |> 
   ungroup() |> 
-  ggplot(aes(sample = log(cases_moving_avg))) + 
+  ggplot(aes(sample = log(cases))) + 
   geom_qq() + 
   geom_qq_line() +
   facet_wrap(~country, scale = "free") +
@@ -129,8 +144,8 @@ mpox_df |>
 # Apply normality tests to each country
 cases_results <- mpox_df |> 
   group_by(country) |> 
-  filter(sum(cases) > 30, cases_moving_avg > 0) |> 
-  group_modify(~test_normality(data = .x, var = "cases_moving_avg")) |> 
+  filter(sum(cases) > 30, cases > 0) |> 
+  group_modify(~test_normality(data = .x, var = "cases")) |> 
   ungroup()
 
 # No p-values are >0.01, therefore we can conclude that our data does is not 

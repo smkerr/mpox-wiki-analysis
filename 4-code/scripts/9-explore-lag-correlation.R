@@ -8,46 +8,16 @@
 test_df <- mpox_df |>
   reframe(
     .by = c(country, iso2, iso3, date),
-    est_pageviews = sum(est_pageviews),
-    pct_est_pageviews = est_pageviews / pageviews_ceil,
+    pageviews = sum(pageviews),
+    pct_pageviews = pageviews / pageviews_ceil,
     page_title = "Mpox",
     pageviews_ceil, 
-    cases,
-    cases_moving_avg
+    cases
   ) |> 
   distinct() 
 
-# Explore data =================================================================
-# plot mpox-related pageviews and mpox cases
-coeff <- 15750000 # value to transform scales
-p <- test_df |>
-  ggplot(aes(x = date)) +
-  geom_col(aes(y = cases_moving_avg / coeff, fill = "7-day average confirmed cases")) +
-  geom_line(aes(y = pct_est_pageviews, color = "Mpox-related pageviews"), linewidth = 1) +
-  facet_wrap(~country) +
-  scale_x_date(date_labels = "%b %Y") +
-  scale_y_continuous(
-    name = "Mpox-related pageviews", # first axis
-    sec.axis = sec_axis(~ . * coeff, name = "7-day average confirmed cases"), # second axis
-    #labels = scales::label_percent()
-  ) +
-  scale_fill_brewer(type = "qual", palette = 3) +
-  labs(
-    x = NULL,
-    fill = NULL,
-    color = NULL,
-    caption = "Source: World Health Organization via Our World in Data"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "top")
-p
 
-# save plot
-ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)
-
-
-
-# Test time-lag correlations between online search activity & new cases ========
+# Test time-lag correlations between pageviews and cases =======================
 # Function to calculate Spearman correlation with lag
 calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
   
@@ -74,7 +44,7 @@ calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
 
 
 # lagged variable
-lags <- -36:36
+lags <- -28:28
 final_results <- data.frame(
   lag = integer(),
   rho = numeric(), # Assuming your function returns a column named rho for correlation coefficient
@@ -84,17 +54,21 @@ final_results <- data.frame(
   stringsAsFactors = FALSE # Avoid factors for country names to simplify things
 )
 
-for (country_name in unique(test_df$country)) {
-  filtered_df <- test_df |> filter(country == country_name)
+calculate_correlation_with_lag(data = test_df, outcome_var = "pct_pageviews", lagged_var = "cases", lag = -28)
+
+for (title in unique(mpox_df$page_title)) {
+  filtered_df <- mpox_df |> filter(page_title == title)
   results <- map(lags,
-                 ~ calculate_correlation_with_lag(data = filtered_df, 
-                                                  outcome_var = "pct_est_pageviews", 
-                                                  lagged_var = "cases_moving_avg", 
-                                                  lag = .x)) |> 
+                 ~ calculate_correlation_with_lag(
+                   data = filtered_df, 
+                   outcome_var = "pct_pageviews", 
+                   lagged_var = "cases", 
+                  lag = .x)
+                 ) |> 
     bind_rows(.id = "lag") |> # combine lag correlations into single dataframe
     mutate(
       lag = as.integer(lags[as.integer(lag)]),
-      country = country_name
+      page_title = title
     )
 
   final_results <- bind_rows(final_results, results)

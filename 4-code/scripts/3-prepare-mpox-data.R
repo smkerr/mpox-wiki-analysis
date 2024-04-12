@@ -15,7 +15,7 @@ write_csv(cases_df, here(glue("3-data/mpox-cases/owid-monkeypox-data ({format(to
 cases_region_df <- cases_df |> 
   select(region = location, iso3 = iso_code, date, cases = new_cases, cases_moving_avg = new_cases_smoothed) |> 
   filter(str_detect(iso3, "OWID"), region != "World") |> # only keep region-level counts
-  mutate(date = ceiling_date(date, unit = "weeks", week_start = 3)) |> # calculate weekly cases
+  mutate(date = ceiling_date(date, unit = "weeks", week_start = 1)) |> ###
   group_by(region, iso3, date) |> 
   summarize(cases = sum(cases, na.rm = TRUE)) |> 
   ungroup()

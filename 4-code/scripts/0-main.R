@@ -67,7 +67,7 @@ source(here("4-code/scripts/4-merge-data.R"))
 source(here("4-code/scripts/5-select-relevant-pages.R"))
 
 # Quality checks ===============================================================
-#source(here("4-code/scripts/4-check-data-quality.R"))
+#source(here("4-code/scripts/6-test-normality-assumption.R"))
 
 # Data analysis ================================================================
 #source(here("4-code/scripts/5-analyze-data.R"))

@@ -243,8 +243,8 @@ ggsave(here("5-visualization/mpox-cases-daily.png"), height = 7.75, width = 10)
 
 # plot 7-day average cases
 cases_daily |> 
-  reframe(cases_moving_avg = sum(cases_moving_avg), .by = date) |> 
-  ggplot(aes(x = date, y = cases_moving_avg)) + 
+  reframe(cases = sum(cases), .by = date) |> 
+  ggplot(aes(x = date, y = cases)) + 
   geom_col(col = "black", width = 0.5) +
   expand_limits(y = 5) +
   scale_x_date(
@@ -397,3 +397,34 @@ break_values <- c(0, 10, 100, 1000, 10000, Inf)
 left_join(world, cases_totals, by = join_by(iso_a2 == iso2)) |> # merge geometries with case data
   tm_shape() + # create map
   tm_polygons(fill = "cases", breaks = break_values, palette = "Blues", title = "Mpox cases")
+
+
+# Combined mpox data ===========================================================
+# plot US mpox-related pageviews and mpox cases
+# TODO: Either find a way to automatically scale the coefficient based on the max values of the particular page_title OR just sum all page_titles' pageviews together OR only plot mpox-related articles 
+coeff <- 100000000 # value to transform scales
+p <- mpox_df |>
+  ggplot(aes(x = date)) +
+  geom_col(aes(y = cases / coeff, fill = "Weekly confirmed cases")) +
+  geom_line(aes(y = pct_pageviews)) +
+  facet_wrap(~country) +
+  scale_x_date(date_labels = "%b %Y") +
+  scale_y_continuous(
+    name = "Mpox-related pageviews (%)", # first axis
+    sec.axis = sec_axis(~ . * coeff, name = "Weekly confirmed cases"), # second axis
+    labels = scales::label_percent()
+  ) +
+  scale_fill_brewer(type = "qual", palette = 3) +
+  facet_wrap(~page_title, scales = "fixed") +
+  labs(
+    x = NULL,
+    fill = NULL,
+    color = NULL,
+    caption = "Source: World Health Organization"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+p
+
+# save plot
+ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)

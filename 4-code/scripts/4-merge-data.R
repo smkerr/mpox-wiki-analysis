@@ -22,7 +22,9 @@ mpox_df <- full_join(
   by = join_by(country_name, iso2, iso3, date)
   ) |>
   select(country = country_name, iso2, iso3, cases, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil) |> 
-  complete(fill = list(pageviews = 0, pct_pageviews = 0, cases = 0))  # fill in missing zero
+  filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
+  complete(fill = list(cases = 0))  |> # fill in missing cases with zeros
+  arrange(country, date, page_title)
 
 # TODO: Should I drop NAs or impute missing values here?
 
