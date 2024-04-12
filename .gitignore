@@ -52,4 +52,4 @@ rsconnect/
 .DS_Store
 */misc/
 **/archive/
-get-mpox-coverage.R
+4-code/scripts/get-media-coverage.R
