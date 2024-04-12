@@ -167,17 +167,18 @@ pageviews_daily <- pageviews |>
   select(country_long, iso2, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil)
 
 # Calculate weekly pageviews
-pageviews_weekly <- pageviews_daily |>
+pageviews_weekly <- pageviews |>
   mutate(
     date = ceiling_date(date, unit = "weeks", week_start = 1), ###
     year = year(date),
     month = month(date)
   ) |>
   reframe(
-    .by = c("wikidata_id", "page_title", "page_id", "country_long", "iso2", "project", "pageviews_ceil", "year", "month", "date"),
+    .by = c("country_long", "iso2", "project", "wikidata_id", "page_title", "page_id", "year", "month", "date"),
     pageviews = sum(pageviews, na.rm = TRUE)
-    ) |>
-  mutate(pct_pageviews = pageviews / pageviews_ceil) |> 
+  ) |>
+  left_join(pageviews_total, by = join_by(iso2, project, year, month), relationship = "many-to-one") |> 
+  mutate(pct_pageviews = pageviews / pageviews_ceil) |> # normalize by dividing by monthly totals 
   select(country_long, iso2, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil)
 
 
