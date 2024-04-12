@@ -52,3 +52,4 @@ rsconnect/
 .DS_Store
 */misc/
 **/archive/
+get-mpox-coverage.R
