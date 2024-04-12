@@ -38,6 +38,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+*.env
 
 # pkgdown site
 docs/
@@ -52,4 +53,3 @@ rsconnect/
 .DS_Store
 */misc/
 **/archive/
-4-code/scripts/get-media-coverage.R

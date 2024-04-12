@@ -12,6 +12,7 @@
 pacman::p_load(
   MASS,         # statistical analysis
   broom,        # tidy model output
+  dotenv,       # .env files
   dplyr,        # wrangle data
   forcats,      # factors
   ggplot2,      # visualize data
