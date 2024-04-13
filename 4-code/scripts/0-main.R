@@ -29,6 +29,7 @@ pacman::p_load(
   purrr,        # vectorize operations
   readr,        # import data
   readxl,       # import excel files
+  rentrez,      # query NCBI's EUtils API 
   scales,       # scaling plots
   segmented,    # segmented regression analysis
   sf,           # simple features
@@ -68,7 +69,7 @@ source(here("4-code/scripts/4-merge-data.R"))
 # Select most relevant articles ================================================
 source(here("4-code/scripts/5-select-relevant-pages.R"))
 
-# Quality checks ===============================================================
+# Test normality assumption ====================================================
 #source(here("4-code/scripts/6-test-normality-assumption.R"))
 
 # Data analysis ================================================================

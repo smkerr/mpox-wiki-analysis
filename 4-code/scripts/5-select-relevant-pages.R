@@ -3,9 +3,6 @@
 # Steve Kerr
 # ==============================================================================
 
-# !!!At least in the US context, the correlation between cases and pageviews appears
-# to be stronger at the weekly level as compared to the daily level. I'll go with 
-# weekly for now...
 
 # Setup ========================================================================
 # load mpox cases & pageviews 
@@ -89,19 +86,14 @@ mpox_df |>
 # Function to calculate Spearman correlation given lag
 calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
   
-  # TODO: Check to make sure that lags are working as expected since I'm unsure
-  # whether they are shifting by days or weeks here ....
-  
   # Shift the lagged variable manually
   if (lag > 0) {
     shifted_cases <- c(rep(NA, lag), data[[lagged_var]][1:(nrow(data) - lag)])
   } else if (lag < 0) {
-    shifted_cases <- c(data[[lagged_var]][(-lag + 1):nrow(data)], rep(NA, -lag))
+    shifted_cases <- c(data[[lagged_var]][(-lag + 1):nrow(data)], rep(NA, - lag))
   } else { # lag == 0
     shifted_cases <- data[[lagged_var]]
   }
-  
-  print(shifted_cases)
   
   # Remove rows where either variable is NA to ensure proper comparison
   clean_data <- data |> 
@@ -122,16 +114,12 @@ calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
   
 }
 
-calculate_correlation_with_lag(mpox_df |> filter(page_title == "Monkeypox"), 
-                               "pct_pageviews",
-                               "cases",
-                               1)
 
+# define lag range (in weeks)
+lags <- -4:4 
+# TODO: should be informed by attention decay analysis
 
-# define lag range
-lags <- -36:36
-
-# initialize empty dataframe to store results
+# initialize empty dataframe
 final_results <- data.frame()
 
 for (title in unique(mpox_df$page_title)) {
@@ -157,7 +145,7 @@ final_results
 
 # TODO: Properly interpret results ... 
 
-
+# Visualize results ============================================================
 # Plot Spearman correlation coefficient by article
 final_results |> 
   ggplot(aes(x = lag, y = rho, color = page_title)) + 
@@ -180,7 +168,6 @@ final_results |>
   facet_wrap(~page_title) + 
   theme_minimal()
 
-
 # p-value
 ggplot(final_results, aes(x = lag, y = p.value, color = page_title)) + 
   geom_line() + 
@@ -195,20 +182,64 @@ ggplot(final_results, aes(x = lag, y = rho, color = page_title)) +
   theme_minimal() +
   theme(legend.position = "none")
 
-# heatmap
+# Order articles by average Spearman correlation coefficient
+order_by_coefficients <- final_results |> 
+  reframe(
+    .by = page_title,
+    avg_rho = mean(rho)
+  ) |> 
+  arrange(avg_rho) |> 
+  pull(page_title)
+
+# heatmap of Spearman correlation coefficients
 final_results |> 
-  #mutate(country = factor(country, levels = country_order)) |> 
+  mutate(page_title = factor(page_title, levels = order_by_coefficients)) |> 
   ggplot(aes(x = lag, y = page_title, fill = rho)) +
   geom_tile(color = "white") +
-  scale_fill_gradient(low = "#91bfdb", high = "#fc8d59") +
-  scale_x_continuous(n.breaks = 20) +
+  scale_fill_gradient2(
+    limits = c(-1, 1),
+    midpoint = 0,
+    low = "#91bfdb", 
+    mid = "#ffffbf",
+    high = "#fc8d59"
+    ) +
+  scale_x_continuous(n.breaks = 10) +
   labs(
     title = "Time lag correlation of Wikipedia page views and weekly mpox cases",
-    x = "Time lag [days]",
+    x = "Time lag (weeks)",
     y = NULL,
     fill = "Spearman \ncorrelation \ncoefficient"
   ) +
   theme_minimal()
-# TODO: Go back to weekly lags since I don't have that level of granularity
+
+# Order articles by average p-value
+order_by_p.values <- final_results |> 
+  reframe(
+    .by = page_title,
+    avg_p.value = mean(p.value)
+  ) |> 
+  arrange(avg_p.value) |> 
+  pull(page_title)
+
+# heatmap of p-values
+final_results |> 
+  mutate(page_title = factor(page_title, levels = order_by_p.values)) |> 
+  ggplot(aes(x = lag, y = page_title, fill = p.value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(
+    limits = c(0, 1),
+    midpoint = 0.5,
+    low = "#91bfdb", 
+    mid = "#ffffbf",
+    high = "#fc8d59"
+  ) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(
+    title = "Significance of time lag correlation of Wikipedia page views and weekly mpox cases",
+    x = "Time lag (weeks)",
+    y = NULL,
+    fill = "p-value"
+  ) +
+  theme_minimal()
 
 # TODO: Implement select criteria ..............................................
