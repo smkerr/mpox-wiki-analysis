@@ -42,6 +42,7 @@ pacman::p_load(
   waxer,        # Wikipedia pageviews
   WikipediR,    # Wikipedia links
   writexl,      # save excel files
+  xml2,         # XML
   zoo           # rolling averages
 )
 
