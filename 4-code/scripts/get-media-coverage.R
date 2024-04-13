@@ -1,11 +1,14 @@
 # GNews API 
 api_key <- Sys.getenv("GNEWS_API_KEY")
 search_query <- "monkeypox"
-start_date <- as_date("2022-01-01")
-end_date <- as_date("2022-05-01")
+start_date <- as_date("2022-11-08")
+end_date <- as_date("2023-02-05")
 date_sequence <- seq.Date(start_date, end_date, by = 1)
 
-news_df <- data.frame()
+if (file.exists(here("3-data/mpox-news/mpox-total-articles.csv"))) {
+  news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles.csv"))  
+} else news_df <- data.frame()
+
 
 for (date in date_sequence) {
   
