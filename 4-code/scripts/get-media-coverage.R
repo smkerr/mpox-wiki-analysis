@@ -1,7 +1,7 @@
 # GNews API 
 api_key <- Sys.getenv("GNEWS_API_KEY")
-search_query <- "monkeypox"
-start_date <- as_date("2022-11-08")
+search_query <- "mpox"
+start_date <- as_date("2022-11-27") # date WHO announced name change to mpox
 end_date <- as_date("2023-02-05")
 date_sequence <- seq.Date(start_date, end_date, by = 1)
 
@@ -30,6 +30,10 @@ for (date in date_sequence) {
 
 print(news_df)
 
+news_df <- news_df |> 
+  filter(!is.na(n_articles)) |> 
+  arrange(date)
+
 # save results
 write_csv(news_df, here("3-data/mpox-news/mpox-total-articles.csv"))
 
@@ -50,4 +54,6 @@ news_df |>
   ) |> 
   ggplot(aes(x = date, y = n_articles)) +
   geom_col() + 
-  theme_minimal()
+  theme_minimal() + 
+  facet_wrap(~search_term, ncol = 1)
+  

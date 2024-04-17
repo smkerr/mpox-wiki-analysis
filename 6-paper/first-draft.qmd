@@ -43,11 +43,7 @@ figure-caption: true
 
 ## Background and Context
 
-As the world becomes increasingly interconnected and climate change elevates the risk of zoonotic spillover events, the public becomes ever more susceptible to global-scale outbreaks.[^1] In this context, traditional disease modeling techniques, while effective for well-documented diseases, may not be as applicable for emerging diseases with low case numbers and less understood epidemiological parameters. Critically, public attention plays a pivotal role in disease detection and response.
-
-[^1]: <https://www.nature.com/articles/s41579-021-00639-z>
-
-## Problem Definition
+As the world becomes increasingly interconnected and climate change elevates the risk of zoonotic spillover events, the public becomes ever more susceptible to global-scale outbreaks [@romanello2021]. In this context, traditional disease modeling techniques, while effective for well-documented diseases, may not be as applicable for emerging diseases with low case numbers and less understood epidemiological parameters. Critically, public attention plays a pivotal role in disease detection and response.Problem Definition
 
 A key to outbreak prevention and response is surveillance and detection. Disease surveillance methodologies encompass a wide range of techniques used to monitor disease incidence, varying from more traditional approaches, which often rely on healthcare system reporting, to more innovative techniques that leverage new technologies and data sources. The most common form of surveillance relies on healthcare providers reporting cases of notifiable diseases to public health authorities \[SOURCE\]. Such methods are cost-effective but can suffer from under-reporting and delays. The problem with these historical methods is that they require significant time before data become available. This lag in obtaining accurate and timely data poses a considerable challenge for policymakers who are tasked with making swift, informed decisions critical to outbreak containment. The urgency for real-time information becomes paramount in situations where delays in decision-making can lead to escalated public health crises. In the face of these challenges, the vast and continually expanding reservoir of online data presents an underutilized opportunity for gaining timely insights into disease dynamics.
 
@@ -59,9 +55,9 @@ The advent of digital tools allows for the real-time tracking of this attention,
 
 ## Research Questions or Hypthesis
 
-This paper[^2] investigates whether Wikipedia pageviews can serve as a reliable proxy for public interest during the 2022-2023 multi-country mpox outbreak. The primary goal is to assess whether Wikipedia, with its vast user base and granular data, can effectively serve as a proxy for measuring public attention and information-seeking behavior in the context of global health crises. This work is motivated by the limitations of existing disease modeling techniques for emerging diseases, which may lack sufficient historical data for accurate forecasting. Public attention, as measured by digital resources like Wikipedia, could provide early indicators of disease outbreaks, thus aiding in more timely and effective public health interventions.
+This paper[^1] investigates whether Wikipedia pageviews can serve as a reliable proxy for public interest during the 2022-2023 multi-country mpox outbreak. The primary goal is to assess whether Wikipedia, with its vast user base and granular data, can effectively serve as a proxy for measuring public attention and information-seeking behavior in the context of global health crises. This work is motivated by the limitations of existing disease modeling techniques for emerging diseases, which may lack sufficient historical data for accurate forecasting. Public attention, as measured by digital resources like Wikipedia, could provide early indicators of disease outbreaks, thus aiding in more timely and effective public health interventions.
 
-[^2]: Project GitHub repository: <https://github.com/smkerr/mpox-wiki-analysis>
+[^1]: Project GitHub repository: <https://github.com/smkerr/mpox-wiki-analysis>
 
 ## Theoretical Framework
 
@@ -121,9 +117,9 @@ Several key academic papers lay the groundwork for this approach. In ["Assessing
 
 ["Association between public attention and monkeypox epidemic: A global lag-correlation analysis"](https://doi.org/10.1002%2Fjmv.28382) by Yan et al. (2023) investigates the association between public attention, as measured by Google Trends Index (GTI), and the global mpox oubtreak. The authors use Google Trends data for information on internet search activity related to mpox as well as data on daily confirmed mpox cases from Our World in Data. It tests time-lag correlations between GTI and daily confirmed mpox cases across the 20 countries with the highest case numbers as of 20 September 2022 using the Spearman correlation coefficients, over a range of -36 to +36 days. Spearman correlation coefficients from these 20 countries were pooled to provide a combined correlation coefficient for each lag. To test whether the time series was stationary, an Augment Dickey-Fuller (ADF) test is applied. The study finds a strong positive correlation, particularly noticeable 13 days after a peak in public attention. The study also conducted meta-analyses and utilized vector autoregression (VAR) models to analyze the temporal relationship between GTI and daily confirmed mpox cases, and a Granger-causality test was employed to evaluate whether the GTI trend could predict daily confirmed mpox cases. The findings suggest that GTI could be a useful tool for early monitoring and prediction of mpox cases, highlighting the significance of digital epidemiology in infectious disease surveillance. The study emphasizes the potential of internet data like GTI in providing early warning signs for health outbreaks and aiding in rapid response strategies. While the study utilizes GTI data to public attention towards the mpox outbreak, however similar methods can be applied to Wikipedia pageviews data to test whether the same conclusions can be drawn using Wikipedia as a data source.
 
-In ["Trends in Online Search Activity and the Correlation with Daily New Cases of Monkeypox among 102 Countries or Territories"](https://doi.org/10.3390/ijerph20043395) by Du et al. (2023), the authors investigate the relationship between online search activity related to mpox and the actual daily new cases of mpox across 102 countries or territories. The study aims to understand how internet search trends can reflect public awareness towards mpox, potentially serving as an early indicator for outbreaks. Data on daily mpox cases from 1 May 2022 to 9 October 2022 was sourced from Our World in Data, while online search activity data related to mpox was sourced from Google Trends using the keyword "monkeypox".[^3] Online search activity was expressed as relative normalized search volume numbers (RNSNs) ranging from 0 to 100 to reflect how many searches are performed for a keyword relative to the total number of searches on the internet over time where a value of 100 represents the time point at which the search term has reached its peak in popularity. Demographic data including total population, population density, average years of schooling, socioeconomic status, and public tourism were sourced from the United Nations and World Bank. Data on health status including HIV prevalence, sanitation levels, and health workforce densities were obtained from the 2019 Global Burden of Disease study. The authors use a segmented time-series analysis to estimate the impact of the PHEIC declaration on online search activity, adjusting for daily new cases across 194 countries or territories. Furthermore, the study tests time-lag correlations between online search activity and daily new cases, specifically considering lags of -21, -14, -7, 0, +7, +14, and +21 days. Next, a general linear regression model (GLM) is used to explore influencing factors on the relationship between online search activity and daily new cases. The authors find a significant correlation between online search activity and daily mpox cases, with online searches often preceding reporting of new cases. This study highlights the value of integrating internet search data into public health surveillance for emerging infectious diseases. Similar to the paper by Yan et al., this study utilizes Google Trends data, however similar methodologies could be applied towards Wikipedia pageviews data.
+In ["Trends in Online Search Activity and the Correlation with Daily New Cases of Monkeypox among 102 Countries or Territories"](https://doi.org/10.3390/ijerph20043395) by Du et al. (2023), the authors investigate the relationship between online search activity related to mpox and the actual daily new cases of mpox across 102 countries or territories. The study aims to understand how internet search trends can reflect public awareness towards mpox, potentially serving as an early indicator for outbreaks. Data on daily mpox cases from 1 May 2022 to 9 October 2022 was sourced from Our World in Data, while online search activity data related to mpox was sourced from Google Trends using the keyword "monkeypox".[^2] Online search activity was expressed as relative normalized search volume numbers (RNSNs) ranging from 0 to 100 to reflect how many searches are performed for a keyword relative to the total number of searches on the internet over time where a value of 100 represents the time point at which the search term has reached its peak in popularity. Demographic data including total population, population density, average years of schooling, socioeconomic status, and public tourism were sourced from the United Nations and World Bank. Data on health status including HIV prevalence, sanitation levels, and health workforce densities were obtained from the 2019 Global Burden of Disease study. The authors use a segmented time-series analysis to estimate the impact of the PHEIC declaration on online search activity, adjusting for daily new cases across 194 countries or territories. Furthermore, the study tests time-lag correlations between online search activity and daily new cases, specifically considering lags of -21, -14, -7, 0, +7, +14, and +21 days. Next, a general linear regression model (GLM) is used to explore influencing factors on the relationship between online search activity and daily new cases. The authors find a significant correlation between online search activity and daily mpox cases, with online searches often preceding reporting of new cases. This study highlights the value of integrating internet search data into public health surveillance for emerging infectious diseases. Similar to the paper by Yan et al., this study utilizes Google Trends data, however similar methodologies could be applied towards Wikipedia pageviews data.
 
-[^3]: Note that this study was conducted prior to WHO's recommendation that monkeypox instead be referred to as "mpox" on 28 November 2022: <https://www.who.int/news/item/28-11-2022-who-recommends-new-name-for-monkeypox-disease>
+[^2]: Note that this study was conducted prior to WHO's recommendation that monkeypox instead be referred to as "mpox" on 28 November 2022: <https://www.who.int/news/item/28-11-2022-who-recommends-new-name-for-monkeypox-disease>
 
 Beyond these studies, several other academic papers have contributed analysis to various aspects of the relationship between online information-seeking behavior and public health.
 
@@ -211,11 +207,11 @@ My thesis also contains several sub-questions to be investigated in support of t
 
 -   **Data Description**: Provide a descriptive overview of your data, including the size of the dataset, key variables, and any pertinent characteristics of the data relevant to your research questions.
 
-To answer my research question, I will rely on two main data sources. First, country-level data on the weekly number of mpox cases is sourced from WHO.[^4] Second, Wikipedia analytics data on daily page view volume by article is sourced directly from Wikipedia.[^5]
+To answer my research question, I will rely on two main data sources. First, country-level data on the weekly number of mpox cases is sourced from WHO.[^3] Second, Wikipedia analytics data on daily page view volume by article is sourced directly from Wikipedia.[^4]
 
-[^4]: <https://worldhealthorg.shinyapps.io/mpx_global/>
+[^3]: <https://worldhealthorg.shinyapps.io/mpx_global/>
 
-[^5]: <https://wikitech.wikimedia.org/wiki/Data_Engineering/Systems/AQS>
+[^4]: <https://wikitech.wikimedia.org/wiki/Data_Engineering/Systems/AQS>
 
 My topic focuses on assessing public attention towards the 2022-2023 multi-country mpox outbreak using Wikipedia data. As such, this analysis relies on two main data sources. First, country-level data on the weekly number of mpox cases is sourced from the World Health Organization (WHO). Second, Wikipedia analytics data on page view volume is sourced directly from Wikipedia.
 
@@ -231,13 +227,13 @@ Data on the number of confirmed mpox cases is obtained from the World Health Org
 
 -   **Validation Methods**: If applicable, discuss how you validated your findings. This might involve techniques such as cross-validation, reliability and validity testing of instruments, or triangulation of data sources.
 
-Daily aggregated numbers of mpox cases by country correspond with the date on which cases were reported to public health authorities. One advantage of this dataset is that it is considered to be largely complete since it comprises every confirmed and probable case reported to the national public health authorities.[^6] While this still leaves room for cases to go underreported in instances where an individual does not seek medical attention (e.g., for fear of stygmatization) or for asymptomatic cases, it still represents the most comprehensive view of the outbreak's scale. Aggregated data is available for all reported cases as of 31 December 2023.
+Daily aggregated numbers of mpox cases by country correspond with the date on which cases were reported to public health authorities. One advantage of this dataset is that it is considered to be largely complete since it comprises every confirmed and probable case reported to the national public health authorities.[^5] While this still leaves room for cases to go underreported in instances where an individual does not seek medical attention (e.g., for fear of stygmatization) or for asymptomatic cases, it still represents the most comprehensive view of the outbreak's scale. Aggregated data is available for all reported cases as of 31 December 2023.
 
-[^6]: For more information on what constitutes a confirmed or probable case, please refer to WHO's mpox case definitions: <https://www.who.int/emergencies/outbreak-toolkit/disease-outbreak-toolboxes/mpox-outbreak-toolbox>
+[^5]: For more information on what constitutes a confirmed or probable case, please refer to WHO's mpox case definitions: <https://www.who.int/emergencies/outbreak-toolkit/disease-outbreak-toolboxes/mpox-outbreak-toolbox>
 
-The top 10 countries by number of confirmed cases are the United States of America (31,246), Brazil (10,967), Spain (7,752), France (4,171), Colombia (4,090), Mexico (4,078), the United Kingdom (3,875), Peru (3,812), Germany (3,800), and China[^7] (2,025).
+The top 10 countries by number of confirmed cases are the United States of America (31,246), Brazil (10,967), Spain (7,752), France (4,171), Colombia (4,090), Mexico (4,078), the United Kingdom (3,875), Peru (3,812), Germany (3,800), and China[^6] (2,025).
 
-[^7]: Cases shown include those reported in mainland China (1,611), Taiwan (333), Hong Kong (80), and Macao (1).
+[^6]: Cases shown include those reported in mainland China (1,611), Taiwan (333), Hong Kong (80), and Macao (1).
 
 As of 31 December 2023, mpox cases have been reported by 117 WHO Member States across all six WHO regions. The dataset contains cases reported between 7 January 2022 to 31 December 2023.
 
@@ -249,13 +245,13 @@ While the global trend appears to have been quite coherent with the number of we
 
 Here we observe that there is substantial variation between the six WHO regions, with the Eastern Mediterranean Region, European Region, and Region of the Americas following a similar trend with cases peaking in summer/fall 2022, while cases in the South-East Asia Region and Western Pacific Region peak in summer/fall 2023. In contrast, cases reported by the African Region appear to be more uniformly distributed, reflecting the fact that mpox is endemic to certain areas of western and central Africa.
 
-In addition to aggregated case data, WHO also collects line list data where each row corresponds with an individual case and contains information on demographics, clinical presentation, epidemiological exposure factors, and laboratory testing.[^8] Due to privacy concerns, line list data is stripped of all personally identifiable information and aggregated by country and date before being made available by WHO.[^9] In contrast to aggregated case data, the `date` variable of the detailed case dataset corresponds with either the date of symptom onset, the date of diagnosis (if date of symptom onset is not available), or the date of reporting (if date of symptom onset and date of diagnosis are not available).[^10] This difference in how cases are assigned to a date grants us a much more granular view of countries' epidemic curves, as shown below. Dates are aggregated at the weekly level to further protect individual cases' privacy.
+In addition to aggregated case data, WHO also collects line list data where each row corresponds with an individual case and contains information on demographics, clinical presentation, epidemiological exposure factors, and laboratory testing.[^7] Due to privacy concerns, line list data is stripped of all personally identifiable information and aggregated by country and date before being made available by WHO.[^8] In contrast to aggregated case data, the `date` variable of the detailed case dataset corresponds with either the date of symptom onset, the date of diagnosis (if date of symptom onset is not available), or the date of reporting (if date of symptom onset and date of diagnosis are not available).[^9] This difference in how cases are assigned to a date grants us a much more granular view of countries' epidemic curves, as shown below. Dates are aggregated at the weekly level to further protect individual cases' privacy.
 
-[^8]: <https://www.who.int/publications/m/item/monkeypox-minimum-dataset-case-reporting-form-(crf)>
+[^7]: <https://www.who.int/publications/m/item/monkeypox-minimum-dataset-case-reporting-form-(crf)>
+
+[^8]: <https://worldhealthorg.shinyapps.io/mpx_global/>
 
 [^9]: <https://worldhealthorg.shinyapps.io/mpx_global/>
-
-[^10]: <https://worldhealthorg.shinyapps.io/mpx_global/>
 
 A significant disadvantage of this detailed dataset is that it only contains information 63% for all reported mpox cases (58,883/93,030). This is driven almost entirely by the fact that WHO no longer includes cases from the United States in this dataset, despite the fact that the United States represents 34% of global cases (31,246/93,030). That said, this data can still be useful for analysis of other countries. As such, detailed dataset can complement the aggregated data presented above.
 
@@ -265,9 +261,9 @@ Again, while the global trend appears to have been quite coherent with the numbe
 
 ### Wikipedia data
 
-The Wikimedia Foundation makes it straightforward to access various analytics data related to its projects, including Wikipedia, by providing the [Wikimedia Analytics Query Service (AQS)](https://wikitech.wikimedia.org/wiki/Data_Engineering/Systems/AQS) [REST API](https://wikimedia.org/api/rest_v1/). AQS offers a range of analytics data, such as page view statistics, editor activity levels, and other traffic data from as far back as 1 August 2015. The REST API facilitates the retrieval of analytics data from Wikipedia in a structured way. Given that Wikipedia data is abundant, publicly accessible, and commonly used, many resources exist to easily access this data.[^11] {[waxer](https://wikimedia.github.io/waxer/)} is one such package which serves as a Wikimedia API wrapper that facilitates querying for traffic (pageviews, unique devices), user (e.g. active editors), and content-based metrics (e.g. edits counts, pages counts) from Wikimedia Analytics Query Service with R.
+The Wikimedia Foundation makes it straightforward to access various analytics data related to its projects, including Wikipedia, by providing the [Wikimedia Analytics Query Service (AQS)](https://wikitech.wikimedia.org/wiki/Data_Engineering/Systems/AQS) [REST API](https://wikimedia.org/api/rest_v1/). AQS offers a range of analytics data, such as page view statistics, editor activity levels, and other traffic data from as far back as 1 August 2015. The REST API facilitates the retrieval of analytics data from Wikipedia in a structured way. Given that Wikipedia data is abundant, publicly accessible, and commonly used, many resources exist to easily access this data.[^10] {[waxer](https://wikimedia.github.io/waxer/)} is one such package which serves as a Wikimedia API wrapper that facilitates querying for traffic (pageviews, unique devices), user (e.g. active editors), and content-based metrics (e.g. edits counts, pages counts) from Wikimedia Analytics Query Service with R.
 
-[^11]: Mikhail Popov, Data Science Manager in Product Analytics at the Wikimedia Foundation, has published a list of R packages related to or affiliated with the Wikimedia Foundation here: <https://people.wikimedia.org/~bearloga/notes/r-pkgs.html>
+[^10]: Mikhail Popov, Data Science Manager in Product Analytics at the Wikimedia Foundation, has published a list of R packages related to or affiliated with the Wikimedia Foundation here: <https://people.wikimedia.org/~bearloga/notes/r-pkgs.html>
 
 Since this project is concerned with assessing public attention, Wikipedia page view statistics will serve as our primary measure for online information-seeking behavior. We query page view statistics from the AQS REST API using the following specifications:
 
@@ -277,25 +273,25 @@ Next, we explore the missingness of each of variable in the `pageviews` dataset.
 
 Seeing as a substantial number of page views are driven by redirects, it is important to understand whether it is valid to include these redirects in our analysis. If search terms appear related to mpox or the monkeypox virus, then it is safe to assume that this represents online information-seeking behavior towards our topic. Our table shows that all search appear to directly relate to mpox or the monkeypox virus, so we conclude that is valid to include redirects in this analysis. This will be reevaluated and handled as more projects and articles are added to the analysis.
 
-Considering that mpox case data is available at a weekly level of granularity, we aggregate page view data by week and plot the results below. We observer two large spikes, with the first centered on May 2022 when non-endemic countries began reporting mpox cases[^12] and the second centered on late July 2022 when WHO declared mpox to be a Public Health Emergency of International Concern (PHEIC).[^13] Other smaller peaks can be observed, although the general trend indicates that public attention decreases over time.
+Considering that mpox case data is available at a weekly level of granularity, we aggregate page view data by week and plot the results below. We observer two large spikes, with the first centered on May 2022 when non-endemic countries began reporting mpox cases[^11] and the second centered on late July 2022 when WHO declared mpox to be a Public Health Emergency of International Concern (PHEIC).[^12] Other smaller peaks can be observed, although the general trend indicates that public attention decreases over time.
 
-[^12]: <https://www.who.int/emergencies/situations/monkeypox-oubreak-2022>
+[^11]: <https://www.who.int/emergencies/situations/monkeypox-oubreak-2022>
 
-[^13]: <https://www.who.int/europe/news/item/23-07-2022-who-director-general-declares-the-ongoing-monkeypox-outbreak-a-public-health-event-of-international-concern>
+[^12]: <https://www.who.int/europe/news/item/23-07-2022-who-director-general-declares-the-ongoing-monkeypox-outbreak-a-public-health-event-of-international-concern>
 
 Another element of this project involves developing a baseline for what online information-seeking behavior may have looked like in the absence of the mpox outbreak, as measured by Wikipedia article access. For this, we will use overall project views for the respective Wikipedia projects to detect seasonality and long-term trends in Wikipedia search trends. To illustrate what this looks, we examine the Wikipedia projects corresponding with the most common languages in the top 10 countries by number of mpox cases.
 
 The plot below shows that English Wikipedia predominates overall Wikipedia traffic, with weekly traffic levels for the other language projects clustered together well below.
 
-While this Data Report showcases the underlying data structure of Wikipedia page view statistics using as "Mpox" and "Monkeypox virus" articles as mere examples, there are many other articles related to mpox and its symptoms[^14] that may also contribute to this analysis. Supplemental article titles are listed below. Since article titles have been recorded in English, the next step would be to cross-reference them with their corresponding titles for other Wikipedia projects.
+While this Data Report showcases the underlying data structure of Wikipedia page view statistics using as "Mpox" and "Monkeypox virus" articles as mere examples, there are many other articles related to mpox and its symptoms[^13] that may also contribute to this analysis. Supplemental article titles are listed below. Since article titles have been recorded in English, the next step would be to cross-reference them with their corresponding titles for other Wikipedia projects.
 
-[^14]: <https://www.who.int/news-room/fact-sheets/detail/monkeypox>
+[^13]: <https://www.who.int/news-room/fact-sheets/detail/monkeypox>
 
 ## Methods (1,000 words)
 
-While mpox case data is available for 117 WHO Member States and Wikipedia page view statistics exist for nearly 300 languages, I will limit the scope of this analysis to the 10 countries with the most cumulative cases, including the United States of America (31,246), Brazil (10,967), Spain (7,752), France (4,171), Colombia (4,090), Mexico (4,078), the United Kingdom (3,875), Peru (3,812), Germany (3,800), and China[^15] (2,025). Accordingly, I will limit the analysis to the Wikipedia projects for the languages that prominently feature in these countries, including English (the United States of America and the United Kingdom), Portuguese (Brazil), Spanish (Spain, Mexico, and Peru), French (France), German (Germany), Chinese (China). I will examine the time period from 1 January 2022 to 31 December 2023.
+While mpox case data is available for 117 WHO Member States and Wikipedia page view statistics exist for nearly 300 languages, I will limit the scope of this analysis to the 10 countries with the most cumulative cases, including the United States of America (31,246), Brazil (10,967), Spain (7,752), France (4,171), Colombia (4,090), Mexico (4,078), the United Kingdom (3,875), Peru (3,812), Germany (3,800), and China[^14] (2,025). Accordingly, I will limit the analysis to the Wikipedia projects for the languages that prominently feature in these countries, including English (the United States of America and the United Kingdom), Portuguese (Brazil), Spanish (Spain, Mexico, and Peru), French (France), German (Germany), Chinese (China). I will examine the time period from 1 January 2022 to 31 December 2023.
 
-[^15]: Cases shown include those reported in mainland China (1,611), Taiwan (333), Hong Kong (80), and Macao (1).
+[^14]: Cases shown include those reported in mainland China (1,611), Taiwan (333), Hong Kong (80), and Macao (1).
 
 | **Country**              | **Number of cases** | **Wikipedia project** |
 |--------------------------|---------------------|-----------------------|
@@ -315,7 +311,7 @@ My proposed methodology takes inspiration from th work of [Yan et al.](https://d
 1.  Define collection of mpox-related Wikipedia articles
     -   Identify articles directly related to mpox, including historical information, symptoms, treatment, and prevention.
     -   Identify articles with a low degree of separation within network of Wikipedia articles.
-    -   Analyze Wikipedia page view statistics to identify medical articles that experienced significant increases in traffic coinciding with the timeline of the 2022-2023 mpox outbreak.[^16]
+    -   Analyze Wikipedia page view statistics to identify medical articles that experienced significant increases in traffic coinciding with the timeline of the 2022-2023 mpox outbreak.[^15]
 2.  Data preparation
     -   Collect daily mpox case numbers from WHO.
     -   Extract daily traffic volume data for the defined collection of Wikipedia articles using Wikipedia's API with the {waxer} package using R.
@@ -339,7 +335,7 @@ My proposed methodology takes inspiration from th work of [Yan et al.](https://d
     -   Interpret the results, while considering the limitations of observational data and the potential for confounding factors.
     -   Discuss the implications for public health surveillance during health emergencies.
 
-[^16]: An assessment would need to be made to determine that the increase in traffic volume of certain medical articles following the start of the outbreak is not spurious but substantial.
+[^15]: An assessment would need to be made to determine that the increase in traffic volume of certain medical articles following the start of the outbreak is not spurious but substantial.
 
 ## Ethical considerations
 

@@ -77,6 +77,39 @@
 \makeatletter
 \def\fps@figure{htbp}
 \makeatother
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
@@ -139,7 +172,7 @@
 \title{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews
 for Mpox Incidence}
 \author{Steven Kerr}
-\date{5 April 2024}
+\date{16 April 2024}
 
 \begin{document}
 \maketitle
@@ -156,18 +189,28 @@ for Mpox Incidence}
 
 \section{Introduction (6) (700 words)}\label{introduction-6-700-words}
 
+Google Trends is a powerful online tool that allows users to analyze
+patterns and trends in search queries across various regions and
+languages (\citeproc{ref-arora2019}{Arora, McKee, and Stuckler 2019}).
+Given the fact that Google represents the most visited website globally,
+with 164 billion website visits in March of 2024 alone {[}@{]}. This
+tool provides insights into the popularity of specific keywords or
+topics over time, expressed through Relative Search Volumes (RSVs). A
+RSV of 100 marks the point at which a search term reaches its peak
+popularity, offering a comparative view of user interest in different
+subjects at different time periods.
+
 \subsection{Background and Context}\label{background-and-context}
 
 As the world becomes increasingly interconnected and climate change
 elevates the risk of zoonotic spillover events, the public becomes ever
-more susceptible to global-scale outbreaks.\footnote{\url{https://www.nature.com/articles/s41579-021-00639-z}}
-In this context, traditional disease modeling techniques, while
-effective for well-documented diseases, may not be as applicable for
-emerging diseases with low case numbers and less understood
-epidemiological parameters. Critically, public attention plays a pivotal
-role in disease detection and response.
-
-\subsection{Problem Definition}\label{problem-definition}
+more susceptible to global-scale outbreaks
+(\citeproc{ref-romanello2021}{Romanello et al. 2021}). In this context,
+traditional disease modeling techniques, while effective for
+well-documented diseases, may not be as applicable for emerging diseases
+with low case numbers and less understood epidemiological parameters.
+Critically, public attention plays a pivotal role in disease detection
+and response.Problem Definition
 
 A key to outbreak prevention and response is surveillance and detection.
 Disease surveillance methodologies encompass a wide range of techniques
@@ -1263,9 +1306,28 @@ Questions}\label{synthesis-and-link-to-hypothesis-research-questions}
   the potential for positive change through informed policy-making.
 \end{itemize}
 
+\section{Acronyms}\label{acronyms}
+
 \section{References (8)}\label{references-8}
 
 {[}s/o Zotero{]}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-arora2019}
+Arora, Vishal S., Martin McKee, and David Stuckler. 2019. {``Google
+Trends: Opportunities and limitations in health and health policy
+research.''} \emph{Health Policy (Amsterdam, Netherlands)} 123 (3):
+338--41. \url{https://doi.org/10.1016/j.healthpol.2019.01.001}.
+
+\bibitem[\citeproctext]{ref-romanello2021}
+Romanello, Marina, Alice McGushin, Claudia Di Napoli, Paul Drummond,
+Nick Hughes, Louis Jamart, Harry Kennard, et al. 2021. {``The 2021
+Report of the Lancet Countdown on Health and Climate Change: Code Red
+for a Healthy Future.''} \emph{The Lancet} 398 (10311): 1619--62.
+\url{https://doi.org/10.1016/S0140-6736(21)01787-6}.
+
+\end{CSLReferences}
 
 
 

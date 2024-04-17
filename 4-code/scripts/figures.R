@@ -12,8 +12,12 @@ pageviews_weekly <- read_csv(here("3-data/wikipedia/pageviews-weekly.csv"))
 pageviews_total <- read_csv(here("3-data/wikipedia/total-pageviews.csv"))
 
 # load mpox case data
-cases_daily <- read_csv(cases_daily, here("3-data/mpox-cases/mpox-cases-daily.csv"))
-cases_weekly <- read_csv(cases_weekly, here("3-data/mpox-cases/mpox-cases-weekly.csv"))
+cases_daily <- read_csv(here("3-data/mpox-cases/mpox-cases-daily.csv"))
+cases_weekly <- read_csv(here("3-data/mpox-cases/mpox-cases-weekly.csv"))
+cases_total <- read_csv(here("3-data/mpox-cases/mpox-cases-total.csv"))
+
+# ISO ref table
+load(here("3-data/ref/iso_codes.RData"))
 
 
 # Wikipedia pageview data ======================================================
@@ -387,16 +391,31 @@ cases_region_df |>
 ggsave(here("5-visualization/mpox-cases-weekly-region-facetted.png"), height = 7.75, width = 10)
 
 
-# calculate total cases by country 
-cases_totals <- cases_daily |> 
-  reframe(cases = sum(cases), .by = c(country, iso3)) |> 
-  left_join(iso_ref, by = join_by(iso3))
+# Map of total cases
+break_values <- c(1, 10, 100, 1000, 10000, Inf) # set break values
+tm <- cases_total |> 
+  #left_join(iso_ref, by = join_by(iso3)) |> # get ISO 2 codes
+  select(country, iso3, cases) |> 
+  right_join(World, by = join_by(iso3 == iso_a3)) |>  # get geometries
+  #filter(iso3 != "ATA") |> # remove Antartica to improve readability
+  st_as_sf() |> 
+  tm_shape(crs = "ESRI:53030") + # create map
+  tm_layout(bg.color = "#d8f9ff") +
+  tm_polygons(
+    title = "Mpox cases",
+    fill = "cases", 
+    breaks = break_values, 
+    palette = "YlOrBr",
+    textNA = "None reported",
+    colorNA = "white",
+    labels = c("1-9", "10-99", "100-999", "1,000-9,999", "10,000+")
+    ) +
+  tm_legend(bg.color = "white", position = tm_pos_in("left", "bottom"))
+tm
 
-# set break values
-break_values <- c(0, 10, 100, 1000, 10000, Inf)
-left_join(world, cases_totals, by = join_by(iso_a2 == iso2)) |> # merge geometries with case data
-  tm_shape() + # create map
-  tm_polygons(fill = "cases", breaks = break_values, palette = "Blues", title = "Mpox cases")
+# Save map
+tmap_save(tm, here("5-visualization/mpox-cases-total-world-map-v2.png"))
+
 
 
 # Combined mpox data ===========================================================

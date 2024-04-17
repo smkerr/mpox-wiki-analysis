@@ -39,12 +39,15 @@ cases_weekly <- cases_daily |>
   summarize(cases = sum(cases, na.rm = TRUE)) |> 
   ungroup()
 
-
-# TODO: Will need to either aggregate or disaggregate China's cases and pageviews
-# Currently cases are aggregated while pageviews are disaggregated
-# As of 20 March 2024: Cases shown include those in mainland China (1611), Hong Kong SAR (83), Taipei (335), and Macao (2)
+# total country-level case data 
+cases_total <- cases_daily |> 
+  reframe(
+    .by = c(country, iso3),
+    cases = sum(cases, na.rm = TRUE)
+  )
 
 
 # Save data ====================================================================
 write_csv(cases_daily, here("3-data/mpox-cases/mpox-cases-daily.csv"))
 write_csv(cases_weekly, here("3-data/mpox-cases/mpox-cases-weekly.csv"))
+write_csv(cases_total, here("3-data/mpox-cases/mpox-cases-total.csv"))
