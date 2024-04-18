@@ -59,7 +59,7 @@ mpox_df <- mpox_df |>
   left_join(total_pageviews_by_date, join_by(date)) |> 
   select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, cases, pct_pageviews, pageviews, pageviews_ceil) |>
   group_by(page_title) |> 
-  filter(sum(pageviews > 450, na.rm = TRUE) <= 5) |> # at least 5 weeks of observations for a given article
+  filter(sum(pageviews > 450, na.rm = TRUE) > 5) |> # at least 5 weeks of observations for a given article
   ungroup()
   #complete(fill = list(pageviews = 450)) |> # assume missing values
   #mutate(pct_pageviews = pageviews / pageviews_ceil)
@@ -80,16 +80,6 @@ mpox_df |>
 #     !is.na(pageviews) ~ pageviews,
 #     TRUE ~ 450 # supression threshold = 450
 #   ))
-
-# Remove articles with fewer than X observations
-mpox_df |>
-  filter(!is.na(pct_pageviews)) |> 
-  count(page_title, sort = TRUE) |> 
-  arrange(n)
-
-mpox_df |> 
-  group_by(page_title) |> 
-  filter(sum(!is.na(pct_pageviews)) > )
   
 
 

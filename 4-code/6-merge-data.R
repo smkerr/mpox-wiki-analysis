@@ -11,6 +11,11 @@ pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
 # load mpox case data 
 cases_daily <- read_csv("3-data/mpox-cases/mpox-cases-daily.csv")
 
+# load mpox news coverage data 
+
+
+# load mpox studies data
+
 # load ISO code reference table
 load(here("3-data/ref/iso_codes.RData"))
 

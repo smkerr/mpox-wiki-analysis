@@ -5,6 +5,9 @@
 
 
 # Load data ====================================================================
+# load combined data
+mpox_df # <- 
+
 # load pageviews data
 pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
 pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
@@ -18,6 +21,12 @@ cases_region_df <- read_csv(here("3-data/mpox-cases/mpox-cases-regions.csv"))
 ## CDC data
 cases_daily <- read_csv(here("3-data/mpox-cases/mpox-cases-daily.csv"))
 cases_weekly <- read_csv(here("3-data/mpox-cases/mpox-cases-weekly.csv"))
+
+# load media coverage data
+news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles.csv"))
+
+# load academic interest data
+studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))
 
 # ISO ref table
 load(here("3-data/ref/iso_codes.RData"))
@@ -133,6 +142,7 @@ ggsave(here("5-visualization/wiki-pageviews-daily.png"))
 
 # plot weekly pageviews
 pageviews_weekly |>
+  filter(iso2 == "US") |> 
   ggplot(aes(x = date, y = pageviews, color = wikidata_id)) +
   geom_point(alpha = 0.75) +
   geom_hline(yintercept = 450, color = "red", linetype = "dashed") + # min pageviews
@@ -266,6 +276,7 @@ cases_daily |>
 ggsave(here("5-visualization/mpox-cases-7day-avg.png"), height = 7.75, width = 10)
 
 
+# plot weekly cases
 # plot weekly cases
 cases_weekly |> 
   reframe(cases = sum(cases), .by = date) |> 
@@ -445,3 +456,103 @@ p
 
 # save plot
 ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)
+
+
+# Media coverage ===============================================================
+# plot daily number of news articles
+news_df |> 
+  reframe(.by = date, n_articles = sum(n_articles)) |> 
+  ggplot(aes(x = date, y = n_articles)) +
+  geom_col() +
+  theme_minimal()
+
+# plot daily number of news articles by search term
+news_df |> 
+  ggplot(aes(x = date, y = n_articles)) +
+  geom_col() +
+  facet_wrap(~search_term, ncol = 1) + 
+  theme_minimal()
+
+# plot weekly number of news articles
+news_df |> 
+  mutate(date = floor_date(date, unit = "weeks")) |> 
+  reframe(.by = date, n_articles = sum(n_articles)) |> 
+  ggplot(aes(x = date, y = n_articles)) +
+  geom_col() +
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(
+    title = "Weekly number of mpox-related news articles",
+    x = NULL
+  ) +
+  theme_minimal()
+
+# plot weekly number of news articles by search term
+news_df |> 
+  mutate(date = floor_date(date, unit = "weeks")) |> 
+  ggplot(aes(x = date, y = n_articles)) +
+  geom_col() +
+  facet_wrap(~search_term, ncol = 1) +
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(
+    title = "Weekly number of mpox-related news articles",
+    x = NULL
+  ) +
+  theme_minimal()
+
+# plot monthly number of news articles
+news_df |> 
+  mutate(date = floor_date(date, unit = "months")) |> 
+  reframe(.by = date, n_articles = sum(n_articles)) |> 
+  ggplot(aes(x = date, y = n_articles)) +
+  geom_col() + 
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(
+    title = "Monthly number of mpox-related scientific publications",
+    x = NULL
+  ) +
+  theme_minimal()
+
+# plot monthly number of news articles by search term
+news_df |> 
+  mutate(date = floor_date(date, unit = "months")) |> 
+  ggplot(aes(x = date, y = n_articles)) +
+  geom_col() + 
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(
+    title = "Monthly number of mpox-related scientific publications",
+    x = NULL
+  ) +
+  facet_wrap(~search_term, ncol = 1) +
+  theme_minimal()
+
+
+
+# Academic studies =============================================================
+# plot daily number of published studies
+studies_df |> 
+  ggplot(aes(x = date)) +
+  geom_bar() +
+  theme_minimal()
+
+# plot weekly number of published studies
+studies_df |> 
+  ggplot(aes(x = date)) +
+  geom_bar() + 
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(
+    title = "Weekly number of mpox-related scientific publications",
+    x = NULL
+  ) +
+  theme_minimal()
+
+# plot monthly number of published studies
+studies_df |> 
+  mutate(date = floor_date(date, unit = "months")) |> 
+  ggplot(aes(x = date)) +
+  geom_bar() + 
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(
+    title = "Monthly number of mpox-related scientific publications",
+    x = NULL
+  ) +
+  theme_minimal()

@@ -41,39 +41,25 @@ for (seq_start in seq(1, search_results$count, 50)) {
 # Prepare data
 studies_df <- studies_df |> 
   mutate(date = ymd(glue("{pubdate_year}-{pubdate_month}-{pubdate_day}"))) |> 
-  select(id, title, date)
-
-# plot daily number of published studies
-studies_df |> 
-  ggplot(aes(x = date)) +
-  geom_bar() +
-  theme_minimal()
-
-# plot monthly number of published studies
-studies_df |> 
-  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> 
-  ggplot(aes(x = date)) +
-  geom_bar() + 
-  theme_minimal()
-
-# plot monthly number of published studies
-studies_df |> 
-  mutate(date = floor_date(date, unit = "months")) |> 
-  ggplot(aes(x = date)) +
-  geom_bar() + 
-  theme_minimal()
-
-# investigate outliers
-studies_df |> 
-  filter(date > today()) # several have supposedly been published in the future
-
-# Clean data
-studies_df <- studies_df |> 
+  select(id, title, date) |> 
   filter(
     date >= as_date("2022-01-01"),
     date <= as_date("2023-12-31")
   ) 
-# TODO: De-duplicate studies
+
+# 18 studies with no titles
+studies_df |> filter(title == "[Not Available].") |> count()
+
+# 41 duplicate titles 
+count(studies_df, title, sort = TRUE) |> filter(n > 1) |> summarise(n = sum(n) - n())
+
+# Remove studies with missing or duplicate titles 
+studies_df <- studies_df |> 
+  filter(title != "[Not Available].") |> 
+  arrange(date) |> 
+  group_by(title) |>
+  slice(1) |> # keep earliest observation
+  ungroup() 
 
 # Save results
 write_csv(studies_df, here("3-data/mpox-studies/mpox-total-studies.csv"))

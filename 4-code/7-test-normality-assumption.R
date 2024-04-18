@@ -7,10 +7,9 @@
 # Setup ========================================================================
 # load Wikipedia pageview data
 pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
-pageviews_weekly <- read_csv("3-data/wikipedia/pageviews-weekly.csv")
 
 # load mpox case data 
-cases_weekly <- read_csv("3-data/mpox-cases/mpox-cases-weekly.csv")
+cases_dailly <- read_csv("3-data/mpox-cases/mpox-cases-daily.csv")
 
 # load ISO code reference table
 load(here("3-data/ref/iso_codes.RData"))
@@ -29,6 +28,14 @@ mpox_df |>
   facet_wrap(~country, scale = "free_y") +
   scale_x_continuous(labels = label_percent()) +
   theme_minimal() 
+
+# pageviews (logged)
+mpox_df |> 
+  filter(pct_pageviews > 0) |> 
+  ggplot(aes(x = log(pct_pageviews))) +  # logged
+  geom_histogram(bins = 30, color = "black") +
+  facet_wrap(~country, scale = "free") +
+  theme_minimal()
 
 # pageviews (logged)
 mpox_df |> 

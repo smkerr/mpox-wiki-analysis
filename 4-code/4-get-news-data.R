@@ -31,11 +31,5 @@ for (date in date_sequence) {
   Sys.sleep(1)
 }
 
-print(news_df)
-
-news_df <- news_df |> 
-  filter(!is.na(n_articles)) |> 
-  arrange(date)
-
 # save results
 write_csv(news_df, here("3-data/mpox-news/mpox-total-articles.csv"))

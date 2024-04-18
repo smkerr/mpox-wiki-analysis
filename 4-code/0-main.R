@@ -40,15 +40,12 @@ pacman::p_load(
   tmap,         # map-making
   tseries,      # time-series
   vars,         # vector autoregressive models
-  waxer,        # Wikipedia pageviews
+  #waxer,        # Wikipedia pageviews
   WikipediR,    # Wikipedia links
   writexl,      # save excel files
   xml2,         # XML
   zoo           # rolling averages
 )
-
-# load custom functions
-#source(here("4-code/funcs/helpers.R"))
 
 # create reference table for ISO country codes
 iso_ref <- ISO_3166_1 |> select(country_name = Name, iso2 = Alpha_2, iso3 = Alpha_3)
