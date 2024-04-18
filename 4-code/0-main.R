@@ -55,10 +55,16 @@ save(iso_ref, file = here("3-data/ref/iso_codes.RData"))
 source(here("4-code/1-identify-related-pages.R")) 
 
 # Wikipedia data ===============================================================
-source(here("4-code/2-prepare-wiki-data.R"))
+source(here("4-code/2a-get-wiki-data.R"))
 
 # Mpox case data ===============================================================
-source(here("4-code/3-prepare-mpox-data.R"))
+source(here("4-code/2b-get-case-data.R"))
+
+# Mpox news data ===============================================================
+#source(here("4-code/2c-get-news-data.R"))
+
+# Mpox studies data ============================================================
+#source(here("4-code/2d-get-studies-data.R"))
 
 # Merge data ===================================================================
 source(here("4-code/4-merge-data.R"))
