@@ -169,7 +169,7 @@ pageviews_daily <- pageviews |>
 # Calculate weekly pageviews
 pageviews_weekly <- pageviews |>
   mutate(
-    date = ceiling_date(date, unit = "weeks", week_start = 1), ###
+    date = floor_date(date, unit = "weeks", week_start = 1), ###
     year = year(date),
     month = month(date)
   ) |>

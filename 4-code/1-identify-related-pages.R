@@ -40,21 +40,15 @@ mpox_relevant_pages <- read_excel(here("3-data/output/mpox-linked-pages-classifi
 # source: WHO Mpox Case Reporting Form (CRF)
 mpox_relevant_pages_manual <- c(
   "Back pain",               
-  "Balanitis",               
   "Chills",                  
-  "Cough",                   
-  "Diarrhea",                
-  "Edema",                   
   "Fever",                   
   "Headache",                
   "Lesion",                  
   "List of skin conditions", 
   "Myalgia",                 
-  "Myocarditis",             
   "Skin condition",          
   "Sore throat",             
-  "Urethritis",              
-  "Vomiting" 
+  "Urethritis"            
   )
 
 

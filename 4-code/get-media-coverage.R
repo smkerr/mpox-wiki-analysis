@@ -1,3 +1,6 @@
+# TODO: Generalize so that it loops through mpox and monkeypox search terms
+
+
 # GNews API 
 api_key <- Sys.getenv("GNEWS_API_KEY")
 search_query <- "mpox"
@@ -36,24 +39,3 @@ news_df <- news_df |>
 
 # save results
 write_csv(news_df, here("3-data/mpox-news/mpox-total-articles.csv"))
-
-news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles.csv"))
-
-# plot daily number of articles
-news_df |> 
-  ggplot(aes(x = date, y = n_articles)) + 
-  geom_col() + 
-  theme_minimal()
-
-# plot weekly number of articles
-news_df |> 
-  mutate(date = ceiling_date(date, unit = "weeks", week_start = 1)) |> 
-  reframe(
-    .by = c(search_term, date),
-    n_articles = sum(n_articles, na.rm = TRUE)
-  ) |> 
-  ggplot(aes(x = date, y = n_articles)) +
-  geom_col() + 
-  theme_minimal() + 
-  facet_wrap(~search_term, ncol = 1)
-  

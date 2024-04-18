@@ -434,7 +434,7 @@ p <- mpox_df |>
     labels = scales::label_percent()
   ) +
   scale_fill_brewer(type = "qual", palette = 3) +
-  facet_wrap(~page_title, scales = "fixed") +
+  facet_wrap(~page_title, scales = "free_y") +
   labs(
     x = NULL,
     fill = NULL,

@@ -53,7 +53,7 @@ studies_df |>
 
 # plot monthly number of published studies
 studies_df |> 
-  mutate(date = ceiling_date(date, unit = "weeks", week_start = 1)) |> 
+  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> 
   ggplot(aes(x = date)) +
   geom_bar() + 
   theme_minimal()
