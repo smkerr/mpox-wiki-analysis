@@ -57,3 +57,5 @@ mpox_pages_extended <- c(mpox_pages, mpox_relevant_pages, mpox_relevant_pages_ma
 
 # save keywords
 save(mpox_pages_extended, file = here("3-data/output/mpox-pages-extended.RData"))
+
+# TODO: To be saved as an .txt file or excel file to make it easer to review? 

@@ -6,10 +6,10 @@
 
 # Setup ========================================================================
 # load Wikipedia pageview data
-pageviews_weekly <- read_csv("3-data/wikipedia/pageviews-weekly.csv")
+pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
 
 # load mpox case data 
-cases_weekly <- read_csv("3-data/mpox-cases/mpox-cases-weekly.csv")
+cases_daily <- read_csv("3-data/mpox-cases/mpox-cases-daily.csv")
 
 # load ISO code reference table
 load(here("3-data/ref/iso_codes.RData"))
@@ -17,20 +17,14 @@ load(here("3-data/ref/iso_codes.RData"))
 # Prepare data =================================================================
 # merge mpox cases and Wikipedia pageview data
 mpox_df <- full_join(
-  left_join(cases_weekly, iso_ref, by = join_by(iso3)),
-  left_join(pageviews_weekly, iso_ref, by = join_by(iso2)), 
-  by = join_by(country_name, iso2, iso3, date)
+  left_join(cases_daily, iso_ref, by = join_by(country == country_name, iso2, iso3)),
+  left_join(pageviews_daily, iso_ref, by = join_by(iso2)), 
+  by = join_by(country == country_name, iso2, iso3, date)
   ) |>
-  select(country = country_name, iso2, iso3, cases, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil) |> 
+  select(country, iso2, iso3, cases, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil) |> 
   filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
   complete(fill = list(cases = 0))  |> # fill in missing cases with zeros
   arrange(country, date, page_title)
-
-# TODO: Should I drop NAs or impute missing values here?
-
-# NOTE: China's page view is excluded from Differential Privacy version (source: https://foundation.wikimedia.org/wiki/Legal:Country_and_Territory_Protection_List)
-# NOTE: Pageview data for the Democratic Republic of the Congo not available, presumably due to the low pageviews since its data should be published if it does exist...
-# Can include these points in the discussion
 
 
 # Implement inclusion criteria =================================================

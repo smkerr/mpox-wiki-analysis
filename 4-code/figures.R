@@ -12,9 +12,12 @@ pageviews_weekly <- read_csv(here("3-data/wikipedia/pageviews-weekly.csv"))
 pageviews_total <- read_csv(here("3-data/wikipedia/total-pageviews.csv"))
 
 # load mpox case data
+## WHO data
+cases_country_df <- read_csv(here("3-data/mpox-cases/mpox-cases-countries.csv"))
+cases_region_df <- read_csv(here("3-data/mpox-cases/mpox-cases-regions.csv"))
+## CDC data
 cases_daily <- read_csv(here("3-data/mpox-cases/mpox-cases-daily.csv"))
 cases_weekly <- read_csv(here("3-data/mpox-cases/mpox-cases-weekly.csv"))
-cases_total <- read_csv(here("3-data/mpox-cases/mpox-cases-total.csv"))
 
 # ISO ref table
 load(here("3-data/ref/iso_codes.RData"))
@@ -70,43 +73,25 @@ plot_df |>
   ) +
   theme_minimal()
 
-plot_df |> 
-  filter(project == "en.wikipedia") |> 
-  ggplot(aes(date, pct_pageviews_ceil)) + 
-  geom_line() +
-  scale_x_date(date_labels = "%b\n%Y") +
-  scale_y_continuous(limits = c(0, 1), labels = label_percent()) +
-  #scale_fill_discrete() +
-  labs(
-    title = "United States",
-    subtitle = "Share of total pageviews",
-    x = NULL,
-    y = "% of total pageviews",
-    fill = "Language project"
-  ) +
-  theme_minimal()
-
+# English Wikipedia comprises ~90-95% of US Wikipedia views 
 plot_df |> 
   filter(project == "en.wikipedia") |> 
   pull(pct_pageviews_ceil) |> 
-  min()
-
-plot_df |> 
-  filter(project == "en.wikipedia") |> 
-  pull(pct_pageviews_ceil) |> 
-  max()
-# ~90-95%
+  range()
 
 
 # Faceted plot of US mpox-related pageviews over time
 pageviews |> 
+  group_by(page_title) |> 
+  filter(sum(!is.na(pageviews)) > 5) |> # remove articles with too few observations
+  ungroup() |> 
   filter(country_long == "United States of America") |>
   filter(project == "en.wikipedia") |> 
   ggplot(aes(x = date, y = pageviews, color = project)) +
   geom_point(alpha = 0.75) + 
   geom_hline(yintercept = 450, color = muted("red"), linetype = "dashed") +
   scale_x_date(date_labels = "%b\n%Y") +
-  facet_wrap(~page_title, scales = "free_y", nrow = 9) +
+  facet_wrap(~page_title, scales = "free_y", ncol = 2) +
   labs(
     title = "United States of America",
     x = NULL
@@ -116,6 +101,7 @@ pageviews |>
 
 # plot daily pageviews
 pageviews_daily |>
+  filter(iso2 == "US") |> 
   ggplot(aes(x = date, y = pageviews, color = wikidata_id)) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 450, color = "red", linetype = "dashed") +
@@ -316,7 +302,13 @@ cases_weekly |>
 ggsave(here("5-visualization/mpox-cases-weekly.png"), height = 7.75, width = 10)
 
 
-# plot weekly cases by region 
+# plot weekly cases by region
+# order regions by total cases
+cases_region_ordered <- cases_region_df |> 
+  reframe(.by = region, total_cases = sum(cases)) |> 
+  arrange(-total_cases)
+cases_region_df <- cases_region_df |> 
+  mutate(region = factor(region, levels = cases_region_ordered$region))
 cases_region_df |> 
   reframe(cases = sum(cases), .by = c(region, date)) |> 
   ggplot(aes(x = date, y = cases, fill = fct_rev(region))) + 
@@ -392,6 +384,12 @@ ggsave(here("5-visualization/mpox-cases-weekly-region-facetted.png"), height = 7
 
 
 # Map of total cases
+## total country-level case data 
+cases_total <- cases_daily |> 
+  reframe(
+    .by = c(country, iso3),
+    cases = sum(cases, na.rm = TRUE)
+  )
 break_values <- c(1, 10, 100, 1000, 10000, Inf) # set break values
 tm <- cases_total |> 
   #left_join(iso_ref, by = join_by(iso3)) |> # get ISO 2 codes

@@ -55,19 +55,19 @@ iso_ref <- ISO_3166_1 |> select(country_name = Name, iso2 = Alpha_2, iso3 = Alph
 save(iso_ref, file = here("3-data/ref/iso_codes.RData"))
 
 # Identify mpox-related articles ===============================================
-source(here("4-code/scripts/1-identify-related-pages.R")) 
+source(here("4-code/1-identify-related-pages.R")) 
 
 # Wikipedia data ===============================================================
-source(here("4-code/scripts/2-prepare-wiki-data.R"))
+source(here("4-code/2-prepare-wiki-data.R"))
 
 # Mpox case data ===============================================================
-source(here("4-code/scripts/3-prepare-mpox-data.R"))
+source(here("4-code/3-prepare-mpox-data.R"))
 
 # Merge data ===================================================================
-source(here("4-code/scripts/4-merge-data.R"))
+source(here("4-code/4-merge-data.R"))
 
 # Select most relevant articles ================================================
-source(here("4-code/scripts/5-select-relevant-pages.R"))
+source(here("4-code/5-select-relevant-pages.R"))
 
 # Test normality assumption ====================================================
 #source(here("4-code/scripts/6-test-normality-assumption.R"))
@@ -76,5 +76,5 @@ source(here("4-code/scripts/5-select-relevant-pages.R"))
 #source(here("4-code/scripts/5-analyze-data.R"))
 
 # Test forecasting potential ===================================================
-source(here("4-code/scripts/5-test-forecasting-potential"))
+source(here("4-code/5-test-forecasting-potential"))
 

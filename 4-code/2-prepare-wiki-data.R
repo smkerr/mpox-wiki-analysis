@@ -169,12 +169,12 @@ pageviews_daily <- pageviews |>
 # Calculate weekly pageviews
 pageviews_weekly <- pageviews |>
   mutate(
-    date = floor_date(date, unit = "weeks", week_start = 1), ###
+    date = floor_date(date, unit = "weeks"),
     year = year(date),
     month = month(date)
   ) |>
   reframe(
-    .by = c("country_long", "iso2", "project", "wikidata_id", "page_title", "page_id", "year", "month", "date"),
+    .by = c(country_long, iso2, project, wikidata_id, page_title, page_id, year, month, date),
     pageviews = sum(pageviews, na.rm = TRUE)
   ) |>
   left_join(pageviews_total, by = join_by(iso2, project, year, month), relationship = "many-to-one") |> 
@@ -185,4 +185,3 @@ pageviews_weekly <- pageviews |>
 # Save data ====================================================================
 write_csv(pageviews_daily, here("3-data/wikipedia/pageviews-daily.csv"))
 write_csv(pageviews_weekly, here("3-data/wikipedia/pageviews-weekly.csv"))
-write_csv(pageviews_total, here("3-data/wikipedia/total-pageviews.csv"))

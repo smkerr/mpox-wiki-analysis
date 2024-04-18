@@ -16,46 +16,33 @@ cases_daily <- read_csv(here("3-data/mpox-cases/cdc-mpox-cases-daily.csv")) |>
   relocate(c(country, iso2, iso3), .before = everything())
 
 # Prepare data =================================================================
-# WHO data 
+# Global data 
 ## daily country-level case data
-cases_df |> 
+cases_country_df <- cases_df |> 
   select(country = location, iso3 = iso_code, date, cases = new_cases, cases_moving_avg = new_cases_smoothed) |> 
-  filter(!str_detect(iso3, "OWID"), region != "World") |> # only keep country data
-  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> ###
-  group_by(region, iso3, date) |> 
-  summarize(cases = sum(cases, na.rm = TRUE)) |> 
-  ungroup()
+  filter(!str_detect(iso3, "OWID"), country != "World") |> # only keep country data
+  reframe(.by = c(country, iso3, date), cases = sum(cases))
 
 ## daily region-level case data
 cases_region_df <- cases_df |> 
   select(region = location, iso3 = iso_code, date, cases = new_cases, cases_moving_avg = new_cases_smoothed) |> 
-  filter(str_detect(iso3, "OWID"), region != "World") |> # only keep region-level counts
-  mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> ###
-  group_by(region, iso3, date) |> 
-  summarize(cases = sum(cases, na.rm = TRUE)) |> 
-  ungroup()
+  filter(str_detect(iso3, "OWID"), region != "World") |> # only keep region data
+  mutate(date = floor_date(date, unit = "weeks")) |> 
+  reframe(.by = c(region, iso3, date), cases = sum(cases))
 
-# order regions by total cases
-cases_region_ordered <- cases_region_df |> 
-  reframe(cases = sum(cases), .by = c(region)) |> 
-  arrange(-cases)
-cases_region_df <- cases_region_df |> 
-  mutate(region = factor(region, levels = cases_region_ordered$region))
-
-# weekly mpox case data 
+# USA data 
+## weekly mpox case data 
 cases_weekly <- cases_daily |> 
   mutate(date = floor_date(date, unit = "weeks", week_start = 1)) |> ###
   reframe(.by = c(country, iso2, iso3, date), cases = sum(cases))
 
-# total country-level case data 
-cases_total <- cases_daily |> 
-  reframe(
-    .by = c(country, iso3),
-    cases = sum(cases, na.rm = TRUE)
-  )
-
 
 # Save data ====================================================================
+# WHO data
+write_csv(cases_country_df, here("3-data/mpox-cases/mpox-cases-countries.csv"))
+write_csv(cases_region_df, here("3-data/mpox-cases/mpox-cases-regions.csv"))
+
+# CDC data
 write_csv(cases_daily, here("3-data/mpox-cases/mpox-cases-daily.csv"))
 write_csv(cases_weekly, here("3-data/mpox-cases/mpox-cases-weekly.csv"))
 write_csv(cases_total, here("3-data/mpox-cases/mpox-cases-total.csv"))

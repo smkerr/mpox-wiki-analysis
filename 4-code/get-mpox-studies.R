@@ -1,5 +1,3 @@
-library(rentrez)
-
 # Set API Key 
 NCBI_API_KEY <- Sys.getenv("NCBI_API_KEY")
 
