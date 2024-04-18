@@ -1,3 +1,8 @@
+# ==============================================================================
+# Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
+# Steve Kerr
+# ==============================================================================
+
 # TODO: Generalize so that it loops through mpox and monkeypox search terms
 
 
