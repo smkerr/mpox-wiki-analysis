@@ -12,7 +12,7 @@ pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
 cases_daily <- read_csv("3-data/mpox-cases/mpox-cases-daily.csv")
 
 # load mpox news coverage data 
-news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles.csv"))
+news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"))
 
 # load mpox studies data
 studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))
