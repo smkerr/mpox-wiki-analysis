@@ -86,3 +86,19 @@ for (search_query in search_terms) {
 
 # save results
 write_csv(headlines_df, here("3-data/mpox-news/mpox-article-headlines.csv"))
+
+# Create de-duplicated news article count dataframe ============================
+news_df <- bind_rows(
+  news_df |> 
+    filter(date < as_date("2022-11-28")) |> 
+    select(-search_term),
+  headlines_df |> 
+    mutate(date = as_date(publishedAt)) |> 
+    distinct(date, title, description, content) |> # de-duplicate 
+    count(date, name = "n_articles")
+  ) |> 
+  arrange(date)
+
+# save results
+write_csv(news_df, here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"))
+  
