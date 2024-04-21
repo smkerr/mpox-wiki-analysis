@@ -59,29 +59,8 @@ mpox_df <- mpox_df |>
   left_join(total_pageviews_by_date, join_by(date)) |> 
   select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, cases, pct_pageviews, pageviews, pageviews_ceil) |>
   group_by(page_title) |> 
-  filter(sum(pageviews > 450, na.rm = TRUE) > 5) |> # at least 5 weeks of observations for a given article
+  filter(sum(pageviews > 450, na.rm = TRUE) > 5) |> # >5 days of observations per article
   ungroup()
-  #complete(fill = list(pageviews = 450)) |> # assume missing values
-  #mutate(pct_pageviews = pageviews / pageviews_ceil)
-
-### 
-mpox_df |> 
-  filter(pageviews > 450) |>
-  count(page_title, sort = TRUE)
-  
-
-# Try out leaving NAs missing....
-
-#complete(fill = list(pageviews = 0, pct_pageviews = 0, cases = 0))  # fill in missing zero
-# mpox_df |> 
-#   group_by(country, iso2, iso3) |> 
-#   mutate(pageviews = case_when(
-#     sum(pageviews, na.rm = TRUE) == 0 ~ NA,
-#     !is.na(pageviews) ~ pageviews,
-#     TRUE ~ 450 # supression threshold = 450
-#   ))
-  
-
 
 
 # Calculate time-lagged correlation between cases and pageviews ================
@@ -117,9 +96,8 @@ calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
 }
 
 
-# define lag range (in weeks)
-lags <- -28:28 
-# TODO: should be informed by attention decay analysis
+# define lag range 
+lags <- -28:28 # TODO: should be informed by attention decay analysis
 
 # initialize empty dataframe
 final_results <- data.frame()
@@ -143,9 +121,6 @@ for (title in unique(mpox_df$page_title)) {
     relocate(c(page_title, lag), .before = everything())
 }
 
-final_results
-
-# TODO: Properly interpret results ... 
 
 # Visualize results ============================================================
 # Plot Spearman correlation coefficient by article
@@ -237,11 +212,15 @@ final_results |>
   ) +
   scale_x_continuous(n.breaks = 10) +
   labs(
-    title = "Significance of time lag correlation of Wikipedia page views and weekly mpox cases",
-    x = "Time lag (weeks)",
+    title = "Significance of time lag correlation of Wikipedia page views and mpox cases",
+    x = "Time lag [days]",
     y = NULL,
     fill = "p-value"
   ) +
   theme_minimal()
 
 # TODO: Implement select criteria ..............................................
+
+# In accordance with Generous et al. ?, select articles based on Pearson correlation, but given that that data is not normally distributed (see section 5), then Spearman correlation is fair to use.
+# These articles will be passed for inclusion in the lag analysis section.
+

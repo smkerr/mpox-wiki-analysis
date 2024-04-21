@@ -9,7 +9,6 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 
 # Prepare data =================================================================
-library(slider)
 attention_df <- mpox_df |>
   # Combine "Monkeypox" + "Monkeypox virus" pageviews
   filter(page_title %in% c("Monkeypox", "Monkeypox virus")) |> 
@@ -39,13 +38,12 @@ ggplot(attention_df) +
 
 
 # Peak pageviews ===============================================================
-library(pracma)
 peak_dates <- attention_df |> 
   mutate(rolling_avg = ifelse(is.na(rolling_avg), 0, rolling_avg)) |> # can't handle NAs
   pull(rolling_avg) |> 
   findpeaks(nups = 2, ndowns = 2, npeaks = 2, minpeakdistance = 7) |> 
-  as_tibble() |> 
-  dplyr::select(value = V1, time = V2, peak_start = V3, peak_end = V4) |> 
+  as.data.frame() |> 
+  select(value = V1, time = V2, peak_start = V3, peak_end = V4) |> 
   arrange(time)
 
 # First peak ===================================================================
@@ -107,3 +105,6 @@ peak_df2 |>
        y = "Rolling Average/Predicted") +
   theme_minimal()
 slope(seg_model2)
+
+# TODO: Save output 
+# TODO: Add plots to figures script

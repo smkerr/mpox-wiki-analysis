@@ -26,6 +26,7 @@ pacman::p_load(
   lubridate,    # dates & times
   nlme,         # mixed-effects models
   nortest,      # normality tests
+  pracma,       # numerical analysis
   purrr,        # vectorize operations
   readr,        # import data
   readxl,       # import excel files
@@ -33,6 +34,7 @@ pacman::p_load(
   scales,       # scaling plots
   segmented,    # segmented regression analysis
   sf,           # simple features
+  slider,       # rolling windows
   spData,       # spatial data
   stringr,      # strings
   tibble,       # tidy data frames
