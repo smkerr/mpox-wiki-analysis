@@ -45,4 +45,3 @@ write_csv(cases_region_df, here("3-data/mpox-cases/mpox-cases-regions.csv"))
 # CDC data
 write_csv(cases_daily, here("3-data/mpox-cases/mpox-cases-daily.csv"))
 write_csv(cases_weekly, here("3-data/mpox-cases/mpox-cases-weekly.csv"))
-write_csv(cases_total, here("3-data/mpox-cases/mpox-cases-total.csv"))

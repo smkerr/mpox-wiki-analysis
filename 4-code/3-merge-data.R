@@ -36,7 +36,6 @@ mpox_df <- full_join(
 mpox_df <- left_join(
   mpox_df,
   news_df |> 
-    # TODO: implement de-duplication based on headlines
     reframe(.by = date, n_articles = sum(n_articles)) |> # combine all article counts
     mutate(country = "United States"),
   by = join_by(country, date)
