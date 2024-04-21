@@ -4,14 +4,10 @@
 # ==============================================================================
 
 
-# Key parameters ===============================================================
-## Define time period
-start_date <- ymd("2022-01-01") # TODO: consider shortening timespan
-end_date <- ymd("2023-02-05") 
-date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
-
-## Define mpox-related articles
+# Setup ===============================================================
+# Mpox-related articles
 load(here("3-data/output/mpox-pages-extended.RData"))
+
 
 # Query page titles in other languages =========================================
 get_alt_page_titles <- function(keyword) {
@@ -37,6 +33,11 @@ mpox_pages_extended <- map_df(str_replace_all(mpox_pages_extended, " ", "_"), ge
 
 # Download Daily Pageviews (Differential Privacy) ==============================
 if (!dir.exists((here("3-data/wikipedia/pageviews-differential-privacy")))) {
+  # Download pageview data from 1 Jan 2022 - 5 Feb 2023 
+  start_date <- ymd("2022-01-01") 
+  end_date <- ymd("2023-02-05") 
+  date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
+  
   for (date in date_sequence) {
     # file path for download
     dest_path <- here(glue("3-data/wikipedia/pageviews-differential-privacy/{as_date(date)}.tsv"))
@@ -50,6 +51,32 @@ if (!dir.exists((here("3-data/wikipedia/pageviews-differential-privacy")))) {
     # try to download file
     result <- try(download.file(url, destfile = dest_path), silent = TRUE)
 
+    # check for error
+    if (inherits(result, "try-error")) {
+      message("Failed to download: ", url)
+      next
+    }
+  }
+  
+  
+  # Download pageview data from 6 Feb 2023 - 27 Feb 2024
+  start_date <- ymd("2023-02-06") 
+  end_date <- ymd("2024-02-27") 
+  date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
+  
+  for (date in date_sequence) {
+    # file path for download
+    dest_path <- here(glue("3-data/wikipedia/pageviews-differential-privacy/{as_date(date)}.tsv"))
+    
+    # skip if file already exists
+    if (file.exists(dest_path)) next
+    
+    # URL
+    url <- glue("https://analytics.wikimedia.org/published/datasets/country_project_page/{as_date(date)}.tsv")
+    
+    # try to download file
+    result <- try(download.file(url, destfile = dest_path), silent = TRUE)
+    
     # check for error
     if (inherits(result, "try-error")) {
       message("Failed to download: ", url)
@@ -142,7 +169,9 @@ fetch_pageviews_for_month <- function(project_code, yyyy_mm) {
 project_codes <- unique(pageviews$project)
 
 # combine data for all months
-month_sequence <- date_sequence |>
+start_date <- ymd("2022-01-01") 
+end_date <- ymd("2024-02-27") 
+month_sequence <- seq.Date(from = start_date, to = end_date, by = "day") |> 
   str_remove("-\\d\\d$") |>
   unique()
 
