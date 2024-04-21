@@ -56,6 +56,7 @@ if (file.exists(here("3-data/mpox-news/mpox-article-headlines.csv"))) {
   headlines_df <- read_csv(here("3-data/mpox-news/mpox-article-headlines.csv"))  
 } else headlines_df <- data.frame()
 
+# TODO: Add conditional statement so that this only runs if it needs to ....
 
 for (search_query in search_terms) {
   for (date in date_sequence) {
