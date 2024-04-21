@@ -9,7 +9,7 @@ NCBI_API_KEY <- Sys.getenv("NCBI_API_KEY")
 # Search database
 search_results <- entrez_search(
   db = "pubmed", 
-  term = "Monkeypox AND 2022:2023[PDAT]", 
+  term = "Monkeypox AND 2022:2024[PDAT]", 
   use_history = TRUE,
   api_key = NCBI_API_KEY 
   )
@@ -49,7 +49,7 @@ studies_df <- studies_df |>
   select(id, title, date) |> 
   filter(
     date >= as_date("2022-01-01"),
-    date <= as_date("2023-12-31")
+    date <= as_date("2024-02-27")
   ) 
 
 # 18 studies with no titles
