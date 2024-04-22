@@ -54,7 +54,7 @@ article_correlations_spearman <- mpox_df |>
                               summarize(
                                 n = n(),
                                 correlation = cor(pct_pageviews,
-                                                  cases,
+                                                  cases, # TODO: logged cases instead???
                                                   use = "complete.obs",
                                                   method = "spearman"),
                                 method = "spearman",
