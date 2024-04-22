@@ -25,7 +25,7 @@ mpox_df |>
   filter(pct_pageviews > 0) |> 
   ggplot(aes(x = pct_pageviews)) + 
   geom_histogram(bins = 30, color = "black") +
-  facet_wrap(~country, scale = "free_y") +
+  facet_wrap(~page_title, scale = "free_y") +
   scale_x_continuous(labels = label_percent()) +
   theme_minimal() 
 
@@ -34,7 +34,7 @@ mpox_df |>
   filter(pct_pageviews > 0) |> 
   ggplot(aes(x = log(pct_pageviews))) +  # logged
   geom_histogram(bins = 30, color = "black") +
-  facet_wrap(~country, scale = "free") +
+  facet_wrap(~page_title, scale = "free") +
   theme_minimal()
 
 # pageviews (logged)
@@ -42,7 +42,7 @@ mpox_df |>
   filter(pct_pageviews > 0) |> 
   ggplot(aes(x = log(pct_pageviews))) +  # logged
   geom_histogram(bins = 30, color = "black") +
-  facet_wrap(~country, scale = "free") +
+  facet_wrap(~page_title, scale = "free") +
   theme_minimal()
 
 ## Q-Q plots -------------------------------------------------------------------
@@ -52,7 +52,7 @@ mpox_df |>
   ggplot(aes(sample = pct_pageviews)) + 
   geom_qq() + 
   geom_qq_line() +
-  facet_wrap(~country, scale = "free") +
+  facet_wrap(~page_title, scale = "free") +
   scale_x_continuous(labels = label_percent()) +
   theme_minimal()
 
@@ -62,7 +62,7 @@ mpox_df |>
   ggplot(aes(sample = log(pct_pageviews))) + 
   geom_qq() + 
   geom_qq_line() +
-  facet_wrap(~country, scale = "free") +
+  facet_wrap(~page_title, scale = "free") +
   theme_minimal()
 
 ## Normality tests -------------------------------------------------------------
@@ -92,7 +92,8 @@ test_normality <- function(data, var) {
 # Apply normality tests to each country
 pageviews_results <- mpox_df |> 
   filter(pct_pageviews > 0) |> 
-  group_by(country) |> 
+  group_by(page_title) |> 
+  filter(n() > 7) |> # min number of observations required
   group_modify(~test_normality(data = .x, var = "pct_pageviews")) |> 
   ungroup()
 
@@ -151,7 +152,6 @@ mpox_df |>
 # Apply normality tests to each country
 cases_results <- mpox_df |> 
   group_by(country) |> 
-  filter(sum(cases) > 30, cases > 0) |> 
   group_modify(~test_normality(data = .x, var = "cases")) |> 
   ungroup()
 

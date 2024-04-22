@@ -1,0 +1,20 @@
+country,iso2,iso3,page_title,n,correlation,method
+United States,US,USA,Monkeypox,130,0.7487755837927904,pearson
+United States,US,USA,Smallpox,185,0.5617262309451846,pearson
+United States,US,USA,Herpes simplex,257,0.4168086079664288,pearson
+United States,US,USA,Wart,104,0.35111227158955066,pearson
+United States,US,USA,Shingles,142,0.2273739074334176,pearson
+United States,US,USA,ACAM2000,3,0.17044067704119725,pearson
+United States,US,USA,Encephalitis,193,0.1457731344784458,pearson
+United States,US,USA,Fever,75,0.05540136109264126,pearson
+United States,US,USA,Orthopoxvirus,24,-0.0012080446276127958,pearson
+United States,US,USA,Genital wart,17,-0.007603793826620007,pearson
+United States,US,USA,Herpes,3,-0.11562501470964172,pearson
+United States,US,USA,Fatigue,14,-0.1490534026878111,pearson
+United States,US,USA,Herpes zoster,32,-0.18982017917308824,pearson
+United States,US,USA,Sore throat,33,-0.19697972706490782,pearson
+United States,US,USA,Headache,7,-0.2149423944920507,pearson
+United States,US,USA,Monkeypox virus,79,-0.30639925756031006,pearson
+United States,US,USA,Herpes simplex virus,209,-0.41975825177999,pearson
+United States,US,USA,Tecovirimat,20,-0.6119957867293468,pearson
+United States,US,USA,Poxviridae,6,-0.6389688557855879,pearson
