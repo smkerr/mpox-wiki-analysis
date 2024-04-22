@@ -41,7 +41,7 @@ lag_df <- mpox_df |>
 # TODO: Decide whether to combine "Monkeypox" + "Monkeypox virus" or keep separate
 
 
-# Calculate time-lagged correlation between cases and pageviews ================
+# Lag correlation between cases and pageviews ==================================
 # Function to calculate Spearman correlation with lag
 calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
   
@@ -73,7 +73,6 @@ calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
   
 }
 
-# Lag correlation for pageviews by article =====================================
 # Define lags 
 lags <- -25:25 ###
 
@@ -218,84 +217,152 @@ ggplot(lag_results, aes(x = lag, y = p.value, fill = p.value)) +
 
 # Test time-lag correlations between online search activity & new cases ========
 # Function to shift pageviews and build the model
-shift_and_model <- function(df, shift_days) {
+lag_and_model <- function(data, lag) {
   # Order chronologically
-  df <- df |> 
+  data <- data |> 
     arrange(date)
   
   # Independent variables
-  independent_vars <- names(df)[!names(df) %in% c("country", "iso2", "iso3", "cases", "date", "cases_moving_avg")]
-  formula_str <- paste("cases_moving_avg ~", paste(independent_vars, collapse = " + "))
+  independent_vars <- names(data)[!names(data) %in% c("country", "iso2", "iso3", "cases", "date", "project")]
+  independent_vars_quoted <- sprintf("`%s`", independent_vars) # add backticks to account for spaces
+  formula_str <- paste("cases ~", paste(independent_vars_quoted, collapse = " + "))
   model_formula <- as.formula(formula_str)
   
-  # Decide to use lead() or lag() based on the sign of shift_days
-  if (shift_days > 0) {
-    shifted_df <- df |> 
-      mutate(across(all_of(independent_vars), ~lead(.x, abs(shift_days)))) |> 
+  # Shift the lagged variables
+  if (lag > 0) {
+    shifted_df <- data |> 
+      mutate(across(all_of(independent_vars), ~lead(.x, abs(lag)))) |> 
       drop_na()
-  } else {
-    shifted_df <- df |> 
-      mutate(across(all_of(independent_vars), ~lag(.x, abs(shift_days)))) |> 
-      drop_na()
+  } else if (lag < 0) {
+    shifted_df <- data |> 
+      mutate(across(all_of(independent_vars), ~lag(.x, abs(lag)))) |> 
+      drop_na() # TODO: Should NAs be dropped???
+  } else { # lag == 0
+    shifted_df <- data
   }
   
   # Build the model
-  model <- lm(model_formula, data = shifted_df)
+  model <- lm(model_formula, data = shifted_df) # TODO: Spearman correlation????
   
   # Return model metrics
-  return(glance(model)$r.squared) 
+  # out <- model |> 
+  #   glance() |> 
+  #   mutate(lag = lag) |> 
+  #   relocate(lag, .before = everything())
+  # out1 <- model |> 
+  #   glance() |> 
+  #   mutate(lag = lag) |> 
+  #   relocate(lag, .before = everything())
+  # out2 <- model |> 
+  #   tidy() |> 
+  #   mutate(lag = lag) |> 
+  #   relocate(lag, .before = everything())
+  # out <- list(model_summary = out1, coeffs = out2)
+  #out <- model |> tidy()
+  
+  #TODO: Assign lag values as names to models for ease of access later
+  return(model)
 }
 
-# Range of shifts from 28 days forward to 28 days backward
-shifts <- lags 
-
-# prepare data
-mpox_ts <- mpox_df |>
-  inner_join(top_mpox_pages, by = join_by(country, iso2, iso3, page_title)) |> 
-  select(-est_pageviews, -pageviews_ceil, -correlation) |>
-  pivot_wider(names_from = page_title, values_from = pct_est_pageviews, names_prefix = "pv_") |>
-  reframe(
-    .by = c(country, iso2, iso3, date, cases, cases_moving_avg),
-    across(starts_with("pv_"), ~sum(.x, na.rm = TRUE))
-  ) |> 
-  group_by(country)
-
-# Initialize list to store results
-results <- list()
-
-# Iterate over each country within the prepared data
-for (country_name in unique(mpox_ts$country)) {
-  country_data <- filter(mpox_ts, country == country_name)
+# Prepare data for lagged modeling
+lag_pivoted <- lag_df |> 
+  select(-wikidata_id, -page_id, -pageviews, -pageviews_ceil) |> 
+  pivot_wider(names_from = page_title, values_from = pct_pageviews) |> 
+  arrange(date)
   
-  # Initialize a data frame to store R^2 values for this country
-  country_results <- tibble(shift = integer(), r_squared = numeric())
-  
-  # Loop over each shift value and build the model for this country
-  for (shift_days in shifts) {
-    r_squared <- shift_and_model(country_data, shift_days)
-    country_results <- bind_rows(country_results, tibble(shift = shift_days, r_squared = r_squared))
-  }
-  
-  # Store the results for this country
-  results[[country_name]] <- country_results
-}
+# Fit model to each lag
+model_results <- map_dfr(lags, ~ lag_and_model(lag_pivoted, .x)$model_summary)
+model_coeffs <- map_dfr(lags, ~ lag_and_model(lag_pivoted, .x)$coeffs)
+model_coeffs <- map_dfr(lags, ~ lag_and_model(lag_pivoted, .x))
+models <- map(lags, ~ lag_and_model(lag_pivoted, .x))
 
-# combine into df
-results_df <- bind_rows(results, .id = "country") |> 
-  left_join(iso_ref, by = join_by(country == country_name)) |> 
-  relocate(c(iso2, iso3), .after = country)
+# TODO: Why so few nobs???
+
+# Viz check
+model_results |> 
+  ggplot(aes(lag, r.squared)) + 
+  geom_line() + 
+  geom_smooth() +
+  geom_vline(xintercept = model_results |> slice_max(r.squared) |> pull(lag), color = "red", linetype = "dashed") +
+  scale_x_continuous(n.breaks = 10) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal()
+
+# Viz check
+model_results |> 
+  ggplot(aes(lag, adj.r.squared)) + 
+  geom_line() + 
+  geom_smooth() +
+  geom_vline(xintercept = model_results |> slice_max(adj.r.squared) |> pull(lag), color = "red", linetype = "dashed") +
+  scale_x_continuous(n.breaks = 10) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal()
+
+# Viz check
+model_results |> 
+  ggplot(aes(lag, AIC)) + 
+  geom_line() + 
+  geom_smooth() +
+  geom_vline(xintercept = model_results |> slice_min(AIC) |> pull(lag), color = "red", linetype = "dashed") +
+  scale_x_continuous(n.breaks = 10) +
+  theme_minimal()
+
+# Viz check 
+model_coeffs |> 
+  ggplot(aes(lag, estimate, color = term)) + 
+  geom_line() + 
+  geom_smooth() +
+  scale_y_continuous(labels = label_comma()) + 
+  theme_minimal()
+
+# Viz check 
+model_coeffs |> 
+  ggplot(aes(lag, p.value, color = term)) + 
+  #geom_line() + 
+  geom_smooth(se = FALSE) +
+  geom_hline(yintercept = 0.05, color = "red", linetype = "dashed") + 
+  scale_y_continuous(limits = c(0, 1)) + 
+  theme_minimal()
+
+# TODO: Analyze residuals ...
+
+# TODO: This may have flipped????
+# correlations will contain the Spearman correlation coefficients for each lag
+## negative lags correspond with the time-lag effect of new cases on pageviews
+## positive lags correspond with the time-lag effect of pageviews on new cases 
+
+
+# Get predictions
+augment(models[[26]]) |>
+  mutate(.rownames = as.numeric(.rownames)) |> 
+  ggplot() + 
+  geom_line(aes(x = `.rownames`, y = cases), color = ("blue")) + 
+  geom_line(aes(x = `.rownames`, y = `.fitted`), color = ("red")) + 
+  theme_minimal()
+
+# residuals
+augment(models[[26]]) |>
+  ggplot() + 
+  #geom_point(aes(x = `.rownames`, y = cases), color = ("blue"), size = 2) + 
+  geom_col(aes(x = `.rownames`, y = `.resid`), fill = ("red"), size = 2) + 
+  theme_minimal()
+
 
 # Store results
-for (iso3_code in unique(results_df$iso3)) {
-  # R^2 for all shifts
-  results_df |> 
-    filter(iso3 == iso3_code) |> 
-    write_csv(here(glue("3-data/output/regression-results/regression-results-{iso3_code}.csv")))
-}
+write_csv(model_results, here(glue("3-data/output/lag-analysis-results.csv")))
 
-# Calculate highest R^2 values
-results_df |> 
-  group_by(country) |> 
-  slice_max(r_squared) |> 
-  ungroup() |> 
-  write_csv(here(glue("3-data/output/regression-results/top-rsquared.csv")))
+# TODO: Move visualizations to figures script
+
+
+# Apply to test data ===========================================================
+# Get data
+
+# Prepare data 
+
+# Use model to augment data with predictions 
+
+# Get goodness of fit statistics
+
+# Visualize gooedness of fit statistics 
+
+# Visualize goodness of fit against data 
