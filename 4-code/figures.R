@@ -6,7 +6,7 @@
 
 # Load data ====================================================================
 # load combined data
-mpox_df # <- 
+mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 # load pageviews data
 pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
@@ -443,7 +443,7 @@ p <- mpox_df |>
     labels = scales::label_percent()
   ) +
   scale_fill_brewer(type = "qual", palette = 3) +
-  facet_wrap(~page_title, scales = "free_y") +
+  #facet_wrap(~page_title, scales = "free_y") +
   labs(
     x = NULL,
     fill = NULL,

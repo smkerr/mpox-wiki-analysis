@@ -122,10 +122,23 @@ import_pageviews_tsv <- function(file_path) {
       ) |> 
     mutate(
       date = as_date(date_str), 
-      page_title = str_replace_all(page_title, "_", " ") # remove underscores
+      page_title = str_replace_all(page_title, "_", " "), # remove underscores
+      country = as.character(country),
+      country = ifelse(iso2 == "US", "United States", country), # align US country name
     ) |>
     rename(country_long = country)
-
+  
+  if (nrow(df) == 0) {
+    df <- data.frame(
+      country_long = NA_character_,
+      iso2 = NA_character_,
+      project = NA_character_,
+      page_id = NA_real_,
+      page_title = NA_character_,
+      wikidata_id = NA_character_,
+      pageviews = NA_real_
+    )
+  }
   return(df)
 }
 
