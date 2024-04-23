@@ -157,6 +157,6 @@ p2_qq
 
 # Save models and data frames
 save(seg_model1, seg_model2, file = here("3-data/output/segmented-analysis/segmented_models.RData"))
-write.csv(attention_df, here("3-data/output/segmented-analysis-data.csv"))
+write.csv(attention_df, here("3-data/output/segmented-analysis/segmented-analysis-data.csv"))
 
 # TODO: Add plots to figures script
