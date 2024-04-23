@@ -7,17 +7,12 @@
 # Setup ========================================================================
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) 
 
+# TODO: Assume upper limit to attention decay? E.g., no more than 50 days or so?
+
 
 # Prepare data =================================================================
 attention_df <- mpox_df |>
-  # Combine "Monkeypox" + "Monkeypox virus" pageviews
-  filter(page_title %in% c("Monkeypox", "Monkeypox virus")) |> 
-  reframe(
-    .by = c(country, iso2, iso3, date),
-    pageviews = sum(pageviews, na.rm = TRUE),
-    pct_pageviews = pageviews / pageviews_ceil
-  ) |>
-  distinct() |> # remove duplicates
+  filter(page_title == "Mpox") |> 
   complete(
     date = seq.Date(from = min(mpox_df$date), to = max(mpox_df$date), by = 1),
     fill = list(country = "United States", iso2 = "US", iso3 = "USA")

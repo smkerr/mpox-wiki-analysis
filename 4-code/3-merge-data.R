@@ -5,34 +5,34 @@
 
 
 # Setup ========================================================================
-# load Wikipedia pageview data
+# Load Wikipedia pageview data
 pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
 
-# load mpox case data 
+# Load mpox case data 
 cases_daily <- read_csv("3-data/mpox-cases/mpox-cases-daily.csv")
 
-# load mpox news coverage data 
+# Load mpox news coverage data 
 news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"))
 
-# load mpox studies data
+# Load mpox studies data
 studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))
 
-# load ISO code reference table
+# Load ISO code reference table
 load(here("3-data/ref/iso_codes.RData"))
 
 # Prepare data =================================================================
-# merge mpox cases and Wikipedia pageview data
+# Merge mpox cases and Wikipedia pageview data
 mpox_df <- full_join(
   left_join(cases_daily, iso_ref, by = join_by(country == country_name, iso2, iso3)),
   left_join(pageviews_daily, iso_ref, by = join_by(iso2)), 
   by = join_by(country == country_name, iso2, iso3, date)
   ) |>
-  select(country, iso2, iso3, cases, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil) |> 
+  select(country, iso2, iso3, project, wikidata_id, page_title, page_id, date, cases, pct_pageviews, pageviews, pageviews_ceil) |> 
   filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
   complete(fill = list(cases = 0))  |> # fill in missing cases with zeros
   arrange(country, date, page_title)
 
-# merge with mpox news data
+# Merge with mpox news data
 mpox_df <- left_join(
   mpox_df,
   news_df |> 
@@ -41,7 +41,7 @@ mpox_df <- left_join(
   by = join_by(country, date)
   )
 
-# merge with mpox studies data
+# Merge with mpox studies data
 mpox_df <- left_join(
   mpox_df,
   studies_df |> 
@@ -50,6 +50,28 @@ mpox_df <- left_join(
   by = join_by(date)
   ) |> 
   complete(fill = list(n_studies = 0))
+
+# Aggregate all mpox-specific articles
+mpox_agg <- mpox_df |> 
+  filter(page_title %in% c("Monkeypox", "Monkeypox virus", "Mpox")) |> 
+  reframe(
+    .by = c(country, iso2, iso3, project, date, cases, n_articles, n_studies),
+    pageviews = sum(pageviews, na.rm = TRUE),
+    pageviews_ceil,
+    pct_pageviews = sum(pageviews, na.rm = TRUE) / pageviews_ceil,
+    page_title = "Mpox", 
+    page_id = 242702, # "Mpox" page ID
+    wikidata_id = "Q382370" # "Mpox" Wikidata ID 
+  ) |>
+  distinct() |> # remove duplicates
+  arrange(date) |> 
+  select(country, iso2, iso3, project, wikidata_id, page_title, page_id, date, cases, pct_pageviews, pageviews, pageviews_ceil, n_articles, n_studies )
+
+# Append aggregate mpox-specific figures with data
+mpox_df <- mpox_df |> 
+  filter(!page_title %in% c("Monkeypox", "Monkeypox virus", "Mpox")) |> 
+  bind_rows(mpox_agg) |> 
+  arrange(date) 
 
 
 # Implement inclusion criteria =================================================
