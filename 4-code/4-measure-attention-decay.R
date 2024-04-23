@@ -7,25 +7,22 @@
 # Setup ========================================================================
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) 
 
-# TODO: Assume upper limit to attention decay? E.g., no more than 50 days or so?
-
 
 # Prepare data =================================================================
 attention_df <- mpox_df |>
   filter(page_title == "Mpox") |> 
-  complete(
-    date = seq.Date(from = min(mpox_df$date), to = max(mpox_df$date), by = 1),
-    fill = list(country = "United States", iso2 = "US", iso3 = "USA")
-    ) |> 
+  complete(date = seq.Date(from = min(mpox_df$date), to = max(mpox_df$date), by = 1)) |> # complete missing dates
+  complete(fill = list(cases = 0)) |> 
+  fill(country, iso2, iso3, project, wikidata_id, page_title, page_id, .direction = "updown") |> 
   mutate(
-    time = row_number(),
-    rolling_avg = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 7, .complete = FALSE)
-    )
+    time = row_number(), # date as numeric variable
+    ma_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 7, .complete = FALSE) # rolling avg of % pageviews
+    ) |> 
+  select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, time, cases, pct_pageviews, ma_pct_pageviews)
 
 # Viz check
 ggplot(attention_df) + 
-  #geom_line(aes(date, pct_pageviews), color = muted("red"), alpha = 0.9) + 
-  geom_line(aes(time, rolling_avg), color = muted("blue"), alpha = 0.9) + 
+  geom_line(aes(time, ma_pct_pageviews), color = muted("blue"), alpha = 0.9) + 
   geom_vline(xintercept = 142, color = "red", linetype = "dashed") +
   geom_vline(xintercept = 215, color = "red", linetype = "dashed") +
   scale_y_continuous(labels = label_percent()) +
@@ -34,12 +31,13 @@ ggplot(attention_df) +
 
 # Peak pageviews ===============================================================
 peak_dates <- attention_df |> 
-  mutate(rolling_avg = ifelse(is.na(rolling_avg), 0, rolling_avg)) |> # can't handle NAs
-  pull(rolling_avg) |> 
+  mutate(ma_pct_pageviews = ifelse(is.na(ma_pct_pageviews), 0, ma_pct_pageviews)) |> # NAs to zeros
+  pull(ma_pct_pageviews) |> 
   findpeaks(nups = 2, ndowns = 2, npeaks = 2, minpeakdistance = 7) |> 
   as.data.frame() |> 
   select(value = V1, time = V2, peak_start = V3, peak_end = V4) |> 
   arrange(time)
+
 
 # First peak ===================================================================
 peak_df1 <- attention_df |> 
@@ -47,59 +45,118 @@ peak_df1 <- attention_df |>
   mutate(days_since_peak = row_number())
 
 # Viz check
-ggplot(peak_df1, aes(days_since_peak, rolling_avg)) +
+ggplot(peak_df1, aes(days_since_peak, ma_pct_pageviews)) +
   geom_point() +
   scale_y_continuous(labels = label_percent()) +
   theme_minimal()
 
+# Viz check
+ggplot(peak_df1, aes(ma_pct_pageviews)) +
+  geom_histogram() +
+  theme_minimal()
+
+# Viz check
+ggplot(peak_df1, aes(log(ma_pct_pageviews))) +
+  geom_histogram() +
+  theme_minimal()
+
 # Fit a linear model
-lm_model1 <- lm(rolling_avg ~ days_since_peak, data = peak_df1) # TODO: log?
+lm_model1 <- lm(log(ma_pct_pageviews) ~ days_since_peak, data = peak_df1) 
 
 # Apply segmented regression
-seg_model1 <- segmented(lm_model1, seg.Z = ~days_since_peak, npsi = 2)
+seg_model1 <- segmented(
+  lm_model1, 
+  seg.Z = ~days_since_peak, 
+  control = seg.control(n.boot = 500)
+  )
+
+# Model summary
 summary(seg_model1)
-seg_model1$indexU$days_since_peak |> as.data.frame() 
+
+# Visualize model fit
 peak_df1 |> 
   mutate(predicted = predict(seg_model1, newdata = data.frame(days_since_peak = days_since_peak))) |> 
   ggplot(aes(x = days_since_peak)) +
-  geom_point(aes(y = rolling_avg), color = "blue", size = 2) +
+  geom_point(aes(y = log(ma_pct_pageviews)), color = "blue", size = 2) +
   geom_line(aes(y = predicted), color = "red") +
-  scale_y_continuous(labels = label_percent()) +
   labs(title = "Segmented Model Fit",
        x = "Days Since Peak",
        y = "Rolling Average/Predicted") +
   theme_minimal()
-slope(seg_model1)
+
+# Check model diagnostics 
+# Residuals plot
+p1_res <- ggplot(data.frame(residuals = residuals(seg_model1)), aes(x = residuals)) +
+  geom_histogram(bins = 30, fill = "grey", color = "black") +
+  geom_vline(xintercept = 0, color = "red") +
+  labs(title = "Histogram of Residuals", x = "Residuals", y = "Frequency") +
+  theme_minimal()
+p1_res
+
+# QQ plot
+p1_qq <- ggplot(data.frame(residuals = residuals(seg_model1)), aes(sample = residuals)) +
+  geom_qq() +
+  geom_qq_line(color = "red") +
+  labs(title = "QQ Plot of Residuals", x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  theme_minimal()
+p1_qq
 
 
 # Second peak ==================================================================
 peak_df2 <- attention_df |> 
   filter(time >= peak_dates$time[2]) |> 
-  mutate(days_since_peak = row_number())
+  mutate(days_since_peak = row_number()) |> 
+  filter(days_since_peak <= 50) # only include first 50 days
 
 # Viz check
-ggplot(peak_df2, aes(days_since_peak, rolling_avg)) +
+ggplot(peak_df2, aes(days_since_peak, ma_pct_pageviews)) +
   geom_point() +
   scale_y_continuous(labels = label_percent()) +
   theme_minimal()
 
 # Fit a linear model
-lm_model2 <- lm(rolling_avg ~ days_since_peak, data = peak_df2) # TODO: log?
+lm_model2 <- lm(log(ma_pct_pageviews) ~ days_since_peak, data = peak_df2) 
 
-seg_model2 <- segmented(lm_model2, seg.Z = ~days_since_peak, npsi = 2)
+# Apply segmented regression
+seg_model2 <- segmented(
+  lm_model2, 
+  seg.Z = ~days_since_peak, 
+  control = seg.control(n.boot = 500)
+  )
+
+# Model summary
 summary(seg_model2)
-seg_model2$indexU$days_since_peak |> as.data.frame() 
+
+# Visualize model fit
 peak_df2 |> 
   mutate(predicted = predict(seg_model2, newdata = data.frame(days_since_peak = days_since_peak))) |> 
   ggplot(aes(x = days_since_peak)) +
-  geom_point(aes(y = rolling_avg), color = "blue", size = 2) +
+  geom_point(aes(y = log(ma_pct_pageviews)), color = "blue", size = 2) + 
   geom_line(aes(y = predicted), color = "red") +
-  scale_y_continuous(labels = label_percent()) +
   labs(title = "Segmented Model Fit",
        x = "Days Since Peak",
        y = "Rolling Average/Predicted") +
   theme_minimal()
-slope(seg_model2)
 
-# TODO: Save output 
+# Check model diagnostics 
+# Residuals plot
+p2_res <- ggplot(data.frame(residuals = residuals(seg_model2)), aes(x = residuals)) +
+  geom_histogram(bins = 30, fill = "grey", color = "black") +
+  geom_vline(xintercept = 0, color = "red") +
+  labs(title = "Histogram of Residuals", x = "Residuals", y = "Frequency") +
+  theme_minimal()
+p2_res
+
+# QQ plot
+p2_qq <- ggplot(data.frame(residuals = residuals(seg_model2)), aes(sample = residuals)) +
+  geom_qq() +
+  geom_qq_line(color = "red") +
+  labs(title = "QQ Plot of Residuals", x = "Theoretical Quantiles", y = "Sample Quantiles") +
+  theme_minimal()
+p2_qq
+
+# Save models and data frames
+save(seg_model1, seg_model2, file = here("3-data/output/segmented-analysis/segmented_models.RData"))
+write.csv(attention_df, here("3-data/output/segmented-analysis-data.csv"))
+
 # TODO: Add plots to figures script
