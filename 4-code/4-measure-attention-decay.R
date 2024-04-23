@@ -16,7 +16,7 @@ attention_df <- mpox_df |>
   fill(country, iso2, iso3, project, wikidata_id, page_title, page_id, .direction = "updown") |> 
   mutate(
     time = row_number(), # date as numeric variable
-    ma_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 7, .complete = FALSE) # rolling avg of % pageviews
+    ma_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6, .complete = FALSE) # rolling avg of % pageviews
     ) |> 
   select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, time, cases, pct_pageviews, ma_pct_pageviews)
 
@@ -158,5 +158,3 @@ p2_qq
 # Save models and data frames
 save(seg_model1, seg_model2, file = here("3-data/output/segmented-analysis/segmented_models.RData"))
 write.csv(attention_df, here("3-data/output/segmented-analysis/segmented-analysis-data.csv"))
-
-# TODO: Add plots to figures script
