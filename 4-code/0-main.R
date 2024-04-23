@@ -15,6 +15,7 @@ pacman::p_load(
   dotenv,       # env files
   dplyr,        # wrangle data
   forcats,      # factors
+  forecast,     # forecasting
   ggplot2,      # visualize data
   glue,         # string literals
   gt,           # formatting tables

@@ -1,20 +1,30 @@
 country,iso2,iso3,page_title,n,correlation,method
-United States,US,USA,Monkeypox,130,0.7487755837927904,pearson
-United States,US,USA,Smallpox,185,0.5617262309451846,pearson
-United States,US,USA,Herpes simplex,257,0.4168086079664288,pearson
-United States,US,USA,Wart,104,0.35111227158955066,pearson
-United States,US,USA,Shingles,142,0.2273739074334176,pearson
+United States,US,USA,Fomite,10,0.990613829911904,pearson
+United States,US,USA,Lesion,64,0.916590926412277,pearson
+United States,US,USA,Mpox,238,0.5640205441484207,pearson
+United States,US,USA,Herpes,65,0.4709210848670242,pearson
+United States,US,USA,Fatigue,94,0.4156936295360866,pearson
+United States,US,USA,Herpes simplex,341,0.39372263899756793,pearson
+United States,US,USA,Wart,258,0.37245260239956895,pearson
+United States,US,USA,Smallpox,375,0.3704879974064267,pearson
+United States,US,USA,Shingles,323,0.34190316321632713,pearson
+United States,US,USA,Orthopoxvirus,31,0.3105035461374604,pearson
+United States,US,USA,Fever,158,0.2841769478596595,pearson
+United States,US,USA,Headache,84,0.20779067790444014,pearson
 United States,US,USA,ACAM2000,3,0.17044067704119725,pearson
-United States,US,USA,Encephalitis,193,0.1457731344784458,pearson
-United States,US,USA,Fever,75,0.05540136109264126,pearson
-United States,US,USA,Orthopoxvirus,24,-0.0012080446276127958,pearson
-United States,US,USA,Genital wart,17,-0.007603793826620007,pearson
-United States,US,USA,Herpes,3,-0.11562501470964172,pearson
-United States,US,USA,Fatigue,14,-0.1490534026878111,pearson
-United States,US,USA,Herpes zoster,32,-0.18982017917308824,pearson
-United States,US,USA,Sore throat,33,-0.19697972706490782,pearson
-United States,US,USA,Headache,7,-0.2149423944920507,pearson
-United States,US,USA,Monkeypox virus,79,-0.30639925756031006,pearson
-United States,US,USA,Herpes simplex virus,209,-0.41975825177999,pearson
+United States,US,USA,Broth,73,0.12774531768552264,pearson
+United States,US,USA,Encephalitis,382,0.11459360377309578,pearson
+United States,US,USA,Antipyretic,40,0.09581046102532745,pearson
+United States,US,USA,Herpangina,69,0.022166895606802198,pearson
+United States,US,USA,Genital herpes,75,0.00951698126379329,pearson
+United States,US,USA,Urethritis,13,-0.03966679049686027,pearson
+United States,US,USA,Sore throat,112,-0.059684601599355576,pearson
+United States,US,USA,Poxviridae,9,-0.06663670215271454,pearson
+United States,US,USA,Myalgia,76,-0.11874743996648676,pearson
+United States,US,USA,Rash,39,-0.12702024270015694,pearson
+United States,US,USA,Herpes zoster,33,-0.15388871980110025,pearson
+United States,US,USA,Herpes simplex virus,383,-0.2337735283829582,pearson
+United States,US,USA,Genital wart,93,-0.507124373390379,pearson
 United States,US,USA,Tecovirimat,20,-0.6119957867293468,pearson
-United States,US,USA,Poxviridae,6,-0.6389688557855879,pearson
+United States,US,USA,DNA virus,2,-1,pearson
+United States,US,USA,Proctitis,2,-1,pearson

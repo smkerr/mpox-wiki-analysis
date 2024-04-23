@@ -1,9 +1,15 @@
+# ==============================================================================
+# Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
+# Steve Kerr
+# ==============================================================================
+
+
+# Setup ========================================================================
 library(fable)
 library(feasts)
 library(tsibble)
 
-
-# load mpox data
+# Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 # Aggregate "Monkeypox" and "Monkeypox virus" pageviews

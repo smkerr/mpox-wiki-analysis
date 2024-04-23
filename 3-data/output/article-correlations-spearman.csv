@@ -1,20 +1,30 @@
 country,iso2,iso3,page_title,n,correlation,method
-United States,US,USA,Monkeypox,130,0.6442707028568685,spearman
-United States,US,USA,Wart,104,0.5837720491818357,spearman
+United States,US,USA,Mpox,238,0.5875170213686574,spearman
+United States,US,USA,Orthopoxvirus,31,0.5459323037459906,spearman
 United States,US,USA,ACAM2000,3,0.5,spearman
-United States,US,USA,Herpes simplex,257,0.4486609493192341,spearman
-United States,US,USA,Smallpox,185,0.38489137796213296,spearman
-United States,US,USA,Encephalitis,193,0.36426086001982994,spearman
-United States,US,USA,Orthopoxvirus,24,0.31528593917757397,spearman
-United States,US,USA,Fatigue,14,0.20468718058745616,spearman
-United States,US,USA,Headache,7,0.1576220812478201,spearman
-United States,US,USA,Genital wart,17,0.10206207261596575,spearman
-United States,US,USA,Fever,75,-0.03174503140236799,spearman
-United States,US,USA,Herpes zoster,32,-0.08110361206542753,spearman
-United States,US,USA,Monkeypox virus,79,-0.12277242229786414,spearman
-United States,US,USA,Shingles,142,-0.19440017680518737,spearman
-United States,US,USA,Sore throat,33,-0.3458177318414057,spearman
-United States,US,USA,Herpes,3,-0.5,spearman
-United States,US,USA,Poxviridae,6,-0.6,spearman
+United States,US,USA,Fomite,10,0.4185110693297313,spearman
+United States,US,USA,Herpes simplex,341,0.3606489403368138,spearman
+United States,US,USA,Wart,258,0.19797651210247497,spearman
+United States,US,USA,Broth,73,0.15785844292372686,spearman
+United States,US,USA,Encephalitis,382,0.1304226815861096,spearman
+United States,US,USA,Smallpox,375,0.11364048975196606,spearman
+United States,US,USA,Herpangina,69,0.10936063823003721,spearman
+United States,US,USA,Fever,158,0.10030372419100493,spearman
+United States,US,USA,Lesion,64,0.08638379261896575,spearman
+United States,US,USA,Genital herpes,75,0.08210243337151475,spearman
+United States,US,USA,Myalgia,76,0.07335904945429518,spearman
+United States,US,USA,Urethritis,13,0.07192426489454565,spearman
+United States,US,USA,Antipyretic,40,0.02586413936204475,spearman
+United States,US,USA,Herpes zoster,33,-0.033168706012069595,spearman
+United States,US,USA,Rash,39,-0.09882430775000653,spearman
+United States,US,USA,Fatigue,94,-0.10186684272427589,spearman
+United States,US,USA,Headache,84,-0.14311164434344412,spearman
+United States,US,USA,Shingles,323,-0.15167351812693644,spearman
+United States,US,USA,Poxviridae,9,-0.2016877936358443,spearman
+United States,US,USA,Herpes,65,-0.23554423347538758,spearman
+United States,US,USA,Genital wart,93,-0.31348493605165095,spearman
+United States,US,USA,Herpes simplex virus,383,-0.333172938254539,spearman
+United States,US,USA,Sore throat,112,-0.47641825860858344,spearman
 United States,US,USA,Tecovirimat,20,-0.6420513769918539,spearman
-United States,US,USA,Herpes simplex virus,209,-0.6770263916011358,spearman
+United States,US,USA,DNA virus,2,-0.9999999999999998,spearman
+United States,US,USA,Proctitis,2,-0.9999999999999998,spearman
