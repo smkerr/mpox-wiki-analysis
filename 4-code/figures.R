@@ -457,6 +457,20 @@ p
 # save plot
 ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews.png"), height = 7.75, width = 10)
 
+mpox_df |> 
+  filter(page_title == "Mpox") |> 
+  ggplot(aes(x = cases, y = pct_pageviews)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  theme_minimal()
+
+mpox_df |> 
+  filter(page_title == "Mpox") |> 
+  ggplot(aes(x = log(cases), y = log(pct_pageviews))) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  theme_minimal()
+
 
 # Media coverage ===============================================================
 # plot daily number of news articles
