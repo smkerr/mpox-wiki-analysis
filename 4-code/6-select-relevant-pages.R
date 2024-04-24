@@ -15,33 +15,6 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 # analysis sections
 
 
-# Calculate Pearson correlation between cases and pageviews ====================
-article_correlations_pearson <- mpox_df |>
-  group_by(country, iso2, iso3, wikidata_id, page_id, page_title) |>
-  filter(sum(pct_pageviews > 0) > 1) |> # remove articles estimated to have zero pageviews
-  ungroup() |>
-  group_by(country, iso2, iso3) |>
-  nest() |>
-  mutate(correlations = map(data, ~ .x |>
-                              group_by(page_title) |>
-                              summarize(
-                                n = n(),
-                                correlation = cor(pct_pageviews,
-                                                  cases,
-                                                  use = "complete.obs",
-                                                  method = "pearson"),
-                                method = "pearson",
-                                .groups = 'drop') |>
-                              arrange(-correlation)
-                            )) |>
-  select(-data) |>
-  unnest(correlations) |>
-  ungroup()
-
-# Save results
-write_csv(article_correlations_pearson, here("3-data/output/article-correlations-pearson.csv"))
-
-
 # Calculate Spearman correlation between cases and pageviews ===================
 article_correlations_spearman <- mpox_df |>
   group_by(country, iso2, iso3, wikidata_id, page_id, page_title) |>
@@ -75,7 +48,7 @@ write_csv(article_correlations_spearman, here("3-data/output/article-correlation
 #> (Pearson or Spearman) and at least 30 observations
 
 # Filter for positive correlation
-included_articles <- bind_rows(article_correlations_pearson, article_correlations_spearman) |> 
+included_articles <- article_correlations_spearman) |> 
   filter(n >= 30) |> 
   group_by(method) |> 
   filter(correlation > 0) |> 
