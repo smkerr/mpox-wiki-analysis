@@ -3191,7 +3191,6 @@ Germany,DE,de.wikipedia,200309,Herpes Zoster,Q182155,666,2022-10-01
 United States,US,en.wikipedia,21323216,Herpes simplex,Q6473911,693,2022-10-01
 United States,US,en.wikipedia,4774419,Herpes simplex virus,Q655331,602,2022-10-01
 France,FR,en.wikipedia,643023,Rash,Q653197,533,2022-10-01
-NA,NA,NA,NA,NA,NA,NA,NA
 France,FR,en.wikipedia,643023,Rash,Q653197,498,2022-10-03
 United States,US,en.wikipedia,16829895,Smallpox,Q12214,1666,2022-10-03
 Japan,JP,ja.wikipedia,31036,天然痘,Q12214,656,2022-10-03
@@ -3213,7 +3212,6 @@ Germany,DE,de.wikipedia,1778,Fieber,Q38933,486,2022-10-05
 Japan,JP,ja.wikipedia,31036,天然痘,Q12214,659,2022-10-05
 United States,US,en.wikipedia,37636,Encephalitis,Q199615,653,2022-10-05
 United States,US,en.wikipedia,34049,Wart,Q101971,455,2022-10-05
-NA,NA,NA,NA,NA,NA,NA,NA
 United States,US,en.wikipedia,242702,Monkeypox,Q382370,581,2022-10-07
 Germany,DE,de.wikipedia,200309,Herpes Zoster,Q182155,628,2022-10-07
 United States,US,en.wikipedia,21323216,Herpes simplex,Q6473911,735,2022-10-07
@@ -3674,7 +3672,6 @@ Japan,JP,ja.wikipedia,31036,天然痘,Q12214,525,2022-12-22
 United States,US,en.wikipedia,37636,Encephalitis,Q199615,693,2022-12-22
 United States,US,en.wikipedia,46253,Fever,Q38933,552,2022-12-22
 United States,US,en.wikipedia,443800,Shingles,Q182155,686,2022-12-23
-NA,NA,NA,NA,NA,NA,NA,NA
 United States,US,en.wikipedia,443800,Shingles,Q182155,556,2022-12-25
 United States,US,en.wikipedia,16829895,Smallpox,Q12214,1134,2022-12-25
 France,FR,fr.wikipedia,96078,Variole,Q12214,485,2022-12-26
@@ -14200,7 +14197,6 @@ United States,US,en.wikipedia,149467,Myalgia,Q474959,144,2024-02-04
 Canada,CA,en.wikipedia,443800,Shingles,Q182155,156,2024-02-04
 Germany,DE,de.wikipedia,52273,Warze,Q101971,163,2024-02-04
 Spain,ES,es.wikipedia,41754,Viruela,Q12214,112,2024-02-04
-India,IN,ta.wiktionary,106272,காய்ச்சல்,NA,181,2024-02-04
 United States,US,zh.wikipedia,486744,尖锐湿疣,Q208726,105,2024-02-04
 India,IN,en.wikipedia,643023,Rash,Q653197,98,2024-02-04
 United States,US,en.wikipedia,188665,Genital wart,Q208726,212,2024-02-04

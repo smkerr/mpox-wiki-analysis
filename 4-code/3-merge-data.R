@@ -28,7 +28,7 @@ mpox_df <- full_join(
   by = join_by(country == country_name, iso2, iso3, date)
   ) |>
   select(country, iso2, iso3, project, wikidata_id, page_title, page_id, date, cases, pct_pageviews, pageviews, pageviews_ceil) |> 
-  filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
+  #filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
   complete(fill = list(cases = 0))  |> # fill in missing cases with zeros
   arrange(country, date, page_title)
 
@@ -39,7 +39,8 @@ mpox_df <- left_join(
     reframe(.by = date, n_articles = sum(n_articles)) |> # combine all article counts
     mutate(country = "United States"),
   by = join_by(country, date)
-  )
+  ) |> 
+  complete(fill = list(n_articles = 0))
 
 # Merge with mpox studies data
 mpox_df <- left_join(
@@ -76,7 +77,6 @@ mpox_df <- mpox_df |>
 
 # Implement inclusion criteria =================================================
 mpox_df <- mpox_df |> filter(iso3 == "USA", project == "en.wikipedia")
-
 
 # Save data ====================================================================
 write_csv(mpox_df, here("3-data/output/mpox-data.csv"))

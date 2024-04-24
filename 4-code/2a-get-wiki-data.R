@@ -5,6 +5,19 @@
 
 
 # Setup ===============================================================
+# Load packages
+pacman::p_load(
+  dplyr, 
+  glue,
+  here,
+  httr,
+  lubridate,
+  purrr,
+  readr,
+  stringr,
+  tidyr
+)
+
 # Mpox-related articles
 load(here("3-data/output/mpox-pages-extended.RData"))
 
@@ -34,6 +47,7 @@ mpox_pages_extended <- map_df(str_replace_all(mpox_pages_extended, " ", "_"), ge
 # Download Daily Pageviews (Differential Privacy) ==============================
 if (!dir.exists((here("3-data/wikipedia/pageviews-differential-privacy")))) {
   # Download pageview data from 1 Jan 2022 - 5 Feb 2023 
+  # source: https://analytics.wikimedia.org/published/datasets/country_project_page_historical/00_README.html
   start_date <- ymd("2022-01-01") 
   end_date <- ymd("2023-02-05") 
   date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
@@ -60,6 +74,7 @@ if (!dir.exists((here("3-data/wikipedia/pageviews-differential-privacy")))) {
   
   
   # Download pageview data from 6 Feb 2023 - 27 Feb 2024
+  # sourceL https://analytics.wikimedia.org/published/datasets/country_project_page/00_README.html
   start_date <- ymd("2023-02-06") 
   end_date <- ymd("2024-02-27") 
   date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
@@ -145,16 +160,17 @@ import_pageviews_tsv <- function(file_path) {
 
 if (!file.exists(here("3-data/wikipedia/pageviews-differential-private.csv"))) { 
   # load, clean, and combine dataframes
-  pageviews <- map_dfr(file_paths, import_pageviews_tsv) 
-  write_csv(pageviews, here("3-data/wikipedia/pageviews-differential-private.csv")) 
+  pageviews_df <- map_dfr(file_paths, import_pageviews_tsv) |> 
+    drop_na()
+  write_csv(pageviews_df, here("3-data/wikipedia/pageviews-differential-private.csv")) 
 } else {
-  pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
+  pageviews_df <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
 }
 
 
 # Get Monthly Total Pageviews ==================================================
 # function to get and parse data for a given month
-fetch_pageviews_for_month <- function(project_code, yyyy_mm) {
+get_pageviews_for_month <- function(project_code, yyyy_mm) {
   year <- str_extract(yyyy_mm, "^\\d{4}")
   month <- str_extract(yyyy_mm, "\\d{2}$")
 
@@ -178,49 +194,62 @@ fetch_pageviews_for_month <- function(project_code, yyyy_mm) {
   return(countries_df)
 }
 
-# create list of project codes 
-project_codes <- unique(pageviews$project)
 
-# combine data for all months
-start_date <- ymd("2022-01-01") 
-end_date <- ymd("2024-02-27") 
-month_sequence <- seq.Date(from = start_date, to = end_date, by = "day") |> 
-  str_remove("-\\d\\d$") |>
-  unique()
-
-# generate all possible combinations of project codes and months
-combo_df <- expand.grid(project = project_codes, date = month_sequence) |> 
-  mutate(project = as.character(project), date = as.character(date))
-
-# get total project views by country
-pageviews_total <- map2(combo_df$project, combo_df$date, fetch_pageviews_for_month) |> 
-  list_rbind()
+if (file.exists(here("3-data/wikipedia/project-views-monthly.csv"))) {
+  pageviews_total <- read_csv(here("3-data/wikipedia/project-views-monthly.csv"))
+} else {
+  # create list of project codes 
+  project_codes <- unique(pageviews$project)
+  
+  # combine data for all months
+  start_date <- ymd("2022-01-01") 
+  end_date <- ymd("2024-02-27") 
+  month_sequence <- seq.Date(from = start_date, to = end_date, by = "day") |> 
+    str_remove("-\\d\\d$") |>
+    unique()
+  
+  # generate all possible combinations of project codes and months
+  combo_df <- expand.grid(project = project_codes, date = month_sequence) |> 
+    mutate(project = as.character(project), date = as.character(date))
+  
+  # get total project views by country
+  pageviews_total <- map2(combo_df$project, combo_df$date, get_pageviews_for_month) |> 
+    list_rbind() 
+}
 
 
 # Prepare data =================================================================
-# Normalize by dividing by monthly totals 
-pageviews_daily <- pageviews |> 
-  mutate(
-    year = year(date),
-    month = month(date)
-  ) |>
+# Daily pageviews
+pageviews_daily <- pageviews_df |>  
+  # Expand to include missing dates
+  complete(page_title, date = seq.Date(min(pageviews_df$date), to = max(pageviews_df$date), by = 1)) |>
+  group_by(page_title) |> 
+  # Fill in missing info
+  fill(country_long, iso2, project, wikidata_id, page_id, .direction = "updown") |> 
+  ungroup() |> 
+  # Normalize by dividing by total monthly country project views 
+  mutate(year = year(date), month = month(date)) |> 
   left_join(pageviews_total, by = join_by(iso2, project, year, month), relationship = "many-to-one") |> 
   mutate(pct_pageviews = pageviews / pageviews_ceil) |> 
-  select(country_long, iso2, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil)
+  select(country_long, iso2, project, wikidata_id, page_id, page_title, date, pct_pageviews, pageviews, pageviews_ceil)
 
-# Calculate weekly pageviews
-pageviews_weekly <- pageviews |>
-  mutate(
-    date = floor_date(date, unit = "weeks"),
-    year = year(date),
-    month = month(date)
-  ) |>
+# Weekly pageviews
+pageviews_weekly <- pageviews_df |>  
+  # Expand to include missing dates
+  complete(page_title, date = seq.Date(min(pageviews_df$date), to = max(pageviews_df$date), by = 1)) |>
+  group_by(page_title) |> 
+  # Fill in missing info
+  fill(country_long, iso2, project, wikidata_id, page_id, .direction = "updown") |> 
+  ungroup() |>
+  # Calculate weekly pageviews
+  mutate(date = floor_date(date, unit = "weeks"), year = year(date), month = month(date)) |>
   reframe(
-    .by = c(country_long, iso2, project, wikidata_id, page_title, page_id, year, month, date),
+    .by = c(country_long, iso2, project, wikidata_id, page_id, page_title, year, month, date),
     pageviews = sum(pageviews, na.rm = TRUE)
   ) |>
+  # Normalize by dividing by total monthly country project views 
   left_join(pageviews_total, by = join_by(iso2, project, year, month), relationship = "many-to-one") |> 
-  mutate(pct_pageviews = pageviews / pageviews_ceil) |> # normalize by dividing by monthly totals 
+  mutate(pct_pageviews = pageviews / pageviews_ceil) |> 
   select(country_long, iso2, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil)
 
 
