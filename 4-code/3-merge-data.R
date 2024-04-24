@@ -7,19 +7,12 @@
 # Setup ========================================================================
 # Load packages
 pacman::p_load(dplyr, here, readr, tidyr)
-# Load Wikipedia pageview data
+
+# Load data 
 pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
-
-# Load mpox case data 
 cases_daily <- read_csv("3-data/mpox-cases/mpox-cases-daily.csv")
-
-# Load mpox news coverage data 
 news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"))
-
-# Load mpox studies data
 studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))
-
-# Load ISO code reference table
 load(here("3-data/ref/iso_codes.RData"))
 
 # Prepare data =================================================================
@@ -30,7 +23,6 @@ mpox_df <- full_join(
   by = join_by(country == country_name, iso2, iso3, date)
   ) |>
   select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, cases, pct_pageviews, pageviews, pageviews_ceil) |> 
-  #filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
   complete(fill = list(cases = 0))  |> # fill in missing cases with zeros
   arrange(country, date, page_title)
 
