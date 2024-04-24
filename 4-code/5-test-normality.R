@@ -62,6 +62,7 @@ pageviews_results |>
 
 ## Normality Testing for Mpox Cases --------------------------------------------
 cases_results <- mpox_df |> 
+  distinct(country, date, cases) |> 
   group_by(country) |> 
   filter(sum(cases) > 30, cases > 0) |> 
   ungroup() |> 
