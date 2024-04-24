@@ -5,6 +5,8 @@
 
 
 # Setup ========================================================================
+# Load packages
+pacman::p_load(dplyr, here, readr, tidyr)
 # Load Wikipedia pageview data
 pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")
 
@@ -27,7 +29,7 @@ mpox_df <- full_join(
   left_join(pageviews_daily, iso_ref, by = join_by(iso2)), 
   by = join_by(country == country_name, iso2, iso3, date)
   ) |>
-  select(country, iso2, iso3, project, wikidata_id, page_title, page_id, date, cases, pct_pageviews, pageviews, pageviews_ceil) |> 
+  select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, cases, pct_pageviews, pageviews, pageviews_ceil) |> 
   #filter(if_all(c(project:page_id, pct_pageviews:pageviews_ceil), ~ !is.na(.))) |> # drop missing observations
   complete(fill = list(cases = 0))  |> # fill in missing cases with zeros
   arrange(country, date, page_title)
@@ -58,15 +60,17 @@ mpox_agg <- mpox_df |>
   reframe(
     .by = c(country, iso2, iso3, project, date, cases, n_articles, n_studies),
     pageviews = sum(pageviews, na.rm = TRUE),
+    pageviews = ifelse(pageviews == 0, NA_integer_, pageviews),
     pageviews_ceil,
     pct_pageviews = sum(pageviews, na.rm = TRUE) / pageviews_ceil,
     page_title = "Mpox", 
     page_id = 242702, # "Mpox" page ID
     wikidata_id = "Q382370" # "Mpox" Wikidata ID 
   ) |>
+  #filter(pageviews != 0) |> 
   distinct() |> # remove duplicates
   arrange(date) |> 
-  select(country, iso2, iso3, project, wikidata_id, page_title, page_id, date, cases, pct_pageviews, pageviews, pageviews_ceil, n_articles, n_studies )
+  select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, cases, pct_pageviews, pageviews, pageviews_ceil, n_articles, n_studies )
 
 # Append aggregate mpox-specific figures with data
 mpox_df <- mpox_df |> 
