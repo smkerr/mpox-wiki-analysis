@@ -25,18 +25,13 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 # Prepare data =================================================================
 # TODO: Consider shortening study period to May 2022 - ?
-# TODO: Consider sharing this data preparation step across analysis scripts
 attention_df <- mpox_df |>
   filter(page_title == "Mpox") |> 
-  complete(
-    date = seq.Date(from = min(mpox_df$date), to = max(mpox_df$date), by = 1), # complete missing dates
-    fill = list(cases = 0) # missing case values are treated as zeros
-    ) |> 
-  # complete missing values for other variables
-  fill(country, iso2, iso3, project, wikidata_id, page_title, page_id, .direction = "updown") |> 
   mutate(
-    time = row_number(), # segmented wants date formatted as numeric value
-    roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6, .complete = FALSE) # calculate 7-day rolling avg
+    # {segmented} package requires numeric dates
+    time = row_number(), 
+    # Calculate 7-day rolling avg
+    roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6, .complete = FALSE) 
     ) |> 
   select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, time, roll_pct_pageviews)
 
