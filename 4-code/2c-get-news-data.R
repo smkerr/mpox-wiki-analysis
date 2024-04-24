@@ -104,10 +104,11 @@ if (file.exists(here("3-data/mpox-news/mpox-article-headlines.csv"))) {
   }
   
   # Time period where "monkeypox" and "mpox" were both in use (test data)
+  # TODO: Combine this section with the section below
   
   # Key parameters
-  start_date <- as_date("2024-02-16") ### I ALREADY CHECKED THE DATES!!!
-  end_date <- as_date("2024-02-27") ### THESE ARE THE ONES YOU NEED TO DOWNLOAD NEXT
+  start_date <- as_date("2023-03-16") ### I ALREADY CHECKED THE DATES!!!
+  end_date <- as_date("2023-05-04") ### THESE ARE THE ONES YOU NEED TO DOWNLOAD NEXT
   date_sequence <- seq.Date(start_date, end_date, by = 1)
   
   for (search_query in search_terms) {
