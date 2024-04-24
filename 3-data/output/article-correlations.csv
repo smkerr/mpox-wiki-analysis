@@ -4,8 +4,8 @@ United States,US,USA,Wart,181,0.5099650053276015,spearman
 United States,US,USA,ACAM2000,181,0.5,spearman
 United States,US,USA,Shingles,177,0.40849956703149803,spearman
 United States,US,USA,Encephalitis,181,0.3932556400293039,spearman
+United States,US,USA,Mpox,181,0.31622485396439637,spearman
 United States,US,USA,Orthopoxvirus,176,0.31528593917757397,spearman
-United States,US,USA,Mpox,125,0.2905466127465764,spearman
 United States,US,USA,Herpes simplex,181,0.1843832918121777,spearman
 United States,US,USA,Fever,174,-0.14752976735939485,spearman
 United States,US,USA,Sore throat,129,-0.23148148148148145,spearman

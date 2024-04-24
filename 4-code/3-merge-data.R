@@ -82,5 +82,6 @@ mpox_df <- mpox_df |>
 # Implement inclusion criteria =================================================
 mpox_df <- mpox_df |> filter(iso3 == "USA", project == "en.wikipedia")
 
+
 # Save data ====================================================================
 write_csv(mpox_df, here("3-data/output/mpox-data.csv"))
