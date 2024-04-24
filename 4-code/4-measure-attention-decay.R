@@ -5,38 +5,58 @@
 
 
 # Setup ========================================================================
+# Load packages
+pacman::p_load(
+  MASS,
+  dplyr,
+  ggplot2,
+  here,
+  pracma,
+  readr,
+  scales,
+  segmented,
+  slider,
+  tidyr
+)
+
+# Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) 
 
 
 # Prepare data =================================================================
+# TODO: Consider shortening study period to May 2022 - ?
+# TODO: Consider sharing this data preparation step across analysis scripts
 attention_df <- mpox_df |>
   filter(page_title == "Mpox") |> 
-  complete(date = seq.Date(from = min(mpox_df$date), to = max(mpox_df$date), by = 1)) |> # complete missing dates
-  complete(fill = list(cases = 0)) |> 
+  complete(
+    date = seq.Date(from = min(mpox_df$date), to = max(mpox_df$date), by = 1), # complete missing dates
+    fill = list(cases = 0) # missing case values are treated as zeros
+    ) |> 
+  # complete missing values for other variables
   fill(country, iso2, iso3, project, wikidata_id, page_title, page_id, .direction = "updown") |> 
   mutate(
-    time = row_number(), # date as numeric variable
-    ma_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6, .complete = FALSE) # rolling avg of % pageviews
+    time = row_number(), # segmented wants date formatted as numeric value
+    roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6, .complete = FALSE) # calculate 7-day rolling avg
     ) |> 
-  select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, time, cases, pct_pageviews, ma_pct_pageviews)
-
-# Viz check
-ggplot(attention_df) + 
-  geom_line(aes(time, ma_pct_pageviews), color = muted("blue"), alpha = 0.9) + 
-  geom_vline(xintercept = 142, color = "red", linetype = "dashed") +
-  geom_vline(xintercept = 215, color = "red", linetype = "dashed") +
-  scale_y_continuous(labels = label_percent()) +
-  theme_minimal()
+  select(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, time, roll_pct_pageviews)
 
 
 # Peak pageviews ===============================================================
 peak_dates <- attention_df |> 
-  mutate(ma_pct_pageviews = ifelse(is.na(ma_pct_pageviews), 0, ma_pct_pageviews)) |> # NAs to zeros
-  pull(ma_pct_pageviews) |> 
+  mutate(roll_pct_pageviews = ifelse(is.na(roll_pct_pageviews), 0, roll_pct_pageviews)) |> # NAs to zeros
+  pull(roll_pct_pageviews) |> 
   findpeaks(nups = 2, ndowns = 2, npeaks = 2, minpeakdistance = 7) |> 
   as.data.frame() |> 
   select(value = V1, time = V2, peak_start = V3, peak_end = V4) |> 
   arrange(time)
+
+# Viz check
+ggplot(attention_df) + 
+  geom_line(aes(time, roll_pct_pageviews), alpha = 0.9) + 
+  geom_vline(xintercept = peak_dates$time[1], color = "red", linetype = "dashed") + # first peak
+  geom_vline(xintercept = peak_dates$time[2], color = "red", linetype = "dashed") + # second peak
+  scale_y_continuous(labels = label_percent()) +
+  theme_minimal()
 
 
 # First peak ===================================================================
@@ -45,23 +65,23 @@ peak_df1 <- attention_df |>
   mutate(days_since_peak = row_number())
 
 # Viz check
-ggplot(peak_df1, aes(days_since_peak, ma_pct_pageviews)) +
+ggplot(peak_df1, aes(x = days_since_peak, y = roll_pct_pageviews)) +
   geom_point() +
   scale_y_continuous(labels = label_percent()) +
   theme_minimal()
 
-# Viz check
-ggplot(peak_df1, aes(ma_pct_pageviews)) +
-  geom_histogram() +
+# Viz check 
+ggplot(peak_df1, aes(x = roll_pct_pageviews)) +
+  geom_histogram(bins = 10) +
   theme_minimal()
 
 # Viz check
-ggplot(peak_df1, aes(log(ma_pct_pageviews))) +
-  geom_histogram() +
+ggplot(peak_df1, aes(log(roll_pct_pageviews))) +
+  geom_histogram(bins = 10) +
   theme_minimal()
 
 # Fit a linear model
-lm_model1 <- lm(log(ma_pct_pageviews) ~ days_since_peak, data = peak_df1) 
+lm_model1 <- lm(log(roll_pct_pageviews) ~ days_since_peak, data = peak_df1) 
 
 # Apply segmented regression
 seg_model1 <- segmented(
@@ -77,7 +97,7 @@ summary(seg_model1)
 peak_df1 |> 
   mutate(predicted = predict(seg_model1, newdata = data.frame(days_since_peak = days_since_peak))) |> 
   ggplot(aes(x = days_since_peak)) +
-  geom_point(aes(y = log(ma_pct_pageviews)), color = "blue", size = 2) +
+  geom_point(aes(y = log(roll_pct_pageviews)), color = "blue", size = 2) +
   geom_line(aes(y = predicted), color = "red") +
   labs(title = "Segmented Model Fit",
        x = "Days Since Peak",
@@ -109,13 +129,25 @@ peak_df2 <- attention_df |>
   filter(days_since_peak <= 50) # only include first 50 days
 
 # Viz check
-ggplot(peak_df2, aes(days_since_peak, ma_pct_pageviews)) +
+ggplot(peak_df2, aes(days_since_peak, roll_pct_pageviews)) +
   geom_point() +
   scale_y_continuous(labels = label_percent()) +
   theme_minimal()
 
+# Viz check 
+# Skewed distribution
+ggplot(peak_df2, aes(roll_pct_pageviews)) +
+  geom_histogram(bins = 10) +
+  theme_minimal()
+
+# Viz check
+# Logging results in more normal distribution
+ggplot(peak_df2, aes(log(roll_pct_pageviews))) +
+  geom_histogram(bins = 10) +
+  theme_minimal()
+
 # Fit a linear model
-lm_model2 <- lm(log(ma_pct_pageviews) ~ days_since_peak, data = peak_df2) 
+lm_model2 <- lm(log(roll_pct_pageviews) ~ days_since_peak, data = peak_df2) 
 
 # Apply segmented regression
 seg_model2 <- segmented(
@@ -131,7 +163,7 @@ summary(seg_model2)
 peak_df2 |> 
   mutate(predicted = predict(seg_model2, newdata = data.frame(days_since_peak = days_since_peak))) |> 
   ggplot(aes(x = days_since_peak)) +
-  geom_point(aes(y = log(ma_pct_pageviews)), color = "blue", size = 2) + 
+  geom_point(aes(y = log(roll_pct_pageviews)), color = "blue", size = 2) + 
   geom_line(aes(y = predicted), color = "red") +
   labs(title = "Segmented Model Fit",
        x = "Days Since Peak",
