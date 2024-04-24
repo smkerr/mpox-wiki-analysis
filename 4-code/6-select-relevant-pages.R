@@ -5,6 +5,8 @@
 
 
 # Setup ========================================================================
+# Load packages 
+pacman::p_load(dplyr, here, readr, purrr)
 # load mpox cases & pageviews 
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
@@ -16,9 +18,10 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 
 # Calculate Spearman correlation between cases and pageviews ===================
-article_correlations_spearman <- mpox_df |>
+article_correlations <- mpox_df |>
+  filter(date >= as_date("2022-05-10") & date <= as_date("2022-05-10") + days(180)) |> 
   group_by(country, iso2, iso3, wikidata_id, page_id, page_title) |>
-  filter(sum(pct_pageviews > 0) > 1) |> # remove articles estimated to have zero pageviews
+  filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles estimated to have zero pageviews
   ungroup() |>
   group_by(country, iso2, iso3) |>
   nest() |>
@@ -39,7 +42,7 @@ article_correlations_spearman <- mpox_df |>
   ungroup()
 
 # Save results
-write_csv(article_correlations_spearman, here("3-data/output/article-correlations-spearman.csv"))
+write_csv(article_correlations, here("3-data/output/article-correlations.csv"))
 
 
 # Implement inclusion criteria =================================================
@@ -48,13 +51,11 @@ write_csv(article_correlations_spearman, here("3-data/output/article-correlation
 #> (Pearson or Spearman) and at least 30 observations
 
 # Filter for positive correlation
-included_articles <- article_correlations_spearman) |> 
-  filter(n >= 30) |> 
-  group_by(method) |> 
-  filter(correlation > 0) |> 
-  ungroup() |> 
-  count(page_title) |> 
-  filter(n == 2) |> 
+included_articles <- article_correlations |> 
+  filter(
+    n >= 30,
+    correlation > 0
+    ) |> 
   pull(page_title)
 
 
