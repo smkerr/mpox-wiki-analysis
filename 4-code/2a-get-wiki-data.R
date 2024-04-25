@@ -256,3 +256,4 @@ pageviews_weekly <- pageviews_df |>
 # Save data ====================================================================
 write_csv(pageviews_daily, here("3-data/wikipedia/pageviews-daily.csv"))
 write_csv(pageviews_weekly, here("3-data/wikipedia/pageviews-weekly.csv"))
+write_csv(pageviews_total, here("3-data/wikipedia/project-views-monthly.csv"))
