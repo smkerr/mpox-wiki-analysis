@@ -39,6 +39,8 @@ figure-caption: true
 
 \[To be added last\]
 
+$cases_t = \beta_0 + \beta_1 \times pageviews_t + \epsilon_t$
+
 # Introduction (6) (700 words)
 
 ## Background and Context
