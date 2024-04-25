@@ -5,6 +5,21 @@
 # ==============================================================================
 
 
+# Setup ========================================================================
+# Load packages
+pacman::p_load(
+  MASS,
+  dplyr, 
+  here, 
+  purrr,
+  readxl,
+  stringr,
+  tibble,
+  WikipediR,
+  writexl
+)
+
+
 # Identify pages linked in "Mpox", "Monkeypox", "Monkeypox virus" pages ========
 # write function to extract titles of linked pages 
 get_linked_pages <- function(page_title) {
@@ -56,7 +71,5 @@ mpox_relevant_pages_manual <- c(
 # Combine relevant page names ==================================================
 mpox_pages_extended <- c(mpox_pages, mpox_relevant_pages, mpox_relevant_pages_manual) |> unique()
 
-# save keywords
+# Save keywords
 save(mpox_pages_extended, file = here("3-data/output/mpox-pages-extended.RData"))
-
-# TODO: To be saved as an .txt file or excel file to make it easier to review? 
