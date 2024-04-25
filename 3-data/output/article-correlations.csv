@@ -1,18 +1,18 @@
 country,iso2,iso3,page_title,n,correlation,method
-United States,US,USA,Smallpox,164,0.7177341374902743,spearman
-United States,US,USA,Wart,181,0.5099650053276015,spearman
-United States,US,USA,ACAM2000,181,0.5,spearman
-United States,US,USA,Shingles,177,0.40849956703149803,spearman
-United States,US,USA,Encephalitis,181,0.3932556400293039,spearman
-United States,US,USA,Mpox,181,0.31622485396439637,spearman
-United States,US,USA,Orthopoxvirus,176,0.31528593917757397,spearman
-United States,US,USA,Herpes simplex,181,0.1843832918121777,spearman
-United States,US,USA,Fever,174,-0.14752976735939485,spearman
+United States,US,USA,Smallpox,247,0.6199735852343095,spearman
+United States,US,USA,Shingles,264,0.5808735416055824,spearman
+United States,US,USA,Wart,267,0.5678388034727947,spearman
+United States,US,USA,ACAM2000,272,0.5,spearman
+United States,US,USA,Mpox,272,0.44541257528337935,spearman
+United States,US,USA,Orthopoxvirus,267,0.31528593917757397,spearman
+United States,US,USA,Herpes simplex,272,0.25857812029069877,spearman
+United States,US,USA,Encephalitis,271,0.2396622982158523,spearman
+United States,US,USA,Fever,238,0.007419945739328884,spearman
+United States,US,USA,Herpes simplex virus,272,-0.22739775844109725,spearman
 United States,US,USA,Sore throat,129,-0.23148148148148145,spearman
-United States,US,USA,Herpes simplex virus,181,-0.38753596720739436,spearman
+United States,US,USA,Fatigue,168,-0.3100318272768329,spearman
 United States,US,USA,Herpes zoster,155,-0.419007341519562,spearman
-United States,US,USA,Fatigue,106,-0.46428571428571414,spearman
-United States,US,USA,Herpes,181,-0.5,spearman
-United States,US,USA,Poxviridae,181,-0.6,spearman
+United States,US,USA,Herpes,272,-0.5,spearman
+United States,US,USA,Poxviridae,272,-0.6,spearman
 United States,US,USA,Tecovirimat,109,-0.6420513769918539,spearman
 United States,US,USA,Headache,103,-1,spearman

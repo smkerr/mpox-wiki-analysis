@@ -6,9 +6,11 @@
 
 # Setup ========================================================================
 # Load packages 
-pacman::p_load(dplyr, here, readr, purrr)
-# load mpox cases & pageviews 
-mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
+pacman::p_load(dplyr, here, readr, purrr, tibble)
+
+# Load data
+mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
+  filter(date >= as_date("2022-05-10") & date <= as_date("2023-02-05"))
 
 # The purpose of this section is to determine which articles that we've flagged 
 # as potentially relevant are in fact correlated with cases 
@@ -19,9 +21,8 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 # Calculate Spearman correlation between cases and pageviews ===================
 article_correlations <- mpox_df |>
-  filter(date >= as_date("2022-05-10") & date <= as_date("2022-05-10") + days(180)) |> 
   group_by(country, iso2, iso3, wikidata_id, page_id, page_title) |>
-  filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles estimated to have zero pageviews
+  filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles with zero pageviews
   ungroup() |>
   group_by(country, iso2, iso3) |>
   nest() |>
@@ -30,7 +31,7 @@ article_correlations <- mpox_df |>
                               summarize(
                                 n = n(),
                                 correlation = cor(pct_pageviews,
-                                                  cases, # TODO: logged cases instead???
+                                                  cases, 
                                                   use = "complete.obs",
                                                   method = "spearman"),
                                 method = "spearman",
@@ -46,19 +47,15 @@ write_csv(article_correlations, here("3-data/output/article-correlations.csv"))
 
 
 # Implement inclusion criteria =================================================
-#> In order to mininze the amount of spurious correlation, we'll identify results 
-#> that are shown to have some level of positive correlation using either method 
-#> (Pearson or Spearman) and at least 30 observations
+#> In order to minimize the amount of spurious correlation, we take articles 
+#> where the absolute value of correlation is > 0.5 with at least 100 observations
 
 # Filter for positive correlation
 included_articles <- article_correlations |> 
-  filter(
-    n >= 30,
-    correlation > 0
-    ) |> 
+  mutate(correlation = abs(correlation)) |> 
+  filter(n >= 100, correlation > 0.5) |> 
   pull(page_title)
 
 
 # Save results =================================================================
 save(included_articles, file = here("3-data/output/mpox-pages-included.RData"))
-# TODO: Save as excel or .txt file to make it easier for reviewer?
