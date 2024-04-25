@@ -1,47 +1,60 @@
 # ==============================================================================
 # Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
-# Steve Kerr
+# Athor: Steve Kerr
+# Date: April 2024
 # ==============================================================================
 
 
 # Setup ========================================================================
-# Load data 
-mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
+# Load packages 
+pacman::p_load(MASS, broom, dplyr, ggplot2, here, lubridate, stringr, tibble, tseries, purrr, readr, scales, slider, tidyr, vars)
 
+# Load data 
+mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
+  filter(date >= as_date("2022-05-10") & date <= as_date("2022-05-10") + days(180)) ### 
 
 # Prepare data =================================================================
-mpox_ts <- mpox_df |> 
-  filter(page_title == "Mpox") |> 
-  complete(date = seq.Date(from = min(as_date("2022-05-10")), to = max(mpox_df$date), by = 1)) |> # fill in missing dates
-  filter(date >= as_date("2022-05-10")) |> 
-  filter(date <= as_date("2022-05-10") + days(180)) |> 
-  complete(fill = list(cases = 0, pageviews = 450, n_articles = 0, n_studies = 0)) |> # impute NAs (set missing pageviews equal to threshold)
-  fill(country, iso2, iso3, project, wikidata_id, page_id, page_title, pageviews_ceil, .direction = "downup") |> 
-  # calculate rolling averages to smooth values
-  mutate(
-    pct_pageviews = pageviews / pageviews_ceil,
-    roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6), 
-    roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 6),
-    roll_n_articles = slide_dbl(n_articles, .f = ~mean(.x, na.rm = TRUE), .before = 6),
-    roll_n_studies = slide_dbl(n_studies, .f = ~mean(.x, na.rm = TRUE), .before = 6)
-  ) |> 
-  select(-cases, -n_articles, -n_studies, -pageviews, -pageviews_ceil, -pct_pageviews)
+mpox_df <- left_join(
+  # calculate 7-day rolling averages for pageviews 
+  mpox_df |> 
+    filter(page_title == "Mpox") |> 
+    group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
+    mutate(
+      pageviews = ifelse(is.na(pageviews), 450, pageviews), ###
+      pct_pageviews = pageviews / pageviews_ceil,
+      roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6)
+    ) |> 
+    ungroup() |> 
+    mutate(across(everything(), ~replace(., is.nan(.), NA))) |> 
+    select(-cases:-n_studies),
+  # calculate 7-day rolling averages for cases, news articles, & scientific studies
+  mpox_df |> 
+    distinct(date, cases, n_articles, n_studies) |> 
+    mutate(
+      roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 6),
+      #roll_n_articles = slide_dbl(n_articles, .f = ~mean(.x, na.rm = TRUE), .before = 6),
+      #roll_n_studies = slide_dbl(n_studies, .f = ~mean(.x, na.rm = TRUE), .before = 6)
+    ) |> 
+    select(date, starts_with("roll")),
+  by = join_by(date)
+)
 
 # Viz check
-mpox_ts |> 
-  pivot_longer(cols = starts_with("ma"), names_to = "var", values_to = "value") |> 
+mpox_df |> 
+  pivot_longer(cols = starts_with("roll"), names_to = "var", values_to = "value") |> 
   ggplot(aes(x = date, y = value, color = var)) +
   geom_line() +
   facet_wrap(~var, ncol = 1, scales = "free_y") +
   scale_x_date(date_labels = "%b\n%Y") +
   labs(title = "Time Series Plot", x = NULL, y = "Value") +
-  theme_minimal()
+  theme_minimal() + 
+  theme(legend.position = "none")
 
 # Test for stationarity ========================================================
 #> Implement ADF test to check for stationarity in all included variables.
 #> Non-stationary data can lead to spurious results in subsequent analyses.
-adf_results1 <- mpox_ts |> 
-  select(starts_with("ma")) |> 
+adf_results1 <- mpox_df |> 
+  select(starts_with("roll")) |> 
   map(adf.test, alternative = "stationary")
 adf_results1 <- adf_results1[1:2] |> 
   map_dfr(tidy) |> 
@@ -49,21 +62,22 @@ adf_results1 <- adf_results1[1:2] |>
   relocate(var, .before = everything())
 non_stationary1 <- adf_results1 |> 
   filter(p.value > 0.05)
+print(non_stationary1)
 
 # First-order differencing to achieve stationarity
 if (nrow(non_stationary1) > 0) {
   # drop first observation
-  mpox_ts1 <- mpox_ts[-1, ]
+  mpox_df1 <- mpox_df[-1, ]
   
   # apply first-order differencing to non-stationary vars
   for (var in non_stationary1$var) {
-    mpox_ts1[[var]] <- diff(mpox_ts[[var]], differences = 1)
+    mpox_df1[[var]] <- diff(mpox_df[[var]], differences = 1)
   }
 }
 
 # Viz check
-mpox_ts1 |> 
-  pivot_longer(cols = starts_with("ma"), names_to = "var", values_to = "value") |> 
+mpox_df1 |> 
+  pivot_longer(cols = starts_with("roll"), names_to = "var", values_to = "value") |> 
   ggplot(aes(x = date, y = value, color = var)) +
   geom_line() +
   facet_wrap(~var, ncol = 1, scales = "free_y") +
@@ -72,8 +86,8 @@ mpox_ts1 |>
   theme_minimal()
 
 # Check for stationarity 
-adf_results2 <- mpox_ts1 |> 
-  select(starts_with("ma")) |> 
+adf_results2 <- mpox_df1 |> 
+  select(starts_with("roll")) |> 
   map(adf.test, alternative = "stationary")
 adf_results2 <- adf_results2[1:2] |> 
   map_dfr(tidy) |> 
@@ -81,27 +95,68 @@ adf_results2 <- adf_results2[1:2] |>
   relocate(var, .before = everything())
 non_stationary2 <- adf_results2 |> 
   filter(p.value > 0.05)
+# The following have a p-value >0.05:
+print(non_stationary2)
+#> p-values of ADF test for all variables are <0.05, therefore we can consider
+#> each variable to be stationary
+
+# Second-order differencing to achieve stationarity
+if (nrow(non_stationary2) > 0) {
+  # drop first observation
+  mpox_df2 <- mpox_df1[-1, ]
+  
+  # apply first-order differencing to non-stationary vars
+  for (var in non_stationary2$var) {
+    mpox_df2[[var]] <- diff(mpox_df1[[var]], differences = 1)
+  }
+}
+
+
+# Viz check
+mpox_df2 |> 
+  pivot_longer(cols = starts_with("roll"), names_to = "var", values_to = "value") |> 
+  ggplot(aes(x = date, y = value, color = var)) +
+  geom_line() +
+  facet_wrap(~var, ncol = 1, scales = "free_y") +
+  scale_x_date(date_labels = "%b\n%Y") +
+  labs(title = "Time Series Plot", x = NULL, y = "Value") +
+  theme_minimal()
+
+
+# Check for stationarity 
+adf_results3 <- mpox_df2 |> 
+  select(starts_with("roll")) |> 
+  map(adf.test, alternative = "stationary")
+adf_results3 <- adf_results3[1:2] |> 
+  map_dfr(tidy) |> 
+  mutate(var = names(adf_results2[1:2])) |> 
+  relocate(var, .before = everything())
+non_stationary3 <- adf_results3 |> 
+  filter(p.value > 0.05)
+# The following have a p-value >0.05:
+print(non_stationary3)
 #> p-values of ADF test for all variables are <0.05, therefore we can consider
 #> each variable to be stationary
 
 
 # Determine optimal lag length =================================================
 # Determine the optimal number of lags based on information criteria (e.g., AIC)
-lag_selection <- mpox_ts1 |> 
+lag_selection <- mpox_df1 |> 
   as.data.frame() |> 
-  select(starts_with("ma")) |> 
+  select(starts_with("roll")) |> 
   VARselect(lag.max = 20, type = "none") # TODO: WHY IS THE OPTIMAL NUMBER OF LAGS ALWAYS THE HIGHEST OPTION?
 optimal_lag <- lag_selection$selection["AIC(n)"]
 
 
 # Convert to a time-series object ==============================================
-ts_df <- mpox_ts1 |> 
-  select(starts_with("ma")) |> 
+mpox_ts <- mpox_df2 |> 
+  #select(roll_pct_pageviews, roll_cases) |> 
+  select(starts_with("roll")) |> 
   ts()
 
 
 # Fit VAR model ================================================================
-var_model <- VAR(ts_df, p = optimal_lag, type = "both")
+var_model <- VAR(mpox_ts, p = optimal_lag, type = "both")
 var_model
 
 # Summary of VAR model
@@ -134,8 +189,8 @@ acf(residuals(var_model)[, "roll_n_studies"], main = "ACF of Studies Residuals")
 # Ljung-Box Test
 Box.test(residuals(var_model)[, "roll_pct_pageviews"], lag = 20, type = "Ljung-Box")
 Box.test(residuals(var_model)[, "roll_cases"], lag = 20, type = "Ljung-Box")
-Box.test(residuals(var_model)[, "roll_n_articles"], lag = 20, type = "Ljung-Box")
-Box.test(residuals(var_model)[, "roll_n_studies"], lag = 20, type = "Ljung-Box")
+#Box.test(residuals(var_model)[, "roll_n_articles"], lag = 20, type = "Ljung-Box")
+#Box.test(residuals(var_model)[, "roll_n_studies"], lag = 20, type = "Ljung-Box")
 
 # Normality test on residuals
 normality_test <- normality.test(var_model)
@@ -144,7 +199,7 @@ print(normality_test)
 # Checking model robustness by slightly varying around the optimal lag
 lags_to_test <- c(optimal_lag - 1, optimal_lag, optimal_lag + 1)
 robustness_results <- lapply(lags_to_test, function(lag) {
-  model <- VAR(ts_df, p = lag, type = "both")
+  model <- VAR(mpox_ts, p = lag, type = "both")
   summary(model)
 })
 
@@ -155,6 +210,7 @@ print(robustness_results)
 # Impulse Response Analysis ====================================================
 #> An impulse response function (IRF) can help to understand how a shock to one 
 #> variable affects the others in the VAR system over time.
+n_ahead = 10
 irf_results <- irf(var_model, cumulative = FALSE, n.ahead = n_ahead, boot = TRUE, runs = 100)
 # TODO: Does it make sense to use cumulative orthogonal impulse response or nah?
 
@@ -190,7 +246,7 @@ irf_df <- irf_df |>
 ggplot(data = irf_df, aes(x = Time, y = Value, color = Series, fill = Series)) +
   geom_hline(yintercept = 0, color = muted("red"), linetype = "dashed") + 
   geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.2) +  # Confidence interval
-  geom_line(aes(color = )) +  # IRF lines
+  geom_line() +  # IRF lines
   #facet_grid(Impulse ~ Response, scales = "free_y") + 
   facet_wrap(~Series, scales = "free_y") +
   labs(title = "Impulse Response Function",
@@ -201,8 +257,6 @@ ggplot(data = irf_df, aes(x = Time, y = Value, color = Series, fill = Series)) +
        ) +
   theme_bw() +
   theme(legend.position = "none")
-
-# TODO: Consider re-scaling pct_pageviews to make viewable ....
 
 
 # Granger causality ============================================================

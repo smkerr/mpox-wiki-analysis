@@ -15,6 +15,7 @@ cases_daily <- read_csv(here("3-data/mpox-cases/cdc-mpox-cases-daily.csv")) |>
   mutate(country = "United States", iso2 = "US", iso3 = "USA", date = mdy(date)) |> 
   relocate(c(country, iso2, iso3), .before = everything())
 
+
 # Prepare data =================================================================
 # Global data 
 ## daily country-level case data
