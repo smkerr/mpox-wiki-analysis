@@ -79,7 +79,7 @@ source(here("4-code/5-test-normality.R"))
 source(here("4-code/6-select-relevant-pages.R"))
 
 # Lag analysis =================================================================
-#source(here("4-code/7-lag-analysis.R"))
+source(here("4-code/7-lag-analysis.R"))
 
 # Regression analysis ==========================================================
 #source(here("4-code/8-regression-analysis.R"))

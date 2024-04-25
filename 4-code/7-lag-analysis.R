@@ -25,7 +25,7 @@ pacman::p_load(
 
 # Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
-  filter(date >= as_date("2022-05-10") & date <= as_date("2022-05-10") + days(180)) 
+  filter(date >= as_date("2022-05-10") & date <= as_date("2022-05-10") + days(180)) ###
 load(here("3-data/output/mpox-pages-included.RData"))
 
 
