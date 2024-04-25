@@ -1,6 +1,6 @@
 # ==============================================================================
 # Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
-# Steve Kerr
+# Author: Steve Kerr
 # Date: April 2024
 # ==============================================================================
 
@@ -21,11 +21,11 @@ pacman::p_load(
 )
 
 # Load data
-mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) 
+mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
+  filter(date >= as_date("2022-05-10") & date <= as_date("2023-02-05"))
 
 
 # Prepare data =================================================================
-# TODO: Consider shortening study period to May 2022 - ?
 attention_df <- mpox_df |>
   filter(page_title == "Mpox") |> 
   mutate(
