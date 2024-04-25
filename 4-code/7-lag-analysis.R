@@ -25,7 +25,7 @@ pacman::p_load(
 
 # Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
-  filter(date >= as_date("2022-05-10") & date <= as_date("2022-05-10") + days(180)) ###
+  filter(date >= as_date("2022-05-10") & date <= as_date("2023-02-05")) 
 load(here("3-data/output/mpox-pages-included.RData"))
 
 
@@ -33,7 +33,8 @@ load(here("3-data/output/mpox-pages-included.RData"))
 mpox_df <- left_join(
   # calculate 7-day rolling averages for pageviews 
   mpox_df |> 
-    filter(page_title %in% included_articles) |> ###
+    #filter(page_title %in% included_articles) |> ###
+    filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles with zero pageviews
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
     mutate(
       pageviews = ifelse(is.na(pageviews), 450, pageviews), ###
@@ -54,6 +55,9 @@ mpox_df <- left_join(
     select(date, starts_with("roll")),
   by = join_by(date)
 )
+
+# Save data
+write_csv(mpox_df, here("3-data/output/processed_mpox_data.csv"))
 
 
 # Lag Correlation Function =====================================================
@@ -77,7 +81,7 @@ calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
   
   # Perform the correlation test with the shifted data
   results <- try({
-    cor.test(clean_data$shifted_cases, clean_data[[outcome_var]], method = "spearman") |>
+    cor.test(clean_data$shifted_cases, clean_data[[outcome_var]], method = "spearman") |> 
       tidy()
   }, silent = TRUE)
   
@@ -112,14 +116,16 @@ for (title in unique(mpox_df$page_title)) {
     relocate(c(page_title, lag), .before = everything())
 }
 
+# Store results
+write_csv(lag_results, here(glue("3-data/output/lag-analysis-results.csv")))
+
 
 # Evaluate Results =============================================================
 ## Visualize coefficient estimates ---------------------------------------------
 # Order articles by average lag value of max coefficient
 order_by_coefficients <- lag_results |> 
-  group_by(page_title) |> 
-  slice_max(estimate) |> 
-  arrange(-lag) |> 
+  reframe(.by = page_title, avg_estimate = mean(estimate, na.rm = TRUE)) |> 
+  arrange(avg_estimate) |> 
   pull(page_title)
 
 # Plot heatmap of Spearman coefficients
@@ -137,12 +143,16 @@ lag_results |>
   ) +
   theme_minimal()
 
+# Save image
+ggsave(filename = here("5-visualization/spearman-correlation-heatmap.png"), width = 10, height = 8, dpi = 300)
+
+
 # Plot barplot of Spearman coefficients
 lag_results |> 
   mutate(page_title = factor(page_title, levels = order_by_coefficients)) |> 
   ggplot(aes(x = lag, y = estimate, fill = estimate)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~page_title, ncol = 1) +
+  facet_wrap(~page_title, ncol = 4) +
   scale_fill_gradient2(
     low = "#91bfdb",
     mid = "#ffffbf", 
@@ -158,6 +168,9 @@ lag_results |>
       y = "Correlation coefficient [r]"
     )
 
+# Save image
+ggsave(filename = here("5-visualization/spearman-correlation-barplot.png"), width = 10, height = 8, dpi = 300)
+
 
 ## Visualize p-values ----------------------------------------------------------
 # Order articles by lag value of min p-value
@@ -169,30 +182,38 @@ order_by_p.values <- lag_results |>
 
 # Plot heatmap of p-values
 lag_results |> 
-  mutate(page_title = factor(page_title, levels = order_by_p.values)) |> 
-  ggplot(aes(x = lag, y = page_title, fill = p.value)) +
+  mutate(
+    signif = case_when(
+      p.value < 0.001 ~ "***", 
+      p.value < 0.01 ~ "**",
+      p.value < 0.05 ~ "*",
+      TRUE ~ "Not signif."),
+    signif = factor(signif, levels = c("Not signif.", "*", "**", "***")),
+    page_title = factor(page_title, levels = order_by_p.values)
+    ) |> 
+  ggplot(aes(x = lag, y = page_title, fill = signif)) +
   geom_tile(color = "white") +
-  scale_fill_gradient2(
-    limits = c(0, 1),
-    midpoint = 0.5,
-    low = "#fc8d59",
-    mid = "#ffffbf",
-    high = "#91bfdb"
+  scale_fill_brewer(
+    type = "seq",
+    palette = 4 
   ) +
   scale_x_continuous(n.breaks = 15) +
   labs(
     title = "Significance of time lag correlation of Wikipedia page views and mpox cases",
     x = "Time lag [days]",
     y = NULL,
-    fill = "p-value"
+    fill = "Significance\nlevel"
   ) +
   theme_minimal()
+
+# Save image
+ggsave(filename = here("5-visualization/spearman-pvalues-heatmap.png"), width = 10, height = 8, dpi = 300)
 
 # Plot barplots of p-values
 lag_results |> 
   ggplot(aes(x = lag, y = p.value, fill = p.value)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~page_title, ncol = 1) +
+  facet_wrap(~page_title, ncol = 4) +
   scale_fill_gradient2(
     low = "#fc8d59",
     mid = "#ffffbf", 
@@ -208,10 +229,10 @@ lag_results |>
     y = "Correlation coefficient [r]"
     )
 
+# Save image
+ggsave(filename = here("5-visualization/spearman-pvalues-barplot.png"), width = 10, height = 8, dpi = 300)
 
-# Store results
-#write_csv(model_results, here(glue("3-data/output/lag-analysis-results.csv")))
-
+# TODO: Create table
 
 # Conclusion ===================================================================
 #> Negative lags correspond with the time-lag effect of independent vars on cases

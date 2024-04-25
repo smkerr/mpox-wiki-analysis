@@ -93,5 +93,4 @@ source(here("4-code/7-lag-analysis.R"))
 # Calculations used in the paper ===============================================
 #source(here("4-code/stats.R"))
 
-
 #> All outputs can be found under `5-visualization` or `3-data/output`
