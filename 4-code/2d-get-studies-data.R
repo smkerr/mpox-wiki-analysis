@@ -1,7 +1,9 @@
 # ==============================================================================
 # Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
-# Steve Kerr
+# Author: Steve Kerr
+# Date: April 2024
 # ==============================================================================
+
 
 # Set API Key 
 NCBI_API_KEY <- Sys.getenv("NCBI_API_KEY")

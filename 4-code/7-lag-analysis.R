@@ -26,18 +26,16 @@ pacman::p_load(
 # Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
   filter(date >= as_date("2022-05-10") & date <= as_date("2023-02-05")) 
-load(here("3-data/output/mpox-pages-included.RData"))
 
 
 # Prepare data =================================================================
 mpox_df <- left_join(
   # calculate 7-day rolling averages for pageviews 
   mpox_df |> 
-    #filter(page_title %in% included_articles) |> ###
     filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles with zero pageviews
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
     mutate(
-      pageviews = ifelse(is.na(pageviews), 450, pageviews), ###
+      pageviews = ifelse(is.na(pageviews), 450, pageviews), # set missing values equal to lower bound threshold
       pct_pageviews = pageviews / pageviews_ceil,
       roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6)
     ) |> 

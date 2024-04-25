@@ -1,3 +1,10 @@
+# ==============================================================================
+# Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
+# Author: Steve Kerr
+# Date: April 2024
+# ==============================================================================
+
+
 # load pageviews data
 pageviews_df <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
 pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))

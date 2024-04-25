@@ -1,6 +1,7 @@
 # ==============================================================================
 # Assessing Public Attention Towards 2022-2023 Mpox Outbreak Using Wikipedia
-# Steve Kerr
+# Author: Steve Kerr
+# Date: April 2024
 # ==============================================================================
 
 
@@ -43,7 +44,7 @@ mpox_agg <- mpox_df |>
     .by = c(country, iso2, iso3, project, wikidata_id, page_id, page_title, date, cases),
     pageviews = sum(pageviews, na.rm = TRUE)
   ) |> 
-  complete(page_title, date = seq.Date(min(pageviews_df$date), to = max(pageviews_df$date), by = 1), fill = list(cases = 0)) |>
+  complete(page_title, date = seq.Date(min(pageviews_daily$date), to = max(pageviews_daily$date), by = 1), fill = list(cases = 0)) |>
   # Fill in missing info
   fill(country, iso2, iso3, project, wikidata_id, page_id, page_title, .direction = "updown") |> 
   # Normalize by dividing by total monthly country project views 
