@@ -290,21 +290,21 @@ summary_table <- summary_table %>%
 summary_table <- summary_table %>%
   data_color(
     columns = c(Avg_Estimate, Median_Estimate),
-    colors = scales::col_numeric(
+    fn = scales::col_numeric(
       palette = c("lightblue", "darkblue"),
       domain = NULL  # Auto-scale based on the data range of each column
     )
   ) %>%
   data_color(
     columns = c(Avg_P_Value, Min_P_Value),
-    colors = scales::col_numeric(
+    fn = scales::col_numeric(
       palette = c("lightgreen", "darkgreen"),
       domain = NULL
     )
   ) %>%
   data_color(
     columns = c(Significant_Lags),
-    colors = scales::col_numeric(
+    fn = scales::col_numeric(
       palette = c("pink", "red"),
       domain = NULL
     )

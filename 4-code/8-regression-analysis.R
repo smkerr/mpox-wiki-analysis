@@ -29,11 +29,6 @@ mpox_test <- read_csv(here("3-data/output/mpox-data.csv")) |>
   filter(date >= as_date("2023-02-06") & date <= as_date("2024-02-27")) 
 load(here("3-data/output/article-selection/mpox-pages-included.RData"))
 
-# TODO: Consider ARIMAX
-# TODO: Consider Ridge or Lass regularization
-# TODO: Expanding window validation
-
-
 
 # Prepare data =================================================================
 train_df <- left_join(
@@ -337,5 +332,5 @@ model_plots <- plot_predictions(
 
 walk(model_plots, print)
 
-# Alternatively, save each plot to a file
+# Save each plot to a file
 #walk2(model_plots, seq_along(model_plots), ~ggsave(paste0("Model_", .y, ".png"), plot = .x, width = 10, height = 6))
