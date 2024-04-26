@@ -15,6 +15,7 @@ cases_daily <- read_csv(here("3-data/mpox-cases/cdc-mpox-cases-daily.csv")) |>
   select(date = Epi_date_V3, cases = Cases, moving_avg_cases = `7-Day Average`) |> 
   mutate(country = "United States", iso2 = "US", iso3 = "USA", date = mdy(date)) |> 
   relocate(c(country, iso2, iso3), .before = everything())
+cases_totals <- read_csv(here("3-data/mpox-cases/cdc-mpox-cases-totals.csv"))
 
 
 # Prepare data =================================================================
