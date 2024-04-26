@@ -216,6 +216,8 @@ if (file.exists(here("3-data/wikipedia/project-views-monthly.csv"))) {
   # get total project views by country
   pageviews_total <- map2(combo_df$project, combo_df$date, get_pageviews_for_month) |> 
     list_rbind() 
+  
+  write_csv(pageviews_total, here("3-data/wikipedia/project-views-monthly.csv"))
 }
 
 
@@ -257,4 +259,3 @@ pageviews_weekly <- pageviews_df |>
 # Save data ====================================================================
 write_csv(pageviews_daily, here("3-data/wikipedia/pageviews-daily.csv"))
 write_csv(pageviews_weekly, here("3-data/wikipedia/pageviews-weekly.csv"))
-write_csv(pageviews_total, here("3-data/wikipedia/project-views-monthly.csv"))
