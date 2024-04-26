@@ -56,7 +56,7 @@ mpox_df <- left_join(
 )
 
 # Save data
-write_csv(mpox_df, here("3-data/output/processed_mpox_data.csv"))
+write_csv(mpox_df, here("3-data/output/lag-analysis/lag-analysis-data.csv"))
 
 
 # Lag Correlation Function =====================================================
@@ -116,7 +116,7 @@ for (title in unique(mpox_df$page_title)) {
 }
 
 # Store results
-write_csv(lag_results, here(glue("3-data/output/lag-analysis-results.csv")))
+write_csv(lag_results, here(glue("3-data/output/lag-analysis/lag-analysis-results.csv")))
 
 
 # Evaluate Results =============================================================

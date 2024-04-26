@@ -44,10 +44,10 @@ mpox_pages <- c("Mpox", "Monkeypox", "Monkeypox virus")
 mpox_linked_pages <- map(mpox_pages, get_linked_pages) |> unlist() |> unique()
 
 # save results
-write_xlsx(tibble(page_title = mpox_linked_pages), here("3-data/output/mpox-linked-pages.xlsx"))
+write_xlsx(tibble(page_title = mpox_linked_pages), here("3-data/output/article-selection/mpox-linked-pages.xlsx"))
 
 # manually classify pages as mpox-related ...
-mpox_relevant_pages <- read_excel(here("3-data/output/mpox-linked-pages-classified.xlsx")) |>
+mpox_relevant_pages <- read_excel(here("3-data/output/article-selection/mpox-linked-pages-classified.xlsx")) |>
   filter(relevant == 1) |> # limit to mpox-related pages
   arrange(page_title) |> 
   pull(page_title)
@@ -72,4 +72,4 @@ mpox_relevant_pages_manual <- c(
 mpox_pages_extended <- c(mpox_pages, mpox_relevant_pages, mpox_relevant_pages_manual) |> unique()
 
 # Save keywords
-save(mpox_pages_extended, file = here("3-data/output/mpox-pages-extended.RData"))
+save(mpox_pages_extended, file = here("3-data/output/article-selection/mpox-pages-extended.RData"))

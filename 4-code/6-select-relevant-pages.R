@@ -44,7 +44,7 @@ article_correlations <- mpox_df |>
   ungroup()
 
 # Save results
-write_csv(article_correlations, here("3-data/output/article-correlations.csv"))
+write_csv(article_correlations, here("3-data/output/article-selection/article-correlations.csv"))
 
 
 # Implement inclusion criteria =================================================
@@ -59,4 +59,4 @@ included_articles <- article_correlations |>
 
 
 # Save results =================================================================
-save(included_articles, file = here("3-data/output/mpox-pages-included.RData"))
+save(included_articles, file = here("3-data/output/article-selection/mpox-pages-included.RData"))

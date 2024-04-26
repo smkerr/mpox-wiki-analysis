@@ -5,9 +5,23 @@
 # ==============================================================================
 
 
+# Setup ========================================================================
+# Load packages 
+pacman::p_load(
+  MASS,
+  dplyr,
+  glue, 
+  here, 
+  readr,
+  rentrez,
+  xml2
+)
+
 # Set API Key 
 NCBI_API_KEY <- Sys.getenv("NCBI_API_KEY")
 
+
+# Get Data =====================================================================
 if (file.exists(here("3-data/mpox-studies/mpox-total-studies.csv"))) {
   studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))  
 } else {

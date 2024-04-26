@@ -20,7 +20,7 @@ pacman::p_load(
 )
 
 # Mpox-related articles
-load(here("3-data/output/mpox-pages-extended.RData"))
+load(here("3-data/output/article-selection/mpox-pages-extended.RData"))
 
 
 # Query page titles in other languages =========================================
