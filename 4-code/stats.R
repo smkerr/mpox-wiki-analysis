@@ -21,8 +21,23 @@ news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles.csv"))
 
 
 # Pageviews ====================================================================
+## Calculate share of language project views in the U.S. -----------------------
+plot_df <- pageviews_total |> 
+  filter(iso2 == "US") |> 
+  group_by(year, month) |> 
+  mutate(
+    pct_pageviews_ceil = pageviews_ceil / sum(pageviews_ceil),
+    total_pageviews_ceil = sum(pageviews_ceil)
+  ) |> 
+  ungroup() |> 
+  mutate(date = as_date(glue("{year}-{month}-01"))) |> 
+  select(iso2, date, project, pct_pageviews_ceil, pageviews_ceil, total_pageviews_ceil) 
 
-
+# English Wikipedia comprises ~90-95% of US Wikipedia views 
+plot_df |> 
+  filter(project == "en.wikipedia") |> 
+  pull(pct_pageviews_ceil) |> 
+  range()
 
 # Mpox cases ===================================================================
 # date range of mpox cases 
