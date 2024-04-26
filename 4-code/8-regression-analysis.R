@@ -7,25 +7,39 @@
 
 # Setup ========================================================================
 # Load packages
-pacman::p_load(MASS, broom, dplyr, ggplot2, glue, here, lubridate, purrr, readr, slider, tidyr)
+pacman::p_load(
+  MASS, 
+  broom, 
+  dplyr, 
+  ggplot2,
+  glue, 
+  gt,
+  here, 
+  lubridate, 
+  purrr, 
+  readr, 
+  slider,
+  tidyr
+  )
 
 # Load data 
-#mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 mpox_train <- read_csv(here("3-data/output/mpox-data.csv")) |> 
   filter(date >= as_date("2022-05-10") & date <= as_date("2023-02-05")) 
 mpox_test <- read_csv(here("3-data/output/mpox-data.csv")) |> 
   filter(date >= as_date("2023-02-06") & date <= as_date("2024-02-27")) 
-load(here("3-data/output/mpox-pages-included.RData"))
+load(here("3-data/output/article-selection/mpox-pages-included.RData"))
 
-# Check model fit summary for expanding window validation 
-# Opt: Apply to period outside study period
+# TODO: Consider ARIMAX
+# TODO: Consider Ridge or Lass regularization
+# TODO: Expanding window validation
+
 
 
 # Prepare data =================================================================
-mpox_df <- left_join(
+train_df <- left_join(
   # calculate 7-day rolling averages for pageviews 
   mpox_train |> 
-    filter(page_title %in% included_articles) |> 
+    filter(page_title %in% c("Mpox", included_articles)) |> 
     # Expand to include missing dates
     complete(
       page_title = included_articles,
@@ -42,7 +56,7 @@ mpox_df <- left_join(
     ungroup() |> 
     mutate(across(everything(), ~replace(., is.nan(.), NA))) |>
     select(-cases:-pageviews_ceil, -n_articles, -n_studies),
-  # calculate 7-day rolling averages for cases, news articles, & scientific studies
+  # Calculate 7-day rolling averages 
   mpox_train |> 
     distinct(date, cases, n_articles, n_studies) |> 
     mutate(
@@ -63,30 +77,32 @@ id_vars <- c("country", "iso2", "iso3", "project")
 # Prepare Data for Modeling ====================================================
 model_datasets <- list(
   # Model 1: "Mpox" pageviews
-  "mpox" = mpox_df |> 
+  "mpox" = train_df |> 
     select(all_of(id_vars), date, roll_cases, Mpox),
   # Model 2: Included articles pageviews
-  "included_articles" = mpox_df |> 
+  "included_articles" = train_df |> 
     select(all_of(id_vars), date, roll_cases, all_of(included_articles)),
   # Model 3: "Mpox" pageviews + news + academia
-  "mpox_covars" = mpox_df |> 
+  "mpox_covars" = train_df |> 
     select(all_of(id_vars), date, starts_with("roll"), Mpox),
   # Model 4: Included articles pageviews + news + academia
-  "included_articles_covars" = mpox_df |> 
+  "included_articles_covars" = train_df |> 
     select(all_of(id_vars), date, starts_with("roll"), all_of(included_articles))
 )
 
 
 # Model Specification ==========================================================
+included_articles_reformatted <- sprintf('`%s`', included_articles) # handle spaces in var names
+
 formulas <- list(
   # Model 1: "Mpox" pageviews
   mpox = as.formula("roll_cases ~ Mpox"),
   # Model 2: Included articles pageviews
-  included_articles = as.formula(glue("roll_cases ~ {paste(sprintf('`%s`', included_articles), collapse = '+')}")),
+  included_articles = as.formula(glue("roll_cases ~ {paste(included_articles_reformatted, collapse = '+')}")),
   # Model 3: "Mpox" pageviews + news + academia
   mpox_covars = as.formula("roll_cases ~ Mpox + roll_n_articles + roll_n_studies"),
   # Model 4: Included articles pageviews + news + academia
-  included_articles_covars = as.formula(glue("roll_cases ~ {paste(sprintf('`%s`', included_articles), collapse = '+')} + roll_n_articles + roll_n_studies"))
+  included_articles_covars = as.formula(glue("roll_cases ~ {paste(included_articles_reformatted, collapse = '+')} + roll_n_articles + roll_n_studies"))
 )
 
 
@@ -101,11 +117,109 @@ model_summary_table <- bind_rows(model_summaries, .id = "Model")
 
 # Combine coefficient estimates into single dataframe
 coef_summaries <- map(models, tidy)
-coef_summary_table <- bind_rows(model_summaries, .id = "Model")
+coef_summary_table <- bind_rows(coef_summaries, .id = "Model")
 
-# TODO: Save summary tables
-# write.csv(model_summary_table, "model_summaries.csv")
-# write.csv(coef_summary_table, "coef_summaries.csv")
+# Save summary data
+write.csv(model_summary_table, here("3-data/output/regression-analysis/model_summaries.csv"))
+write.csv(coef_summary_table, here("3-data/output/regression-analysis/coef_summaries.csv"))
+
+gt_table <- gt(model_summary_table) %>%
+  tab_header(
+    title = "Summary of Regression Models",
+    subtitle = "Linear regression analysis comparing different models"
+  ) %>%
+  fmt_number(
+    columns = c(r.squared, adj.r.squared, sigma, statistic, p.value, AIC, BIC),
+    decimals = 3
+  ) %>%
+  fmt_number(
+    columns = c(df, df.residual, nobs),
+    decimals = 0
+  ) %>%
+  cols_label(
+    r.squared = "R²",
+    adj.r.squared = "Adjusted R²",
+    sigma = "Sigma",
+    statistic = "F Statistic",
+    p.value = "P Value",
+    df = "DF",
+    logLik = "Log-Likelihood",
+    AIC = "AIC",
+    BIC = "BIC",
+    deviance = "Deviance",
+    df.residual = "DF Residual",
+    nobs = "N"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  ) %>%
+  tab_options(
+    heading.title.font.size = 14,
+    heading.subtitle.font.size = 12
+  ) %>%
+  gt::tab_footnote(
+    footnote = "All models were estimated using linear regression; P values indicate statistical significance.",
+    locations = cells_column_labels(columns = p.value)
+  )
+gt_table
+
+# Save the table as HTML or LaTeX
+# gtsave(gt_table, "model_summary_table.html")
+# gtsave(gt_table, "model_summary_table.tex")
+
+# Ensure you have gt installed and loaded
+if (!requireNamespace("gt", quietly = TRUE)) {
+  install.packages("gt")
+}
+
+# Assuming coef_summary_table is your dataframe
+gt_table_coef <- gt(coef_summary_table) %>%
+  tab_header(
+    title = "Coefficient Summary of Regression Models",
+    subtitle = "Summary of regression coefficients for different models"
+  ) %>%
+  fmt_number(
+    columns = c(estimate, std.error, statistic, p.value),
+    decimals = 4
+  ) %>%
+  cols_label(
+    term = "Variable",
+    estimate = "Estimate",
+    std.error = "Standard Error",
+    statistic = "T-Value",
+    p.value = "P Value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  ) %>%
+  tab_options(
+    heading.title.font.size = 14,
+    heading.subtitle.font.size = 12
+  ) %>%
+  data_color(
+    columns = c(p.value),
+    colors = scales::col_numeric(
+      palette = c("red", "orange", "green"),
+      domain = c(0.05, 0.01, 0)
+    )
+  ) %>%
+  tab_footnote(
+    footnote = "Statistically significant coefficients are highlighted; T-values represent the strength and direction of the predictors.",
+    locations = cells_column_labels(columns = p.value)
+  ) %>%
+  tab_spanner(
+    label = "Coefficient Analysis",
+    columns = c(estimate, std.error, statistic, p.value)
+  )
+
+# View the table
+print(gt_table_coef)
+
+# Save the table as HTML or LaTeX
+# gtsave(gt_table_coef, "coefficient_summary_table.html")
+# gtsave(gt_table_coef, "coefficient_summary_table.tex")
 
 
 # Model Diagnostics ============================================================
@@ -138,76 +252,18 @@ plot_model <- function(formula, data) {
       x = "Date"
       )
   
-  return(p)
+  print(p)
 }
 
 # Plot actual vs fitted cases
-plot_model(formulas$mpox, model_datasets$mpox)
-plot_model(formulas$included_articles, model_datasets$included_articles)
-plot_model(formulas$mpox_covars, model_datasets$mpox_covars)
-plot_model(formulas$included_articles_covars, model_datasets$included_articles_covars)
-
-
-# Check Residuals ==============================================================
-plot_model <- function(formula, data) {
-  # Fit the model
-  model <- lm(formula, data)
-  
-  # Augment the data with the model's fitted values and residuals
-  augmented_data <- augment(model)
-  
-  # Plotting
-  p <- ggplot(augmented_data, aes(x = date)) +
-    geom_line(aes(y = roll_cases), color = "black") +
-    geom_line(aes(y = .resid), color = "red", linetype = "longdash") +
-    theme_minimal() +
-    labs(
-      title = "Actual vs Fitted Cases",
-      y = "Cases",
-      x = "Date"
-    )
-  
-  return(p)
-}
-
-lm(formulas$mpox, model_datasets$mpox) |> augment() |> 
-  ggplot(aes(x = date)) +
-  geom_line(aes(y = .fitted), color = "black") +
-  geom_line(aes(y = .resid), color = "red", linetype = "longdash") +
-  theme_minimal() +
-  labs(
-    title = "Actual vs Fitted Cases",
-    y = "Cases",
-    x = "Date"
-  )
-
-model <- lm(formulas$mpox, model_datasets$mpox)
-plot(model, which = 1)  # Residuals vs Fitted
-
-qqnorm(resid(model))
-qqline(resid(model), col = "steelblue")
-
-plot(model, which = 3)
-
-hist(resid(model))
-
-acf(resid(model))
-
-# Residuals vs Fitted with ggplot2
-model |> 
-  augment() |> 
-  ggplot(aes(x = .fitted, y = .resid)) +
-  geom_point() +
-  geom_smooth(method = "loess", color = "red") +
-  labs(title = "Residuals vs Fitted", x = "Fitted Values", y = "Residuals")
-
+walk2(formulas, model_datasets, plot_model)
 
 # Validate Forecast ============================================================
 ## Prepare data ----------------------------------------------------------------
-mpox_test <- left_join(
+test_df <- left_join(
   # calculate 7-day rolling averages for pageviews 
   mpox_test |> 
-    filter(page_title %in% included_articles) |> 
+    filter(page_title %in% c("Mpox", included_articles)) |> 
     # Expand to include missing dates
     complete(
       page_title = included_articles,
@@ -240,7 +296,7 @@ mpox_test <- left_join(
 
 ## Make Predictions ------------------------------------------------------------
 # For all models
-predictions <- map(models, ~predict(.x, newdata = mpox_test))
+predictions <- map(models, ~predict(.x, newdata = test_df))
 
 ## Evaluate Predictions --------------------------------------------------------
 # Calculate RMSE for the first model's predictions
@@ -249,7 +305,7 @@ rmse <- function(actual, predicted) {
 }
 
 # Calculate RMSE 
-rmse_values <- map_dbl(predictions, ~rmse(mpox_test$roll_cases, .x))
+rmse_values <- map_dbl(predictions, ~rmse(test_df$roll_cases, .x))
 
 # Visualize Predictions --------------------------------------------------------
 plot_predictions <- function(predictions, actual_data, date_col, case_col, model_names = NULL) {
@@ -272,16 +328,13 @@ plot_predictions <- function(predictions, actual_data, date_col, case_col, model
   return(plots)
 }
 
-# Assuming `mpox_test` contains 'date' as 'date' and 'roll_cases' as the actual outcomes
 model_plots <- plot_predictions(
   predictions = predictions,
-  actual_data = mpox_test,
+  actual_data = test_df,
   date_col = "date",
   case_col = "roll_cases"
 )
 
-# If you have specific names for models, pass them like this:
-# model_names = c("Mpox Model", "Included Articles Model", ...)
 walk(model_plots, print)
 
 # Alternatively, save each plot to a file
