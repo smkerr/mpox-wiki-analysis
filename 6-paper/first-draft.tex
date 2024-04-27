@@ -160,7 +160,6 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence},
   pdfauthor={Steven Kerr},
   colorlinks=true,
   linkcolor={blue},
@@ -169,36 +168,76 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
-\title{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews
-for Mpox Incidence}
 \author{Steven Kerr}
-\date{16 April 2024}
+\date{27 April 2024}
 
 \begin{document}
-\maketitle
 
-\renewcommand*\contentsname{Table of contents}
-{
-\hypersetup{linkcolor=}
-\setcounter{tocdepth}{3}
+\begin{titlepage}
+    \centering
+    \includegraphics[width=0.75\textwidth]{img/hertie-school-logo.jpg}
+    \vspace*{\fill}
+    
+    \textbf{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence}
+
+    \vspace{2.5cm}
+
+    Steven Miles Kerr
+
+    \vspace{1cm}
+    
+    Master of Data Science for Public Policy, Class of 2024\\
+    
+    \vspace{0.5cm}
+
+    April 29, 2024\\
+
+    \vspace*{\fill}
+
+    Supervised by Prof. Dr. Simon Munzert
+
+\end{titlepage}
+
 \tableofcontents
-}
+\thispagestyle{empty}
+\newpage
+
+\setcounter{page}{1}
+
 \section{Abstract (7) (350 words)}\label{abstract-7-350-words}
 
 {[}To be added last{]}
 
+\(cases_t = \beta_0 + \beta_1 \times pageviews_t + \epsilon_t\)
+
 \section{Introduction (6) (700 words)}\label{introduction-6-700-words}
 
-Google Trends is a powerful online tool that allows users to analyze
-patterns and trends in search queries across various regions and
-languages (\citeproc{ref-arora2019}{Arora, McKee, and Stuckler 2019}).
-Given the fact that Google represents the most visited website globally,
-with 164 billion website visits in March of 2024 alone {[}@{]}. This
-tool provides insights into the popularity of specific keywords or
-topics over time, expressed through Relative Search Volumes (RSVs). A
-RSV of 100 marks the point at which a search term reaches its peak
-popularity, offering a comparative view of user interest in different
-subjects at different time periods.
+Google Trends serves as a robust tool for analyzing global search
+patterns, providing insights into public interest across countries. This
+tool capitalizes on the immense traffic Google receives to evaluate the
+popularity of specific keywords over time, measured by Relative Search
+Volumes (RSVs). Its ability to offer real-time data on user search
+behavior at no cost has made Google Trends a crucial resource in
+academic and practical research, including in tracking health-related
+public concerns. Google Flu Trends (GFT) is perhaps the most widely
+recognized use case, capable of producing highly accurate predictions in
+near real-time (\citeproc{ref-ginsberg2009}{Ginsberg et al. 2009}).
+Although the accuracy of its predictions were compromised by factors
+like media influence during particularly severe outbreaks, as seen
+during the 2009 H1N1 pandemic and the severe 2012-2013 flu season, it
+succeeded in inspiring others to explore these methods as well
+(\citeproc{ref-olson2013}{Olson et al. 2013};
+\citeproc{ref-butler2013}{Butler 2013}). Researchers have demonstrated
+its utility in predicting cases of diseases such as COVID-19
+(\citeproc{ref-abbas2021}{Abbas et al. 2021}); Effenberger et al.
+(\citeproc{ref-effenberger2020}{2020}); Gong et al.
+(\citeproc{ref-gong2022}{2022}){]}, malaria
+(\citeproc{ref-ocampo2013}{Ocampo, Chunara, and Brownstein 2013}),
+norovirus (\citeproc{ref-yuan2021}{Yuan et al. 2021}), and the West-Nile
+virus disease (WNVD) (\citeproc{ref-bragazzi2016}{Bragazzi et al. 2016})
+among other diseases, highlighting its potential for early outbreak
+detection and public health surveillance
+(\citeproc{ref-generous2014}{Generous et al. 2014}).
 
 \subsection{Background and Context}\label{background-and-context}
 
@@ -1308,17 +1347,67 @@ Questions}\label{synthesis-and-link-to-hypothesis-research-questions}
 
 \section{Acronyms}\label{acronyms}
 
-\section{References (8)}\label{references-8}
-
-{[}s/o Zotero{]}
+\section*{References (8)}\label{references-8}
+\addcontentsline{toc}{section}{References (8)}
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
-\bibitem[\citeproctext]{ref-arora2019}
-Arora, Vishal S., Martin McKee, and David Stuckler. 2019. {``Google
-Trends: Opportunities and limitations in health and health policy
-research.''} \emph{Health Policy (Amsterdam, Netherlands)} 123 (3):
-338--41. \url{https://doi.org/10.1016/j.healthpol.2019.01.001}.
+\bibitem[\citeproctext]{ref-abbas2021}
+Abbas, Mostafa, Thomas B. Morland, Eric S. Hall, and Yasser
+EL-Manzalawy. 2021. {``Associations Between Google Search Trends for
+Symptoms and COVID-19 Confirmed and Death Cases in the United States.''}
+\emph{International Journal of Environmental Research and Public Health}
+18 (9): 4560. \url{https://doi.org/10.3390/ijerph18094560}.
+
+\bibitem[\citeproctext]{ref-bragazzi2016}
+Bragazzi, Nicola Luigi, Susanna Bacigaluppi, Chiara Robba, Anna Siri,
+Giovanna Canepa, and Francesco Brigo. 2016. {``Infodemiological Data of
+West-Nile Virus Disease in Italy in the Study Period
+2004{\textendash}2015.''} \emph{Data in Brief} 9 (December): 839--45.
+\url{https://doi.org/10.1016/j.dib.2016.10.022}.
+
+\bibitem[\citeproctext]{ref-butler2013}
+Butler, Declan. 2013. {``When Google Got Flu Wrong.''} \emph{Nature} 494
+(7436): 155--56. \url{https://doi.org/10.1038/494155a}.
+
+\bibitem[\citeproctext]{ref-effenberger2020}
+Effenberger, Maria, Andreas Kronbichler, Jae Il Shin, Gert Mayer,
+Herbert Tilg, and Paul Perco. 2020. {``Association of the COVID-19
+pandemic with Internet Search Volumes: A Google TrendsTM Analysis.''}
+\emph{International journal of infectious diseases: IJID: official
+publication of the International Society for Infectious Diseases} 95
+(June): 192--97. \url{https://doi.org/10.1016/j.ijid.2020.04.033}.
+
+\bibitem[\citeproctext]{ref-generous2014}
+Generous, Nicholas, Geoffrey Fairchild, Alina Deshpande, Sara Y. Del
+Valle, and Reid Priedhorsky. 2014. {``Global Disease Monitoring and
+Forecasting with Wikipedia.''} \emph{PLOS Computational Biology} 10
+(11): e1003892. \url{https://doi.org/10.1371/journal.pcbi.1003892}.
+
+\bibitem[\citeproctext]{ref-ginsberg2009}
+Ginsberg, Jeremy, Matthew H. Mohebbi, Rajan S. Patel, Lynnette Brammer,
+Mark S. Smolinski, and Larry Brilliant. 2009. {``Detecting Influenza
+Epidemics Using Search Engine Query Data.''} \emph{Nature} 457 (7232):
+1012--14. \url{https://doi.org/10.1038/nature07634}.
+
+\bibitem[\citeproctext]{ref-gong2022}
+Gong, Xue, Mengchi Hou, Yangyang Han, Hailun Liang, and Rui Guo. 2022.
+{``Application of the Internet Platform in Monitoring Chinese Public
+Attention to the Outbreak of COVID-19.''} \emph{Frontiers in Public
+Health} 9 (January): 755530.
+\url{https://doi.org/10.3389/fpubh.2021.755530}.
+
+\bibitem[\citeproctext]{ref-ocampo2013}
+Ocampo, Alex J., Rumi Chunara, and John S. Brownstein. 2013. {``Using
+Search Queries for Malaria Surveillance, Thailand.''} \emph{Malaria
+Journal} 12 (1): 390. \url{https://doi.org/10.1186/1475-2875-12-390}.
+
+\bibitem[\citeproctext]{ref-olson2013}
+Olson, Donald R., Kevin J. Konty, Marc Paladini, Cecile Viboud, and Lone
+Simonsen. 2013. {``Reassessing Google Flu Trends data for detection of
+seasonal and pandemic influenza: a comparative epidemiological study at
+three geographic scales.''} \emph{PLoS computational biology} 9 (10):
+e1003256. \url{https://doi.org/10.1371/journal.pcbi.1003256}.
 
 \bibitem[\citeproctext]{ref-romanello2021}
 Romanello, Marina, Alice McGushin, Claudia Di Napoli, Paul Drummond,
@@ -1326,6 +1415,13 @@ Nick Hughes, Louis Jamart, Harry Kennard, et al. 2021. {``The 2021
 Report of the Lancet Countdown on Health and Climate Change: Code Red
 for a Healthy Future.''} \emph{The Lancet} 398 (10311): 1619--62.
 \url{https://doi.org/10.1016/S0140-6736(21)01787-6}.
+
+\bibitem[\citeproctext]{ref-yuan2021}
+Yuan, Kai, Guangrui Huang, Lepeng Wang, Ting Wang, Wenbin Liu, Haixu
+Jiang, and Albert C. Yang. 2021. {``Predicting Norovirus in the United
+States Using Google Trends: Infodemiology Study.''} \emph{Journal of
+Medical Internet Research} 23 (9): e24554.
+\url{https://doi.org/10.2196/24554}.
 
 \end{CSLReferences}
 

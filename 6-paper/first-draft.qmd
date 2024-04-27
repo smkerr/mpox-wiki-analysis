@@ -8,18 +8,20 @@ date-format: "D MMMM YYYY"
 #thanks:
 format: 
   pdf:
-    latex-engine: "xelatex" # or pdflatex, lualatex
-    documentclass: "article"
+    latex-engine: "lualatex" # or pdflatex, lualatex
+    documentclass: article
+    titlepage: false
     geometry: "margin=1in"
     fontsize: "12pt"
     highlight-style: "github"
     colorlinks: true
     keep-tex: true
+filters: [remove_title.lua]
 editor: "visual"
 bibliography: references.bib
 #csl: apa.csl # Citation Style Language file to format bibliography
-toc: true
-toc-depth: 3
+toc: false
+#toc-depth: 3
 #lof: true
 #lot: true
 number-sections: false
@@ -35,6 +37,39 @@ figure-caption: true
 # more info here: https://quarto.org/docs/reference/formats/pdf.html
 ---
 
+```{=latex}
+\begin{titlepage}
+    \centering
+    \includegraphics[width=0.75\textwidth]{img/hertie-school-logo.jpg}
+    \vspace*{\fill}
+    
+    \textbf{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence}
+
+    \vspace{2.5cm}
+
+    Steven Miles Kerr
+
+    \vspace{1cm}
+    
+    Master of Data Science for Public Policy, Class of 2024\\
+    
+    \vspace{0.5cm}
+
+    April 29, 2024\\
+
+    \vspace*{\fill}
+
+    Supervised by Prof. Dr. Simon Munzert
+
+\end{titlepage}
+```
+```{=latex}
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+\setcounter{page}{1}
+```
 # Abstract (7) (350 words)
 
 \[To be added last\]
@@ -42,6 +77,8 @@ figure-caption: true
 $cases_t = \beta_0 + \beta_1 \times pageviews_t + \epsilon_t$
 
 # Introduction (6) (700 words)
+
+Google Trends serves as a robust tool for analyzing global search patterns, providing insights into public interest across countries. This tool capitalizes on the immense traffic Google receives to evaluate the popularity of specific keywords over time, measured by Relative Search Volumes (RSVs). Its ability to offer real-time data on user search behavior at no cost has made Google Trends a crucial resource in academic and practical research, including in tracking health-related public concerns. Google Flu Trends (GFT) is perhaps the most widely recognized use case, capable of producing highly accurate predictions in near real-time [@ginsberg2009]. Although the accuracy of its predictions were compromised by factors like media influence during particularly severe outbreaks, as seen during the 2009 H1N1 pandemic and the severe 2012-2013 flu season, it succeeded in inspiring others to explore these methods as well [@olson2013; @butler2013]. Researchers have demonstrated its utility in predicting cases of diseases such as COVID-19 [@abbas2021]; @effenberger2020; @gong2022\], malaria [@ocampo2013], norovirus [@yuan2021], and the West-Nile virus disease (WNVD) [@bragazzi2016] among other diseases, highlighting its potential for early outbreak detection and public health surveillance [@generous2014].
 
 ## Background and Context
 
@@ -448,5 +485,3 @@ My proposed methodology takes inspiration from th work of [Yan et al.](https://d
 # Acronyms
 
 # References (8)
-
-\[s/o Zotero\]
