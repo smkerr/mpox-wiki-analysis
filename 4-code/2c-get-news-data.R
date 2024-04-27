@@ -112,8 +112,8 @@ if (file.exists(here("3-data/mpox-news/mpox-article-headlines.csv"))) {
   # TODO: Combine this section with the section below
   
   # Key parameters
-  start_date <- as_date("2023-06-16") ### I ALREADY CHECKED THE DATES!!!
-  end_date <- as_date("2023-08-04") ### THESE ARE THE ONES YOU NEED TO DOWNLOAD NEXT
+  start_date <- as_date("2023-08-05") ### I ALREADY CHECKED THE DATES!!!
+  end_date <- as_date("2023-09-23") ### THESE ARE THE ONES YOU NEED TO DOWNLOAD NEXT
   date_sequence <- seq.Date(start_date, end_date, by = 1)
   
   for (search_query in search_terms) {
@@ -157,6 +157,8 @@ news_deduplicated <- bind_rows(
     count(date, name = "n_articles")
   ) |> 
   arrange(date)
+
+# TODO: Add zeroes for dates without articles
 
 # save results
 write_csv(news_deduplicated, here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"))
