@@ -204,6 +204,97 @@
 
 \setcounter{page}{1}
 
+\section{Tables}\label{tables}
+
+\begin{longtable*}{lrrrr}
+\caption*{
+{\large Goodness-of-fit statistics for different multivariate regression models}
+} \\ 
+\toprule
+Fitting parameter & "Mpox" pageviews & Mpox-related pageviews & "Mpox" pageviews + media coverage + scientific interest & Mpox-related pageviews + media coverage + scientific interest \\ 
+\midrule\addlinespace[2.5pt]
+r.squared & $0.49$ & $0.73$ & $0.74$ & $0.82$ \\ 
+adj.r.squared & $0.49$ & $0.73$ & $0.74$ & $0.81$ \\ 
+AIC & $5,821$ & $5,525$ & $5,487$ & $5,336$ \\ 
+BIC & $5,834$ & $5,572$ & $5,508$ & $5,391$ \\ 
+\bottomrule
+\end{longtable*}
+
+\setlength{\LTpost}{0mm}
+\begin{longtable*}{l|cccc}
+\caption*{
+{\large Multivariate regression models estimating the impact of different predictors}
+} \\ 
+\toprule
+\multicolumn{1}{l}{} & Value & SE & T & p-value \\ 
+\midrule\addlinespace[2.5pt]
+\multicolumn{5}{l}{Mpox pageviews} \\ 
+\midrule\addlinespace[2.5pt]
+Intercept & $26.54$ & $4.06$ & $6.53$ & $0.00$ \\ 
+Mpox & $40,658,770.08$ & $1,844,431.35$ & $22.04$ & $0.00$ \\ 
+\midrule\addlinespace[2.5pt]
+\multicolumn{5}{l}{Mpox-related pageviews} \\ 
+\midrule\addlinespace[2.5pt]
+Intercept & $-59.79$ & $7.30$ & $-8.19$ & $0.00$ \\ 
+Fatigue & $-572,760,406.76$ & $222,110,653.00$ & $-2.58$ & $0.01$ \\ 
+Genital wart & $-771,226,216.61$ & $553,021,530.09$ & $-1.39$ & $0.16$ \\ 
+Herpangina & $497,728,354.70$ & $472,811,618.53$ & $1.05$ & $0.29$ \\ 
+Herpes & $2,581,246,715.99$ & $272,349,897.71$ & $9.48$ & $0.00$ \\ 
+Herpes simplex & $323,647,509.01$ & $35,672,833.72$ & $9.07$ & $0.00$ \\ 
+Mpox & $11,459,510.30$ & $2,433,602.98$ & $4.71$ & $0.00$ \\ 
+Orthopoxvirus & $443,227,156.10$ & $92,481,447.48$ & $4.79$ & $0.00$ \\ 
+Shingles & $-20,629,368.82$ & $39,087,598.98$ & $-0.53$ & $0.60$ \\ 
+Smallpox & $215,401,201.68$ & $16,652,862.32$ & $12.93$ & $0.00$ \\ 
+\midrule\addlinespace[2.5pt]
+\multicolumn{5}{l}{Mpox pageviews + media coverage + scientific interest} \\ 
+\midrule\addlinespace[2.5pt]
+Intercept & $-71.85$ & $6.50$ & $-11.05$ & $0.00$ \\ 
+Mpox & $3,183,667.13$ & $3,430,962.12$ & $0.93$ & $0.35$ \\ 
+roll\_n\_articles & $7.14$ & $0.82$ & $8.68$ & $0.00$ \\ 
+roll\_n\_studies & $15.38$ & $1.08$ & $14.18$ & $0.00$ \\ 
+\midrule\addlinespace[2.5pt]
+\multicolumn{5}{l}{Mpox-related pageviews + media coverage + scientific interest} \\ 
+\midrule\addlinespace[2.5pt]
+Intercept & $-83.59$ & $6.70$ & $-12.48$ & $0.00$ \\ 
+Fatigue & $-439,137,601.06$ & $183,628,092.40$ & $-2.39$ & $0.02$ \\ 
+Genital wart & $-800,590,695.33$ & $456,578,994.06$ & $-1.75$ & $0.08$ \\ 
+Herpangina & $614,442,805.59$ & $390,489,797.34$ & $1.57$ & $0.12$ \\ 
+Herpes & $1,045,896,980.18$ & $249,044,021.49$ & $4.20$ & $0.00$ \\ 
+Herpes simplex & $5,903,959.22$ & $36,184,827.22$ & $0.16$ & $0.87$ \\ 
+Mpox & $-1,837,335.65$ & $3,020,000.50$ & $-0.61$ & $0.54$ \\ 
+Orthopoxvirus & $137,002,151.61$ & $84,083,223.30$ & $1.63$ & $0.10$ \\ 
+Shingles & $-63,640,161.80$ & $32,494,173.24$ & $-1.96$ & $0.05$ \\ 
+Smallpox & $158,821,374.90$ & $14,398,638.56$ & $11.03$ & $0.00$ \\ 
+roll\_n\_articles & $5.56$ & $0.82$ & $6.81$ & $0.00$ \\ 
+roll\_n\_studies & $12.39$ & $1.09$ & $11.40$ & $0.00$ \\ 
+\bottomrule
+\end{longtable*}
+\begin{minipage}{\linewidth}
+Source: Your Source Here\\
+\end{minipage}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Test & Statistic & df1/df & df2 & P-value \\ 
+\midrule
+\multicolumn{5}{@{}l@{}}{\textit{Granger causality: roll\_pct\_pageviews on roll\_cases}} \\
+F-Test & 3.2148 & 35 & 332 & 2.11e-08 \\
+\addlinespace
+\multicolumn{5}{@{}l@{}}{\textit{Instant causality: roll\_pct\_pageviews and roll\_cases}} \\
+Chi-squared & 0.21393 & 1 &  & 0.6437 \\
+\addlinespace
+\multicolumn{5}{@{}l@{}}{\textit{Granger causality: roll\_cases on roll\_pct\_pageviews}} \\
+F-Test & 5.9063 & 35 & 332 & <2.2e-16 \\
+\addlinespace
+\multicolumn{5}{@{}l@{}}{\textit{Instant causality: roll\_cases and roll\_pct\_pageviews}} \\
+Chi-squared & 0.21393 & 1 &  & 0.6437 \\
+\bottomrule
+\end{tabular}
+\caption{Summary of Granger causality test results.}
+\end{table}
+
 \section{Figures}\label{figures}
 
 \begin{figure}[H]
@@ -1403,8 +1494,9 @@ Questions}\label{synthesis-and-link-to-hypothesis-research-questions}
 
 \section{Acronyms}\label{acronyms}
 
-\section*{References (8)}\label{references-8}
-\addcontentsline{toc}{section}{References (8)}
+\section{References (8)}\label{references-8}
+
+```
 
 \phantomsection\label{refs}
 \begin{CSLReferences}{1}{0}
