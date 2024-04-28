@@ -29,16 +29,10 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 # load pageviews data
 pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
 pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
-pageviews_weekly <- read_csv(here("3-data/wikipedia/pageviews-weekly.csv"))
 pageviews_total <- read_csv(here("3-data/wikipedia/project-views-monthly.csv"))
 
 # load mpox case data
-## WHO data
-cases_country_df <- read_csv(here("3-data/mpox-cases/mpox-cases-countries.csv"))
-cases_region_df <- read_csv(here("3-data/mpox-cases/mpox-cases-regions.csv"))
-## CDC data
 cases_daily <- read_csv(here("3-data/mpox-cases/mpox-cases-daily.csv"))
-cases_weekly <- read_csv(here("3-data/mpox-cases/mpox-cases-weekly.csv"))
 cases_totals <- read_csv(here("3-data/mpox-cases/cdc-mpox-cases-totals.csv"))
 
 # load media coverage data
