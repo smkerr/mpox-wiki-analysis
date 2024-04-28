@@ -50,6 +50,7 @@ normality_tests <- function(data, var) {
 hist_pageviews(mpox_df)
 qq_pageviews(mpox_df)
 
+
 ## Normality Testing for Pageviews ---------------------------------------------
 pageviews_results <- mpox_df |> 
   filter(pct_pageviews > 0) |> 
