@@ -70,28 +70,23 @@ source(here("4-code/2d-get-studies-data.R"))
 # Merge data ===================================================================
 source(here("4-code/3-merge-data.R"))
 
-# Measure attention decay ======================================================
-source(here("4-code/4-attention-decay.R"))
-
 # Test normality assumption ====================================================
-source(here("4-code/5-test-normality.R"))
-
-# Select most relevant Wikipedia articles ======================================
-source(here("4-code/6-select-relevant-pages.R"))
+source(here("4-code/4-test-normality.R"))
 
 # Lag analysis =================================================================
-source(here("4-code/7-lag-analysis.R"))
+source(here("4-code/5-lag-analysis.R"))
 
 # Regression analysis ==========================================================
-#source(here("4-code/8-regression-analysis.R"))
+#source(here("4-code/6-regression-analysis.R"))
 
 # Test for Granger causality ===================================================
-#source(here("4-code/9-granger-causality.R"))
+#source(here("4-code/7-granger-causality.R"))
 
-# Tables & Figures =============================================================
+# Figures ======================================================================
 #source(here("4-code/figures.R"))
+
+# Tables =======================================================================
+#source(here("4-code/tables.R"))
 
 # Calculations used in the paper ===============================================
 #source(here("4-code/stats.R"))
-
-#> All outputs can be found under `5-visualization` or `3-data/output`
