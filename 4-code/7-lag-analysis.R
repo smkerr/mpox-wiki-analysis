@@ -28,19 +28,20 @@ pacman::p_load(
 
 # Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 
-  filter(date >= as_date("2022-05-10") & date <= as_date("2023-02-05")) 
+  filter(date >= as_date("2022-05-10") & date <= as_date("2024-02-27")) 
 
 
 # Prepare data =================================================================
-mpox_df <- left_join(
+lag_df <- left_join(
   # calculate 7-day rolling averages for pageviews 
   mpox_df |> 
-    filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles with zero pageviews
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
+    filter(sum(pct_pageviews > 0, na.rm = TRUE) > 75) |> # remove articles with zero pageviews
+    pull(page_title) |> unique()
     mutate(
-      pageviews = ifelse(is.na(pageviews), 450, pageviews), # set missing values equal to lower bound threshold
+      #pageviews = ifelse(is.na(pageviews), 449, pageviews), # set missing values right below the minimum pageviews threshold
       pct_pageviews = pageviews / pageviews_ceil,
-      roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6)
+      roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)
     ) |> 
     ungroup() |> 
     mutate(across(everything(), ~replace(., is.nan(.), NA))) |> 
@@ -49,16 +50,16 @@ mpox_df <- left_join(
   mpox_df |> 
     distinct(date, cases, n_articles, n_studies) |> 
     mutate(
-      roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 6),
-      roll_n_articles = slide_dbl(n_articles, .f = ~mean(.x, na.rm = TRUE), .before = 6),
-      roll_n_studies = slide_dbl(n_studies, .f = ~mean(.x, na.rm = TRUE), .before = 6)
+      roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 3, .after = 3),
+      roll_n_articles = slide_dbl(n_articles, .f = ~mean(.x, na.rm = TRUE), .before = 3, .after = 3),
+      roll_n_studies = slide_dbl(n_studies, .f = ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)
     ) |> 
     select(date, starts_with("roll")),
   by = join_by(date)
 )
 
 # Save data
-write_csv(mpox_df, here("3-data/output/lag-analysis/lag-analysis-data.csv"))
+write_csv(lag_df, here("3-data/output/lag-analysis/lag-analysis-data.csv"))
 
 
 # Lag Correlation Function =====================================================
@@ -95,11 +96,11 @@ calculate_correlation_with_lag <- function(data, outcome_var, lagged_var, lag) {
 
 
 # Calculate Correlation Across Lags ============================================
-lags <- -37:37
+lags <- -35:35
 
 lag_results <- data.frame()
-for (title in unique(mpox_df$page_title)) {
-  filtered_df <- mpox_df |> filter(page_title == title)
+for (title in unique(lag_df$page_title)) {
+  filtered_df <- lag_df |> filter(page_title == title)
   results <- map(lags,
                  ~ calculate_correlation_with_lag(
                    data = filtered_df, 
@@ -119,6 +120,11 @@ for (title in unique(mpox_df$page_title)) {
 
 # Store results
 write_csv(lag_results, here(glue("3-data/output/lag-analysis/lag-analysis-results.csv")))
+
+lag_df |> 
+  count(page_title) |> 
+  filter(n <= 150)
+  filter(page_title == "DNA virus")
 
 
 # Evaluate Results =============================================================

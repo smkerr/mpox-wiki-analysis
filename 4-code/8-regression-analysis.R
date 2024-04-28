@@ -19,7 +19,8 @@ pacman::p_load(
   purrr, 
   readr, 
   slider,
-  tidyr
+  tidyr,
+  install = FALSE
   )
 
 # Load data 

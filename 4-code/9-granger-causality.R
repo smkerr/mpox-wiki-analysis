@@ -24,7 +24,8 @@ pacman::p_load(
   slider, 
   tidyr, 
   tseries, ###
-  vars
+  vars,
+  install = FALSE
   )
 
 # Load data 

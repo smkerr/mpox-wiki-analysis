@@ -7,7 +7,7 @@
 
 # Setup ========================================================================
 # Load packages
-pacman::p_load(MASS, dplyr, here, readr, tidyr)
+pacman::p_load(MASS, dplyr, here, readr, tidyr, install = FALSE)
 
 # Load data 
 pageviews_daily <- read_csv("3-data/wikipedia/pageviews-daily.csv")

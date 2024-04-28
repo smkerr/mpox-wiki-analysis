@@ -44,7 +44,8 @@ pacman::p_load(
   WikipediR,    # Wikipedia links
   writexl,      # save excel files
   xml2,         # XML
-  zoo           # rolling averages
+  zoo,          # rolling averages
+  install = FALSE
 )
 
 # Build reference tables

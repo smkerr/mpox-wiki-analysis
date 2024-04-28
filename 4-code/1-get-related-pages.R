@@ -16,7 +16,8 @@ pacman::p_load(
   stringr,
   tibble,
   WikipediR,
-  writexl
+  writexl,
+  install = FALSE
 )
 
 

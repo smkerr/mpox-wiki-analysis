@@ -14,7 +14,8 @@ pacman::p_load(
   here, 
   readr,
   rentrez,
-  xml2
+  xml2,
+  install = FALSE
 )
 
 # Set API Key 

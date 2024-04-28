@@ -7,7 +7,7 @@
 
 # Setup ========================================================================
 # Load packages 
-pacman::p_load(MASS, dplyr, here, readr, purrr, tibble)
+pacman::p_load(MASS, dplyr, here, readr, purrr, tibble, install = FALSE)
 
 # Load data
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv")) |> 

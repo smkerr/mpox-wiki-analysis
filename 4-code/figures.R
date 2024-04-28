@@ -19,7 +19,8 @@ pacman::p_load(
   scales,
   slider,
   spData,
-  tmap
+  tmap,
+  install = FALSE
 )
 
 # Load data

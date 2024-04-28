@@ -17,7 +17,8 @@ pacman::p_load(
   purrr,
   readr,
   tibble,
-  tidyr
+  tidyr,
+  install = FALSE
   )
 
 # Set API key

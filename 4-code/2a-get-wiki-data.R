@@ -17,7 +17,8 @@ pacman::p_load(
   purrr,
   readr,
   stringr,
-  tidyr
+  tidyr,
+  install = FALSE
 )
 
 # Mpox-related articles
@@ -134,9 +135,9 @@ import_pageviews_tsv <- function(file_path) {
   df <- df |>
     filter(page_title %in% str_replace_all(mpox_pages_extended, " ", "_")) |> 
     filter(
-      !(page_title == "Utah" & project != "su.wikipedia.org"), # "utah" means "vomiting" in Sundanese
-      !(page_title == "Hosta" & project != "hu.wikipedia.org"), # "hosta" means "cough" in Hungarian
-      !(page_title == "Broth" & project == "en.wikipedia.org") # "broth" means "rash" in Scots Gaelic
+      !(page_title == "Utah" & str_detect(project, "su.wikipedia")), # "utah" means "vomiting" in Sundanese
+      !(page_title == "Hosta" & str_detect(project, "hu.wikipedia")), # "hosta" means "cough" in Hungarian
+      !(page_title == "Broth" & str_detect(project, "en.wikipedia")) # "broth" means "rash" in Scots Gaelic
       ) |> 
     mutate(
       date = as_date(date_str), 

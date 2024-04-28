@@ -13,7 +13,8 @@ pacman::p_load(
   glue,
   here,
   readr,
-  stringr
+  stringr,
+  install = FALSE
 )
 
 
