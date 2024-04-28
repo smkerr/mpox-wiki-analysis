@@ -28,8 +28,8 @@ pacman::p_load(
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 # load pageviews data
-pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
-pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
+#pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
+#pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
 pageviews_total <- read_csv(here("3-data/wikipedia/project-views-monthly.csv"))
 
 # load mpox case data
@@ -41,6 +41,9 @@ news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"
 
 # load academic interest data
 studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))
+
+# Load lag analysis results
+lag_results <- read_csv(here(glue("3-data/output/lag-analysis/lag-analysis-results.csv")))
 
 # ISO ref table
 load(here("3-data/ref/iso_codes.RData"))
@@ -107,7 +110,7 @@ plot_df |>
   )
 
 # Save plot
-ggsave(here("5-visualization/pageviews-by-language.png"), 
+ggsave(here("6-figures/pageviews-by-language.png"), 
        height = 7.75, width = 12, dpi = 600)
 
 
@@ -146,7 +149,7 @@ mpox_df |>
     )
 
 # Save plot
-ggsave(here("5-visualization/pageviews-mpox-specific.png"), 
+ggsave(here("6-figures/pageviews-mpox-specific.png"), 
        height = 7.75, width = 12, dpi = 600)
 
 
@@ -198,7 +201,7 @@ mpox_df |>
     )
 
 # save plot
-ggsave(here("5-visualization/pageviews-mpox-related.png"))
+ggsave(here("6-figures/pageviews-mpox-related.png"))
 
 
 # CDC Case Data ================================================================
@@ -221,7 +224,7 @@ us_states_map <- left_join(us_states, cases_totals, by = join_by(NAME == Locatio
 us_states_map
 
 # Save map
-tmap_save(us_states_map, filename = here("5-visualization/cases-USA-map.png"),
+tmap_save(us_states_map, filename = here("6-figures/cases-USA-map.png"),
           width = 10, height = 7, dpi = 300)
 
 
@@ -264,7 +267,7 @@ cases_daily |>
   )
 
 # Save plot
-ggsave(here("5-visualization/cases.png"), height = 7.75, width = 10)
+ggsave(here("6-figures/cases.png"), height = 7.75, width = 10)
 
 
 # Combined Data ================================================================
@@ -342,7 +345,7 @@ plot_df |>
     )
 
 # save plot
-ggsave(here("5-visualization/cases-&-pageviews-rolling-avg.png"), height = 7.75, width = 10)
+ggsave(here("6-figures/cases-&-pageviews-rolling-avg.png"), height = 7.75, width = 10)
 
 
 # News Coverage Data ===========================================================
@@ -375,7 +378,7 @@ news_df |>
   )
 
 # save plot
-ggsave(here("5-visualization/mpox-news.png"), height = 7.75, width = 10)
+ggsave(here("6-figures/mpox-news.png"), height = 7.75, width = 10)
 
 
 # Scientific Studies Data ======================================================
@@ -407,4 +410,106 @@ studies_df |>
   )
 
 # save plot
-ggsave(here("5-visualization/mpox-studies.png"), height = 7.75, width = 10)
+ggsave(here("6-figures/mpox-studies.png"), height = 7.75, width = 10)
+
+
+
+# Lag Analysis =================================================================
+## Visualize coefficient estimates ---------------------------------------------
+# Order articles by average lag value of max coefficient
+order_by_coefficients <- lag_results |> 
+  reframe(.by = page_title, min_estimate = min(estimate, na.rm = TRUE)) |> 
+  arrange(min_estimate) |> 
+  pull(page_title)
+
+# Plot heatmap of Spearman coefficients
+lag_results |>
+  mutate(page_title = factor(page_title, levels = order_by_coefficients)) |> 
+  ggplot(aes(x = lag, y = page_title, fill = estimate, color = page_title)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#91bfdb", mid = "#ffffbf", high = "#fc8d59",  midpoint = 0, limits = c(-1, 1)) +
+  scale_x_continuous(n.breaks = 15) +
+  labs(
+    title = "Time lag correlation of Wikipedia pageviews and mpox cases",
+    x = "Time lag [days]",
+    y = NULL,
+    fill = "Spearman \ncorrelation \ncoefficient"
+  ) +
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
+
+
+# Save image
+ggsave(filename = here("6-figures/spearman-correlation-heatmap.png"), width = 10, height = 8, dpi = 300)
+
+
+# Plot barplot of Spearman coefficients
+lag_results |> 
+  mutate(page_title = factor(page_title, levels = order_by_coefficients)) |> 
+  ggplot(aes(x = lag, y = estimate, fill = estimate)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~page_title, ncol = 4) +
+  scale_fill_gradient2(
+    low = "#91bfdb",
+    mid = "#ffffbf", 
+    high = "#fc8d59", 
+    midpoint = 0, 
+    limits = c(-1, 1)
+  ) + 
+  scale_x_continuous(n.breaks = 15) +
+  theme_minimal() +
+  labs(
+    title = "Time-lag correlations of mpox-related Wikipedia pageviews and mpox cases",
+    x = "Time lag [days]",
+    y = "Spearman correlation coefficient",
+    fill = "Estimate"
+  )
+
+# Save image
+ggsave(filename = here("6-figures/spearman-correlation-barplot.png"), width = 10, height = 8, dpi = 300)
+
+
+## Visualize p-values ----------------------------------------------------------
+# Order articles by lag value of min p-value
+order_by_p.values <- lag_results |> 
+  reframe(.by = page_title, avg_p.value = mean(p.value, na.rm = TRUE)) |> 
+  arrange(-avg_p.value) |> 
+  pull(page_title)
+
+# Plot heatmap of p-values
+lag_results |> 
+  mutate(
+    signif = case_when(
+      p.value < 0.001 ~ "<0.001", 
+      p.value < 0.01 ~ "<0.01",
+      p.value < 0.05 ~ "<0.05",
+      TRUE ~ "Not signif."),
+    signif = factor(signif, levels = c("Not signif.", "<0.05", "<0.01", "<0.001")),
+    page_title = factor(page_title, levels = order_by_p.values)
+  ) |> 
+  ggplot(aes(x = lag, y = page_title, fill = signif)) +
+  geom_tile(color = "white") +
+  scale_fill_brewer(
+    type = "seq",
+    palette = 4 
+  ) +
+  scale_x_continuous(n.breaks = 15) +
+  labs(
+    title = "Significance of time lag correlation of Wikipedia pageviews and mpox cases",
+    x = "Time lag [days]",
+    y = NULL,
+    fill = "Significance\nlevel"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
+
+# Save image
+ggsave(filename = here("6-figures/spearman-pvalues-heatmap.png"), width = 10, height = 8, dpi = 300)

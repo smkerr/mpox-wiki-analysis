@@ -160,7 +160,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdfauthor={Steven Kerr},
+  pdfauthor={Steven Miles Kerr},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -168,14 +168,14 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
-\author{Steven Kerr}
-\date{27 April 2024}
+\author{Steven Miles Kerr}
+\date{28 April 2024}
 
 \begin{document}
 
 \begin{titlepage}
     \centering
-    \includegraphics[width=0.75\textwidth]{img/hertie-school-logo.jpg}
+    \includegraphics[width=0.75\textwidth]{images/hertie-school-logo.jpg}
     \vspace*{\fill}
     
     \textbf{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence}
@@ -204,6 +204,62 @@
 
 \setcounter{page}{1}
 
+\section{Figures}\label{figures}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{images/mpox-cases-USA-states-map.png}
+
+}
+
+\caption{Note: Alaska (5 cases) and Hawaii (40 cases) are not depicted.}
+
+\end{figure}%%
+\begin{figure}[H]
+
+{\centering \includegraphics{images/wiki-pageview-differential-privacy-pipeline.jpg}
+
+}
+
+\caption{\href{https://diff.wikimedia.org/2023/06/21/new-dataset-uncovers-wikipedia-browsing-habits-while-protecting-users/screenshot-2023-05-23-at-10-34-18-am/}{Conceptual
+Steps of the Pageview Differential Privacy Pipeline}, a
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{CC BY-SA 4.0}
+licensed work by Hal Triedman}
+
+\end{figure}%
+
+\begin{center}
+\includegraphics{images/mpox-cases-USA-weekly.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/wiki-project-views-USA-monthly.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/wiki-pageviews-mpox-specific-USA-weekly-01.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/mpox-news-USA-weekly.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/mpox-cases-&-wiki-pageviews-USA-rolling-avg.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/mpox-studies-USA-weekly.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/spearman-correlation-heatmap.png}
+\end{center}
+
+\begin{center}
+\includegraphics{images/spearman-pvalues-heatmap.png}
+\end{center}
+
 \section{Abstract (7) (350 words)}\label{abstract-7-350-words}
 
 {[}To be added last{]}
@@ -229,9 +285,9 @@ succeeded in inspiring others to explore these methods as well
 (\citeproc{ref-olson2013}{Olson et al. 2013};
 \citeproc{ref-butler2013}{Butler 2013}). Researchers have demonstrated
 its utility in predicting cases of diseases such as COVID-19
-(\citeproc{ref-abbas2021}{Abbas et al. 2021}); Effenberger et al.
-(\citeproc{ref-effenberger2020}{2020}); Gong et al.
-(\citeproc{ref-gong2022}{2022}){]}, malaria
+(\citeproc{ref-abbas2021}{Abbas et al. 2021};
+\citeproc{ref-effenberger2020}{Effenberger et al. 2020};
+\citeproc{ref-gong2022}{Gong et al. 2022}), malaria
 (\citeproc{ref-ocampo2013}{Ocampo, Chunara, and Brownstein 2013}),
 norovirus (\citeproc{ref-yuan2021}{Yuan et al. 2021}), and the West-Nile
 virus disease (WNVD) (\citeproc{ref-bragazzi2016}{Bragazzi et al. 2016})

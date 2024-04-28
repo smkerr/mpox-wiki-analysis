@@ -1,7 +1,6 @@
 ---
 title: "From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence"
-#subtitle:
-author: "Steven Kerr"
+author: "Steven Miles Kerr"
 date: "today"
 date-format: "D MMMM YYYY"
 #abstract: 
@@ -21,7 +20,6 @@ editor: "visual"
 bibliography: references.bib
 #csl: apa.csl # Citation Style Language file to format bibliography
 toc: false
-#toc-depth: 3
 #lof: true
 #lot: true
 number-sections: false
@@ -40,7 +38,7 @@ figure-caption: true
 ```{=latex}
 \begin{titlepage}
     \centering
-    \includegraphics[width=0.75\textwidth]{img/hertie-school-logo.jpg}
+    \includegraphics[width=0.75\textwidth]{images/hertie-school-logo.jpg}
     \vspace*{\fill}
     
     \textbf{From Clicks to Cases: The Predictive Power of Wikipedia Pageviews for Mpox Incidence}
@@ -70,6 +68,28 @@ figure-caption: true
 
 \setcounter{page}{1}
 ```
+# Figures
+
+![Note: Alaska (5 cases) and Hawaii (40 cases) are not depicted.](images/mpox-cases-USA-states-map.png){fig-align="center"}
+
+![[Conceptual Steps of the Pageview Differential Privacy Pipeline](https://diff.wikimedia.org/2023/06/21/new-dataset-uncovers-wikipedia-browsing-habits-while-protecting-users/screenshot-2023-05-23-at-10-34-18-am/), a [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) licensed work by Hal Triedman](images/wiki-pageview-differential-privacy-pipeline.jpg){fig-align="center"}
+
+![](images/mpox-cases-USA-weekly.png){fig-align="center"}
+
+![](images/wiki-project-views-USA-monthly.png){fig-align="center"}
+
+![](images/wiki-pageviews-mpox-specific-USA-weekly-01.png){fig-align="center"}
+
+![](images/mpox-news-USA-weekly.png){fig-align="center"}
+
+![](images/mpox-cases-&-wiki-pageviews-USA-rolling-avg.png){fig-align="center"}
+
+![](images/mpox-studies-USA-weekly.png){fig-align="center"}
+
+![](images/spearman-correlation-heatmap.png){fig-align="center"}
+
+![](images/spearman-pvalues-heatmap.png){fig-align="center"}
+
 # Abstract (7) (350 words)
 
 \[To be added last\]
@@ -78,7 +98,7 @@ $cases_t = \beta_0 + \beta_1 \times pageviews_t + \epsilon_t$
 
 # Introduction (6) (700 words)
 
-Google Trends serves as a robust tool for analyzing global search patterns, providing insights into public interest across countries. This tool capitalizes on the immense traffic Google receives to evaluate the popularity of specific keywords over time, measured by Relative Search Volumes (RSVs). Its ability to offer real-time data on user search behavior at no cost has made Google Trends a crucial resource in academic and practical research, including in tracking health-related public concerns. Google Flu Trends (GFT) is perhaps the most widely recognized use case, capable of producing highly accurate predictions in near real-time [@ginsberg2009]. Although the accuracy of its predictions were compromised by factors like media influence during particularly severe outbreaks, as seen during the 2009 H1N1 pandemic and the severe 2012-2013 flu season, it succeeded in inspiring others to explore these methods as well [@olson2013; @butler2013]. Researchers have demonstrated its utility in predicting cases of diseases such as COVID-19 [@abbas2021]; @effenberger2020; @gong2022\], malaria [@ocampo2013], norovirus [@yuan2021], and the West-Nile virus disease (WNVD) [@bragazzi2016] among other diseases, highlighting its potential for early outbreak detection and public health surveillance [@generous2014].
+Google Trends serves as a robust tool for analyzing global search patterns, providing insights into public interest across countries. This tool capitalizes on the immense traffic Google receives to evaluate the popularity of specific keywords over time, measured by Relative Search Volumes (RSVs). Its ability to offer real-time data on user search behavior at no cost has made Google Trends a crucial resource in academic and practical research, including in tracking health-related public concerns. Google Flu Trends (GFT) is perhaps the most widely recognized use case, capable of producing highly accurate predictions in near real-time [@ginsberg2009]. Although the accuracy of its predictions were compromised by factors like media influence during particularly severe outbreaks, as seen during the 2009 H1N1 pandemic and the severe 2012-2013 flu season, it succeeded in inspiring others to explore these methods as well [@olson2013; @butler2013]. Researchers have demonstrated its utility in predicting cases of diseases such as COVID-19 [@abbas2021; @effenberger2020; @gong2022], malaria [@ocampo2013], norovirus [@yuan2021], and the West-Nile virus disease (WNVD) [@bragazzi2016] among other diseases, highlighting its potential for early outbreak detection and public health surveillance [@generous2014].
 
 ## Background and Context
 
