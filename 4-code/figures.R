@@ -175,22 +175,27 @@ mpox_df |>
   ungroup() |> 
   mutate(page_title = factor(page_title, levels = order_by_peak)) |> 
   ggplot(aes(x = date, y = pageviews, color = page_title)) +
-  geom_segment(aes(x = as_date("2022-01-01"), y = 450, # threshold during initial period
-                   xend = as_date("2023-09-20"), yend = 450), 
-               linetype = "dashed", color = muted("red"), linewidth = 0.5) + 
-  geom_segment(aes(x = as_date("2023-09-18"), y = 90, # threshold during later period
+  geom_segment(aes(x = as_date("2022-05-01"), y = 450, # threshold during initial period
+                   xend = as_date("2023-09-19"), yend = 450), 
+               linetype = "dashed", color = muted("red"), linewidth = 0.25) + 
+  geom_segment(aes(x = as_date("2023-09-20"), y = 90, # threshold during later period
                    xend = as_date("2024-02-27"), yend = 90), 
-               linetype = "dashed", color = muted("red")) + 
+               linetype = "dashed", color = muted("red"), linewidth = 0.25) + 
   geom_vline(xintercept = as_date("2023-09-20"), color = "steelblue") +
   geom_point(alpha = 0.75, size = 0.5) + 
-  scale_x_date(date_labels = "%b\n%Y") +
+  scale_x_date(
+    limits = c(as_date("2022-05-01"), as_date("2024-02-27")), 
+    expand = expansion(),
+    date_breaks = "3 months",
+    breaks = seq.Date(from = as_date("2022-05-01"), to = as_date("2024-02-27"), by = "3 months"), 
+    date_labels = "%b\n%Y" 
+  ) + 
   facet_wrap(~page_title, scales = "free_y", ncol = 2) +
   labs(
     title = "U.S. Pageviews by Mpox-related Wikipedia Article",
-    subtitle = "Note: Beginning September 20, 2023, the minimum number of pageviews required for data release was lowered from 450 to 90",
     x = NULL,
-    y = "Number of pageviews",
-    caption = "Source: Wikimedia Foundation"
+    y = "Pageviews",
+    caption = "Source: Wikimedia Foundation\nNote: Beginning September 20, 2023, the minimum number of pageviews required for data release was lowered from 450 to 90"
   ) +
   theme_minimal() +
   theme(
@@ -201,7 +206,7 @@ mpox_df |>
     )
 
 # save plot
-ggsave(here("6-figures/pageviews-mpox-related.png"))
+ggsave(here("6-figures/pageviews-mpox-related.png"), width = 10, height = 12)
 
 
 # CDC Case Data ================================================================
@@ -236,7 +241,7 @@ cases_daily |>
   geom_col(width = 7, color = "black") +
   expand_limits(y = 5) +
   scale_x_date(
-    limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
+    limits = c(as_date("2022-01-01"), max(cases_daily$date)), 
     expand = expansion(mult = 0.05),
     date_breaks = "1 month",
     breaks = seq.Date(from = as_date("2022-05-01"), to = max(cases_daily$date), by = "3 months"), 
@@ -409,7 +414,7 @@ studies_df |>
     axis.title.y = element_text(face = "bold")
   )
 
-# save plot
+# Save plot
 ggsave(here("6-figures/mpox-studies.png"), height = 7.75, width = 10)
 
 

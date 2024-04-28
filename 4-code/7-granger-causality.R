@@ -11,8 +11,9 @@ pacman::p_load(
   MASS, 
   broom, 
   dplyr,
-  ggnewscale, ###
+  #ggnewscale, ###
   ggplot2,
+  glue,
   here,
   lubridate, 
   stringr,
@@ -22,8 +23,9 @@ pacman::p_load(
   readr, 
   scales, 
   slider, 
+  tibble,
   tidyr, 
-  tseries, ###
+  #tseries, ###
   vars,
   install = FALSE
   )
@@ -124,7 +126,7 @@ print(non_stationary2)
 # Determine the optimal number of lags based on information criteria (e.g., AIC)
 lag_selection <- df1 |> 
   select(starts_with("roll")) |> 
-  VARselect(lag.max = 37, type = "none") 
+  VARselect(lag.max = 35, type = "none") 
 optimal_lag <- lag_selection$selection["AIC(n)"]
 
 
@@ -143,7 +145,6 @@ summary(var_model)
 
 
 # Validate the model ===========================================================
-# Check for autocorrelation in residuals
 #> Check whether there is significant autocorrelation at any of the first 10 lags 
 #> of the residuals. If the p-values are above the significance level (usually 0.05), 
 #> the residuals do not have significant autocorrelation.
@@ -181,7 +182,7 @@ cor(var_model$datamat)
 # Impulse Response Analysis ====================================================
 #> An impulse response function (IRF) can help to understand how a shock to one 
 #> variable affects the others in the VAR system over time.
-n_ahead = 10
+n_ahead = 35
 irf_results <- irf(var_model, cumulative = FALSE, n.ahead = n_ahead, boot = TRUE, runs = 100)
 
 # Extracting and preparing data
@@ -206,22 +207,35 @@ irf_df <- irf_df |>
   left_join(upper_df, by = c("Time", "Series")) |>
   left_join(lower_df, by = c("Time", "Series")) |> 
   mutate(Time = as.numeric(Time)) |> 
-  mutate(Impulse = str_extract(Series, "^[^.]+"), Response = str_extract(Series, "(?<=\\.)[^.]*$"))
+  mutate(Series = str_replace_all(Series, "roll_cases", "cases"),
+         Series = str_replace_all(Series, "roll_pct_pageviews", 'pageviews (%)')) |> 
+  mutate(Impulse = str_extract(Series, "^[^.]+"), Response = str_extract(Series, "(?<=\\.)[^.]*$")) |> 
+  mutate(title = glue("Response of {Response} to {Impulse}"))
   
 # Plotting IRF
-ggplot(data = irf_df, aes(x = Time, y = Value, color = Series, fill = Series)) +
+irf_df |> 
+  ggplot(aes(x = Time, y = Value, color = Series, fill = Series)) +
   geom_hline(yintercept = 0, color = muted("red"), linetype = "dashed") + 
   geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.2) +  # Confidence interval
   geom_line() +  # IRF lines
-  facet_wrap(~Series, scales = "free_y") +
+  facet_wrap(~title, scales = "free_y") +
+  scale_y_continuous(labels = label_number()) +
   labs(title = "Impulse Response Function",
-       x = "Time (Lags)",
+       x = "Time lag [Days]",
        y = "Response",
        color = NULL,
        fill = "Response to"
        ) +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+    )
+
+# Save plot
+ggsave(here("6-figures/impulse-response-function.png"), height = 7.75, width = 10)
 
 
 # Granger causality ============================================================
@@ -236,7 +250,9 @@ var_model$datamat |>
 granger_pageviews <- causality(var_model, cause = "roll_pct_pageviews")
 granger_cases <- causality(var_model, cause = "roll_cases")
 
-granger_pageviews
+granger_pageviews 
 granger_cases
+
+granger_results_df$`P-value` <- format.pval(granger_results_df$`P-value`, digits = 2)
 
 #> The key aspect of the result to look at is the p-value. If the p-value is less than your significance level (commonly set at 0.05), you can conclude that there is evidence to suggest that the cause variable Granger-causes the other variable(s) in the VAR model
