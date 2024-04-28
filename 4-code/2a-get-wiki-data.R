@@ -135,7 +135,8 @@ import_pageviews_tsv <- function(file_path) {
     filter(page_title %in% str_replace_all(mpox_pages_extended, " ", "_")) |> 
     filter(
       !(page_title == "Utah" & project != "su.wikipedia.org"), # "utah" means "vomiting" in Sundanese
-      !(page_title == "Hosta" & project != "hu.wikipedia.org") # "hosta" means "cough" in Hungarian
+      !(page_title == "Hosta" & project != "hu.wikipedia.org"), # "hosta" means "cough" in Hungarian
+      !(page_title == "Broth" & project == "en.wikipedia.org") # "broth" means "rash" in Scots Gaelic
       ) |> 
     mutate(
       date = as_date(date_str), 
@@ -237,26 +238,6 @@ pageviews_daily <- pageviews_df |>
   mutate(pct_pageviews = pageviews / pageviews_ceil) |> 
   select(country_long, iso2, project, wikidata_id, page_id, page_title, date, pct_pageviews, pageviews, pageviews_ceil)
 
-# Weekly pageviews
-pageviews_weekly <- pageviews_df |>  
-  # Expand to include missing dates
-  complete(page_title, date = seq.Date(min(pageviews_df$date), to = max(pageviews_df$date), by = 1)) |>
-  group_by(page_title) |> 
-  # Fill in missing info
-  fill(country_long, iso2, project, wikidata_id, page_id, .direction = "updown") |> 
-  ungroup() |>
-  # Calculate weekly pageviews
-  mutate(date = floor_date(date, unit = "weeks"), year = year(date), month = month(date)) |>
-  reframe(
-    .by = c(country_long, iso2, project, wikidata_id, page_id, page_title, year, month, date),
-    pageviews = sum(pageviews, na.rm = TRUE)
-  ) |>
-  # Normalize by dividing by total monthly country project views 
-  left_join(pageviews_total, by = join_by(iso2, project, year, month), relationship = "many-to-one") |> 
-  mutate(pct_pageviews = pageviews / pageviews_ceil) |> 
-  select(country_long, iso2, project, wikidata_id, page_title, page_id, date, pct_pageviews, pageviews, pageviews_ceil)
-
 
 # Save data ====================================================================
 write_csv(pageviews_daily, here("3-data/wikipedia/pageviews-daily.csv"))
-write_csv(pageviews_weekly, here("3-data/wikipedia/pageviews-weekly.csv"))
