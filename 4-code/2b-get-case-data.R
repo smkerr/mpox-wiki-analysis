@@ -5,7 +5,19 @@
 # ==============================================================================
 
 
-# Load data ====================================================================
+# Setup ====================================================================
+# Load packages
+pacman::p_load(
+  MASS,
+  dplyr,
+  glue,
+  here,
+  readr,
+  stringr
+)
+
+
+# Get data =====================================================================
 # load WHO/OWID mpox case data
 cases_df <- read_csv("https://raw.githubusercontent.com/owid/monkeypox/main/owid-monkeypox-data.csv")
 write_csv(cases_df, here(glue("3-data/mpox-cases/owid-monkeypox-data ({format(today(), '%Y-%m-%d')}).csv")))

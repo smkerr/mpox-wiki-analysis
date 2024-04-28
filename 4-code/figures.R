@@ -12,10 +12,12 @@ pacman::p_load(
   dplyr,
   forcats,
   ggplot2,
+  glue,
   here, 
   lubridate,
   readr, 
   scales,
+  slider,
   spData,
   tmap
 )
@@ -28,7 +30,7 @@ mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
 pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
 pageviews_weekly <- read_csv(here("3-data/wikipedia/pageviews-weekly.csv"))
-pageviews_total <- read_csv(here("3-data/wikipedia/total-pageviews.csv"))
+pageviews_total <- read_csv(here("3-data/wikipedia/project-views-monthly.csv"))
 
 # load mpox case data
 ## WHO data
@@ -50,6 +52,110 @@ load(here("3-data/ref/iso_codes.RData"))
 
 
 # Wikipedia Pageview Data ======================================================
+## U.S. Share of Wikipedia Pageviews by Language Project -----------------------
+plot_df <- pageviews_total |> 
+  filter(iso2 == "US") |> 
+  group_by(year, month) |> 
+  mutate(
+    pct_pageviews_ceil = pageviews_ceil / sum(pageviews_ceil),
+    total_pageviews_ceil = sum(pageviews_ceil)
+  ) |> 
+  ungroup() |> 
+  mutate(date = as_date(glue("{year}-{month}-01"))) |> 
+  select(iso2, date, project, pct_pageviews_ceil, pageviews_ceil, total_pageviews_ceil) 
+
+# Order U.S. language projects by popularity 
+project_order <- plot_df |> 
+  reframe(.by = project, total_project_views = sum(pageviews_ceil)) |>
+  arrange(total_project_views) |> 
+  pull(project)
+
+
+# Create plot 
+plot_df |>
+  mutate(
+    project = fct_lump_n(project, n = 4, w = pageviews_ceil),
+    project = case_when(
+      project == "Other" ~ "Other", 
+      project == "es.wikipedia" ~ "Spanish", 
+      project == "zh.wikipedia" ~ "Chinese", 
+      project == "fr.wikipedia" ~  "French",
+      project == "en.wikipedia" ~ "English"
+    ),
+    project = factor(project, levels = c("Other", "Spanish", "Chinese", 
+                                         "French" ,"English"))
+  ) |>
+  ggplot(aes(x = date, y = pct_pageviews_ceil, fill = project)) +
+  geom_col() + 
+  scale_x_date(
+    date_breaks = "1 month",
+    date_labels = "%b\n%Y",
+    expand = expansion()
+  ) + 
+  scale_y_continuous(labels = label_percent(), breaks = pretty_breaks(n = 10)) +
+  scale_fill_brewer(
+    type = "qual", palette = 3, direction = -1,
+    breaks = c("English", "French", "Chinese", "Spanish", "Other")
+  ) +
+  labs(
+    title = "U.S. Wikipedia Pageviews by Language",
+    x = NULL, 
+    y = "% of total pageviews",
+    fill = "Language",
+    caption = "Source: Wikimedia Foundation"
+  ) +
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
+
+# Save plot
+ggsave(here("5-visualization/wiki-project-views-USA-monthly.png"), 
+       height = 7.75, width = 12, dpi = 600)
+
+
+# U.S. Percentage of Mpox-related Pageviews ------------------------------------
+mpox_df |> 
+  filter(page_title == "Mpox") |> 
+  filter(date >= as_date("2022-05-01")) |> 
+  mutate(date = floor_date(date, unit = "weeks")) |> 
+  reframe(pageviews = sum(pageviews), .by = date) |> 
+  ggplot(aes(date, pageviews)) + 
+  geom_col() +
+  scale_x_date(
+    limits = c(as_date("2022-0-01"), max(cases_daily$date)),
+    date_breaks = "1 month",
+    breaks = seq.Date(from = as_date("2022-05-15"), to = max(cases_daily$date), by = "3 months"), 
+    date_labels = "%b\n%Y" 
+  ) + 
+  scale_y_continuous(
+    limits = c(0, 200000), 
+    breaks = pretty_breaks(n = 14),
+    labels = comma_format()
+  ) +
+  labs(
+    title = "U.S. Pageviews for Mpox-specific Wikipedia Articles",
+    x = "Week",
+    y = "Pageviews",
+    caption = "Source: Wikimedia Foundation\nNote: Mpox-specific pageviews comprise those for 'Mpox' and 'Monkeypox virus' English-language articles"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(hjust = 0.5)  
+    )
+
+# Save plot
+ggsave(here("5-visualization/wiki-pageviews-mpox-specific-USA-weekly.png"), 
+       height = 7.75, width = 12, dpi = 600)
+
+
+
 ## U.S. Pageviews by Mpox-related Article --------------------------------------
 # Order mpox-related articles by date of peak pageviews
 order_by_peak <- mpox_df |> 
@@ -71,13 +177,13 @@ mpox_df |>
   ungroup() |> 
   mutate(page_title = factor(page_title, levels = order_by_peak)) |> 
   ggplot(aes(x = date, y = pageviews, color = page_title)) +
-  geom_vline(xintercept = as_date("2023-09-20"), color = "steelblue") +
   geom_segment(aes(x = as_date("2022-01-01"), y = 450, # threshold during initial period
                    xend = as_date("2023-09-20"), yend = 450), 
                linetype = "dashed", color = muted("red"), linewidth = 0.5) + 
   geom_segment(aes(x = as_date("2023-09-18"), y = 90, # threshold during later period
                    xend = as_date("2024-02-27"), yend = 90), 
                linetype = "dashed", color = muted("red")) + 
+  geom_vline(xintercept = as_date("2023-09-20"), color = "steelblue") +
   geom_point(alpha = 0.75, size = 0.5) + 
   scale_x_date(date_labels = "%b\n%Y") +
   facet_wrap(~page_title, scales = "free_y", ncol = 2) +
@@ -89,63 +195,15 @@ mpox_df |>
     caption = "Source: Wikimedia Foundation"
   ) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+    )
 
 # save plot
 ggsave(here("5-visualization/wiki-pageviews-by-article-USA-daily.png"))
-
-
-# U.S. Percentage of Mpox-related Pageviews ------------------------------------
-# TODO
-# TODO: Include annotations for key events during outbreak
-# TODO: Could possibly distinguish between "Monkeypox", "Monkeypox virus", and "Mpox"
-
-
-## U.S. Share of Wikipedia Pageviews by Language Project -----------------------
-plot_df <- pageviews_total |> 
-  filter(iso2 == "US") |> 
-  group_by(year, month) |> 
-  mutate(
-    pct_pageviews_ceil = pageviews_ceil / sum(pageviews_ceil),
-    total_pageviews_ceil = sum(pageviews_ceil)
-    ) |> 
-  ungroup() |> 
-  mutate(date = as_date(glue("{year}-{month}-01"))) |> 
-  select(iso2, date, project, pct_pageviews_ceil, pageviews_ceil, total_pageviews_ceil) 
-
-# Order U.S. language projects by popularity 
-project_order <- plot_df |> 
-  reframe(.by = project, total_project_views = sum(pageviews_ceil)) |>
-  arrange(total_project_views) |> 
-  pull(project)
-
-# Create plot 
-plot_df |>
-  mutate(
-    project = fct_lump_n(project, n = 4, w = pageviews_ceil),
-    project = factor(project, levels = c("Other", "es.wikipedia", "zh.wikipedia", 
-                                         "fr.wikipedia" ,"en.wikipedia"))
-    ) |>
-  ggplot(aes(x = date, y = pct_pageviews_ceil, fill = project)) +
-  geom_col() + 
-  scale_x_date(date_labels = "%b\n%Y") +
-  scale_y_continuous(labels = label_percent()) +
-  scale_fill_brewer(
-    type = "qual", palette = 3, direction = -1,
-    breaks = c("en.wikipedia", "fr.wikipedia", "zh.wikipedia", "es.wikipedia", "Other")
-    ) +
-  labs(
-    title = "U.S. Share of Wikipedia Pageviews by Language Project",
-    x = NULL,
-    y = "% of total pageviews",
-    fill = "Language project",
-    caption = "Source: Wikimedia Foundation"
-  ) +
-  theme_minimal()
-
-# Save plot
-ggsave(here("5-visualization/wiki-project-views-USA-monthly.png"), height = 7.75, width = 10)
-
 
 
 # CDC Case Data ================================================================
@@ -171,49 +229,8 @@ us_states_map
 tmap_save(us_states_map, filename = here("5-visualization/mpox-cases-USA-states-map.png"),
           width = 10, height = 7, dpi = 300)
 
-# TODO: Note that Alaska (5 cases) and Hawaii (40 cases) are not pictured
-cases_totals |> 
-  filter(Location %in% c("Alaska", "Hawaii"))
 
-
-## U.S. Daily Cases Barplot ----------------------------------------------------
-cases_daily |> 
-  reframe(cases = sum(cases), .by = date) |> 
-  ggplot(aes(x = date, y = cases)) + 
-  geom_col(width = 1) +
-  expand_limits(y = 5) +
-  scale_x_date(
-    limits = c(as_date("2022-05-01"), max(cases_daily$date)), 
-    expand = expansion(mult = 0.05),
-    date_breaks = "3 months",
-    date_labels = "%b\n%Y" 
-  ) + 
-  scale_y_continuous(
-    limits = c(0, NA), 
-    expand = expansion(mult = c(0.02, 0.02)), 
-    breaks = pretty_breaks(),
-    labels = comma_format()
-  ) +
-  scale_fill_brewer() +
-  labs(
-    title = "U.S. Daily Mpox Cases",
-    subtitle = "Data as of March 5, 2024",
-    x = "Date reported",
-    y = "Cases",
-    caption = "Source: U.S. CDC",
-    fill = NULL
-  ) +
-  theme_minimal() + 
-  theme(
-    legend.position = "none",
-    plot.margin = unit(c(0.2, 1, 0.2, 0.2), units = "cm")
-  )
-
-# Save plot
-ggsave(here("5-visualization/mpox-cases-USA-daily.png"), height = 7.75, width = 10)
-
-
-## U.S. Weekly Cases Barplot ---------------------------------------------------
+## U.S. Weekly Cases -----------------------------------------------------------
 cases_daily |> 
   mutate(date = floor_date(date, unit = "weeks")) |> 
   reframe(cases = sum(cases), .by = date) |> 
@@ -221,20 +238,21 @@ cases_daily |>
   geom_col(width = 7, color = "black") +
   expand_limits(y = 5) +
   scale_x_date(
-    limits = c(as_date("2022-05-01"), max(cases_daily$date)), 
+    limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
     expand = expansion(mult = 0.05),
-    date_breaks = "3 months",
+    date_breaks = "1 month",
+    breaks = seq.Date(from = as_date("2022-05-01"), to = max(cases_daily$date), by = "3 months"), 
     date_labels = "%b\n%Y" 
   ) + 
   scale_y_continuous(
-    limits = c(0, NA), 
+    limits = c(0, 3500), 
     expand = expansion(mult = c(0.02, 0.02)), 
-    breaks = pretty_breaks(),
+    breaks = pretty_breaks(n = 6),
     labels = comma_format()
   ) +
   scale_fill_brewer() +
   labs(
-    title = "U.S. Weekly Mpox Cases",
+    title = "Epidemic Curve",
     subtitle = "Data as of March 5, 2024",
     x = "Week reported",
     y = "Cases",
@@ -244,7 +262,10 @@ cases_daily |>
   theme_minimal() + 
   theme(
     legend.position = "none",
-    plot.margin = unit(c(0.2, 1, 0.2, 0.2), units = "cm")
+    plot.margin = unit(c(0.2, 1, 0.2, 0.2), units = "cm"),
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
   )
 
 # Save plot
@@ -252,144 +273,143 @@ ggsave(here("5-visualization/mpox-cases-USA-weekly.png"), height = 7.75, width =
 
 
 # Combined Data ================================================================
-## U.S. Weekly Mpox Cases & Mpox Pageviews --------------------------------------------
-# TODO: Consider plotting at a daily frequency for comparison
-coeff <- 50000000 # value to transform scales
-mpox_df |>
+## U.S. Weekly Mpox Cases & Mpox Pageviews -------------------------------------
+coeff <- 35000000 # value to transform scales
+plot_df <- left_join(
+  # calculate 7-day rolling averages for pageviews 
+  mpox_df |> 
+    filter(sum(pct_pageviews > 0, na.rm = TRUE) > 1) |> # remove articles with zero pageviews
+    group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
+    mutate(
+      #pageviews = ifelse(is.na(pageviews), 0, pageviews), # set missing values equal to lower bound threshold
+      pct_pageviews = pageviews / pageviews_ceil,
+      roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)
+    ) |> 
+    ungroup() |> 
+    mutate(across(everything(), ~replace(., is.nan(.), NA))) |> 
+    select(-cases:-n_studies),
+  # calculate 7-day rolling averages for cases, news articles, & scientific studies
+  mpox_df |> 
+    distinct(date, cases, n_articles, n_studies) |> 
+    mutate(roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)) |> 
+    select(date, starts_with("roll")),
+  by = join_by(date)
+)
+
+vline_dates <- c(as_date("2022-05-20"),
+                 as_date("2022-07-23"),
+                 as_date("2022-11-28"))
+labels <- c("U.S. reports first case",
+            "WHO declares PHEIC",
+            'Monkeypox renamed "mpox"')
+
+
+
+plot_df |>
   filter(page_title == "Mpox") |> 
   filter(date >= as_date("2022-05-01")) |> 
-  mutate(date = floor_date(date, unit = "weeks")) |> 
-  reframe(
-    .by = c(iso2, project, date), 
-    cases = sum(cases, na.rm = TRUE), 
-    pageviews = sum(pageviews, na.rm = TRUE)
-    ) |> 
-  mutate(year = year(date), month = month(date)) |> 
-  left_join(pageviews_total, by = join_by(iso2, project, year, month)) |> 
-  mutate(pct_pageviews = pageviews / pageviews_ceil) |> # express pageviews as percentage of monthly total
   ggplot(aes(x = date)) +
-  geom_col(aes(y = cases / coeff, fill = "Weekly cases")) +
-  geom_line(aes(y = pct_pageviews), color = "red", linewidth = 1, alpha = 0.5) +
-  scale_x_date(date_labels = "%b\n%Y") +
+  geom_col(aes(y = roll_cases / coeff, fill = "Cases")) +
+  geom_vline(xintercept = vline_dates) + #, linetype = "longdash") +
+  geom_text(data = data.frame(date = vline_dates, label = labels),
+            aes(x = date, y = Inf, label = label), angle = 90, vjust = -1, hjust = 1.05, size = 3) +
+  geom_line(aes(y = roll_pct_pageviews, color = "Pageviews (%)"), linewidth = 1) +
+  scale_x_date(
+    limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
+    date_breaks = "1 month",
+    breaks = seq.Date(from = as_date("2022-05-01"), to = max(cases_daily$date), by = "3 months"), 
+    date_labels = "%b\n%Y" ,
+    expand = expansion()
+  ) + 
   scale_y_continuous(
-    name = "Pageviews (%)", # first axis
-    sec.axis = sec_axis(~ . * coeff, name = "Cases"), # second axis
-    labels = label_percent()
+    limits = c(0, 0.000014), 
+    name = "7-day average pageviews (%)", # first axis
+    sec.axis = sec_axis(~ . * coeff, name = "7-day average cases", breaks = pretty_breaks(12)), # second axis
+    breaks = pretty_breaks(6),
+    labels = label_percent(),
+    expand = expansion()
   ) +
   scale_fill_brewer(type = "qual", palette = 3) +
   labs(
-    title = "U.S. Weekly Mpox Cases & Pageviews",
+    title = "U.S. Mpox-specific Wikipedia Pageviews",
+    subtitle = "Note: Pageviews are expressed as a percentage of total monthly U.S. English-language pageviews",
     x = NULL,
     fill = NULL,
     color = NULL,
     caption = "Source: U.S. CDC"
   ) +
   theme_minimal() +
-  theme(legend.position = "none")
-p
+  theme(
+    legend.position = "top",
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+    )
 
 # save plot
-ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews-USA-weekly.png"), height = 7.75, width = 10)
+ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews-USA-rolling-avg.png"), height = 7.75, width = 10)
 
 
 # News Coverage Data ===========================================================
-## U.S. Daily Mpox-related News Articles ---------------------------------------
-# TODO: Add moving average
-news_df |> 
-  filter(date >= as_date("2022-05-01")) |> 
-  reframe(.by = date, n_articles = sum(n_articles)) |> 
-  ggplot(aes(x = date, y = n_articles)) +
-  geom_col() +
-  scale_x_date(date_labels = "%b\n%Y") +
-  labs(
-    title = "Weekly number of mpox-related news articles",
-    x = NULL,
-    y = "Number of news articles",
-    caption = "Source: GNews"
-  ) +
-  theme_minimal()
-
 ## U.S. Weekly Mpox-related News Articles --------------------------------------
-# TODO: Add moving average
 news_df |> 
   filter(date >= as_date("2022-05-01")) |> 
   mutate(date = floor_date(date, unit = "weeks")) |> 
   reframe(.by = date, n_articles = sum(n_articles)) |> 
   ggplot(aes(x = date, y = n_articles)) +
   geom_col() +
-  scale_x_date(date_labels = "%b\n%Y") +
+  scale_x_date(
+    limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
+    date_breaks = "1 month",
+    breaks = seq.Date(from = as_date("2022-05-01"), to = max(cases_daily$date), by = "3 months"), 
+    date_labels = "%b\n%Y" ,
+    expand = expansion()
+  ) + 
+  scale_y_continuous(limits = c(0, 290), breaks = pretty_breaks(10)) +
   labs(
-    title = "Weekly number of mpox-related news articles",
-    x = NULL,
-    y = "Number of news articles",
+    title = "U.S. Media Coverage of Mpox",
+    x = "Week",
+    y = "News articles",
     caption = "Source: GNews"
   ) +
-  theme_minimal()
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
 
-## U.S. Monthly Mpox-related News Articles -------------------------------------
-# TODO: Add moving average
-news_df |> 
-  filter(date >= as_date("2022-05-01")) |> 
-  mutate(date = floor_date(date, unit = "months")) |> 
-  reframe(.by = date, n_articles = sum(n_articles)) |> 
-  ggplot(aes(x = date, y = n_articles)) +
-  geom_col() +
-  scale_x_date(date_labels = "%b\n%Y") +
-  labs(
-    title = "Monthly number of mpox-related news articles",
-    x = NULL,
-    y = "Number of news articles",
-    caption = "Source: GNews"
-  ) +
-  theme_minimal()
+# save plot
+ggsave(here("5-visualization/mpox-news-USA-weekly.png"), height = 7.75, width = 10)
 
 
 # Scientific Studies Data ======================================================
-## Daily Mpox-related Scientific Studies ---------------------------------------
-# TODO: Add moving average
-studies_df |> 
-  filter(date >= as_date("2022-01-01")) |> 
-  ggplot(aes(x = date)) +
-  geom_bar() +
-  scale_x_date(date_labels = "%b\n%Y") +
-  labs(
-    title = "Mpox-related Studies",
-    x = "Publication date",
-    y = "Number of studies",
-    caption = "Source: PubMed"
-  ) +
-  theme_minimal()
-
-
 ## Weekly Mpox-related Scientific Studies ---------------------------------------
-# TODO: Add moving average
 studies_df |> 
   filter(date >= as_date("2022-01-01")) |> 
   mutate(date = floor_date(date, unit = "weeks")) |> 
   ggplot(aes(x = date)) +
   geom_bar() +
-  scale_x_date(date_labels = "%b\n%Y") +
+  scale_x_date(
+    limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
+    date_breaks = "1 month",
+    breaks = seq.Date(from = as_date("2022-05-01"), to = max(cases_daily$date), by = "3 months"), 
+    date_labels = "%b\n%Y" ,
+    expand = expansion()
+  ) + 
+  scale_y_continuous(limits = c(0, 100), breaks = pretty_breaks(5)) +
   labs(
-    title = "Mpox-related Studies",
-    x = NULL, #"Publication date",
-    y = "Number of studies",
+    title = "Mpox-related Scientific Publications",
+    x = "Week of publication",
+    y = "Publications",
     caption = "Source: PubMed"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
 
-
-## Monthly Mpox-related Scientific Studies -------------------------------------
-# TODO: Add moving average
-studies_df |> 
-  filter(date >= as_date("2022-01-01")) |> 
-  mutate(date = floor_date(date, unit = "months")) |> 
-  ggplot(aes(x = date)) +
-  geom_bar() +
-  scale_x_date(date_labels = "%b\n%Y") +
-  labs(
-    title = "Mpox-related Studies",
-    x = NULL, #"Publication date",
-    y = "Number of studies",
-    caption = "Source: PubMed"
-  ) +
-  theme_minimal()
+# save plot
+ggsave(here("5-visualization/mpox-studies-USA-weekly.png"), height = 7.75, width = 10)
