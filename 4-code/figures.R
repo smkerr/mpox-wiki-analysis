@@ -152,8 +152,7 @@ ggsave(here("5-visualization/wiki-project-views-USA-monthly.png"), height = 7.75
 ## U.S. States Map -------------------------------------------------------------
 break_values <- c(1, 10, 100, 1000, Inf) # set break values
 us_states_map <- left_join(us_states, cases_totals, by = join_by(NAME == Location)) |> 
-  #tm_shape() +
-  tm_shape(crs = "EPSG:5070") + #
+  tm_shape(crs = "EPSG:5070") +
   tm_polygons(
     title = "Mpox cases",
     fill = "Cases", 
@@ -164,13 +163,13 @@ us_states_map <- left_join(us_states, cases_totals, by = join_by(NAME == Locatio
   tm_title(text = "U.S. Mpox Cases", height = 2) + 
   tm_title(text = "Data as of March 5, 2024", size = 1) + 
   tm_legend(bg.color = "white", position = tm_pos_in("left", "bottom")) + 
-  tm_credits("Source: U.S. CDC") 
+  tm_credits("Source: U.S. CDC")
   #tm_credits("Note: Alaska (5 cases) and Hawaii (40 cases) are not shown.")
 us_states_map
 
 # Save map
 tmap_save(us_states_map, filename = here("5-visualization/mpox-cases-USA-states-map.png"),
-          width = 10, height = 5, dpi = 300)
+          width = 10, height = 7, dpi = 300)
 
 # TODO: Note that Alaska (5 cases) and Hawaii (40 cases) are not pictured
 cases_totals |> 
