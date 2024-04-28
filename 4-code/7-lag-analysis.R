@@ -21,7 +21,9 @@ pacman::p_load(
   scales, 
   slider, 
   stringr,
-  tidyr
+  tibble,
+  tidyr,
+  install = FALSE
 )
 
 # Load data
@@ -135,12 +137,18 @@ lag_results |>
   scale_fill_gradient2(low = "#91bfdb", mid = "#ffffbf", high = "#fc8d59",  midpoint = 0, limits = c(-1, 1)) +
   scale_x_continuous(n.breaks = 15) +
   labs(
-    title = "Time lag correlation of Wikipedia page views and mpox cases",
+    title = "Time lag correlation of Wikipedia pageviews and mpox cases",
     x = "Time lag [days]",
     y = NULL,
     fill = "Spearman \ncorrelation \ncoefficient"
   ) +
-  theme_minimal()
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
+
 
 # Save image
 ggsave(filename = here("5-visualization/spearman-correlation-heatmap.png"), width = 10, height = 8, dpi = 300)
@@ -163,8 +171,9 @@ lag_results |>
   theme_minimal() +
   labs(
     title = "Time-lag correlations of mpox-related Wikipedia pageviews and mpox cases",
-     x = "Time lag [days]",
-      y = "Correlation coefficient [r]"
+    x = "Time lag [days]",
+    y = "Spearman correlation coefficient",
+    fill = "Estimate"
     )
 
 # Save image
@@ -183,11 +192,11 @@ order_by_p.values <- lag_results |>
 lag_results |> 
   mutate(
     signif = case_when(
-      p.value < 0.001 ~ "***", 
-      p.value < 0.01 ~ "**",
-      p.value < 0.05 ~ "*",
+      p.value < 0.001 ~ "<0.001", 
+      p.value < 0.01 ~ "<0.01",
+      p.value < 0.05 ~ "<0.05",
       TRUE ~ "Not signif."),
-    signif = factor(signif, levels = c("Not signif.", "*", "**", "***")),
+    signif = factor(signif, levels = c("Not signif.", "<0.05", "<0.01", "<0.001")),
     page_title = factor(page_title, levels = order_by_p.values)
     ) |> 
   ggplot(aes(x = lag, y = page_title, fill = signif)) +
@@ -198,12 +207,17 @@ lag_results |>
   ) +
   scale_x_continuous(n.breaks = 15) +
   labs(
-    title = "Significance of time lag correlation of Wikipedia page views and mpox cases",
+    title = "Significance of time lag correlation of Wikipedia pageviews and mpox cases",
     x = "Time lag [days]",
     y = NULL,
     fill = "Significance\nlevel"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold")
+  )
 
 # Save image
 ggsave(filename = here("5-visualization/spearman-pvalues-heatmap.png"), width = 10, height = 8, dpi = 300)

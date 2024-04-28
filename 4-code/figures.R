@@ -112,18 +112,18 @@ plot_df |>
   )
 
 # Save plot
-ggsave(here("5-visualization/wiki-project-views-USA-monthly.png"), 
+ggsave(here("5-visualization/pageviews-by-language.png"), 
        height = 7.75, width = 12, dpi = 600)
 
 
-# U.S. Percentage of Mpox-related Pageviews ------------------------------------
+## U.S. Percentage of Mpox-related Pageviews ------------------------------------
 mpox_df |> 
   filter(page_title == "Mpox") |> 
   filter(date >= as_date("2022-05-01")) |> 
   mutate(date = floor_date(date, unit = "weeks")) |> 
   reframe(pageviews = sum(pageviews), .by = date) |> 
   ggplot(aes(date, pageviews)) + 
-  geom_col() +
+  geom_col(width = 7, color = "black") +
   scale_x_date(
     limits = c(as_date("2022-0-01"), max(cases_daily$date)),
     date_breaks = "1 month",
@@ -151,7 +151,7 @@ mpox_df |>
     )
 
 # Save plot
-ggsave(here("5-visualization/wiki-pageviews-mpox-specific-USA-weekly.png"), 
+ggsave(here("5-visualization/pageviews-mpox-specific.png"), 
        height = 7.75, width = 12, dpi = 600)
 
 
@@ -203,7 +203,7 @@ mpox_df |>
     )
 
 # save plot
-ggsave(here("5-visualization/wiki-pageviews-by-article-USA-daily.png"))
+ggsave(here("5-visualization/pageviews-mpox-related.png"))
 
 
 # CDC Case Data ================================================================
@@ -226,7 +226,7 @@ us_states_map <- left_join(us_states, cases_totals, by = join_by(NAME == Locatio
 us_states_map
 
 # Save map
-tmap_save(us_states_map, filename = here("5-visualization/mpox-cases-USA-states-map.png"),
+tmap_save(us_states_map, filename = here("5-visualization/cases-USA-map.png"),
           width = 10, height = 7, dpi = 300)
 
 
@@ -269,7 +269,7 @@ cases_daily |>
   )
 
 # Save plot
-ggsave(here("5-visualization/mpox-cases-USA-weekly.png"), height = 7.75, width = 10)
+ggsave(here("5-visualization/cases.png"), height = 7.75, width = 10)
 
 
 # Combined Data ================================================================
@@ -347,7 +347,7 @@ plot_df |>
     )
 
 # save plot
-ggsave(here("5-visualization/mpox-cases-&-wiki-pageviews-USA-rolling-avg.png"), height = 7.75, width = 10)
+ggsave(here("5-visualization/cases-&-pageviews-rolling-avg.png"), height = 7.75, width = 10)
 
 
 # News Coverage Data ===========================================================
@@ -357,7 +357,7 @@ news_df |>
   mutate(date = floor_date(date, unit = "weeks")) |> 
   reframe(.by = date, n_articles = sum(n_articles)) |> 
   ggplot(aes(x = date, y = n_articles)) +
-  geom_col() +
+  geom_col(width = 7, color = "black") +
   scale_x_date(
     limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
     date_breaks = "1 month",
@@ -380,7 +380,7 @@ news_df |>
   )
 
 # save plot
-ggsave(here("5-visualization/mpox-news-USA-weekly.png"), height = 7.75, width = 10)
+ggsave(here("5-visualization/mpox-news.png"), height = 7.75, width = 10)
 
 
 # Scientific Studies Data ======================================================
@@ -389,7 +389,7 @@ studies_df |>
   filter(date >= as_date("2022-01-01")) |> 
   mutate(date = floor_date(date, unit = "weeks")) |> 
   ggplot(aes(x = date)) +
-  geom_bar() +
+  geom_bar(width = 7, color = "black") +
   scale_x_date(
     limits = c(as_date("2022-0-01"), max(cases_daily$date)), 
     date_breaks = "1 month",
@@ -412,4 +412,4 @@ studies_df |>
   )
 
 # save plot
-ggsave(here("5-visualization/mpox-studies-USA-weekly.png"), height = 7.75, width = 10)
+ggsave(here("5-visualization/mpox-studies.png"), height = 7.75, width = 10)
