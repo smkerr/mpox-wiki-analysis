@@ -77,16 +77,13 @@ source(here("4-code/4-test-normality.R"))
 source(here("4-code/5-lag-analysis.R"))
 
 # Regression analysis ==========================================================
-#source(here("4-code/6-regression-analysis.R"))
+source(here("4-code/6-regression-analysis.R"))
 
 # Test for Granger causality ===================================================
-#source(here("4-code/7-granger-causality.R"))
+source(here("4-code/7-granger-causality.R"))
 
 # Figures ======================================================================
-#source(here("4-code/figures.R"))
+source(here("4-code/figures.R"))
 
 # Tables =======================================================================
-#source(here("4-code/tables.R"))
-
-# Calculations used in the paper ===============================================
-#source(here("4-code/stats.R"))
+source(here("4-code/tables.R"))

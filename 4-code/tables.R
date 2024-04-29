@@ -25,27 +25,6 @@ pacman::p_load(
   install = FALSE
 )
 
-# Load data
-# TODO: I may not actually need all of these datasets
-# load combined data
-#mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
-
-# load pageviews data
-#pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
-#pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
-#pageviews_weekly <- read_csv(here("3-data/wikipedia/pageviews-weekly.csv"))
-#pageviews_total <- read_csv(here("3-data/wikipedia/total-pageviews.csv"))
-
-# load mpox case data
-#cases_daily <- read_csv(here("3-data/mpox-cases/mpox-cases-daily.csv"))
-#cases_weekly <- read_csv(here("3-data/mpox-cases/mpox-cases-weekly.csv"))
-
-# load media coverage data
-#news_df <- read_csv(here("3-data/mpox-news/mpox-total-articles-deduplicated.csv"))
-
-# load academic interest data
-#studies_df <- read_csv(here("3-data/mpox-studies/mpox-total-studies.csv"))
-
 # Load lag analysis results
 lag_results <- read_csv(here(glue("3-data/output/lag-analysis/lag-analysis-results.csv")))
 
@@ -65,7 +44,6 @@ lag_results |>
 
 summary_data <- lag_results |>
   group_by(page_title) |>
-  #mutate(page_title = factor(page_title, levels = rev(order_by_coefficients))) |> 
   summarise(
     Avg_Estimate = mean(estimate, na.rm = TRUE),
     Median_Estimate = median(estimate, na.rm = TRUE),
@@ -91,7 +69,8 @@ summary_table <- gt(summary_data) |>
     decimals = 2
   ) |>
   fmt_number(
-    columns = c(Significant_Lags)
+    columns = c(Significant_Lags),
+    decimals = 0
   ) |>
   tab_options(
     table.font.size = px(12),
@@ -116,7 +95,9 @@ summary_table <- summary_table |>
   # Bold the table title
   tab_header(
     title = md("**Summary of Lag Analysis**")
-  )
+  ) 
+
+gtsave(summary_table, here("5-tables/lag-analysis-summary-table.tex"))
 
 
 summary_table <- summary_table |>
@@ -128,7 +109,7 @@ summary_table <- summary_table |>
     )
   ) |>
   data_color(
-    columns = c(Avg_P_Value, Min_P_Value),
+    columns = c(Avg_P_Value, Median_P_Value),
     fn = scales::col_numeric(
       palette = c("lightgreen", "darkgreen"),
       domain = NULL

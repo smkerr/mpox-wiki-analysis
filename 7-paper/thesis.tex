@@ -945,6 +945,8 @@ analysis distinguished between negative lags, suggesting mpox cases
 influenced subsequent pageviews, and positive lags, indicating that
 pageviews may have predicted later mpox cases.
 
+\includegraphics{images/lag-analysis-summary-table.png}
+
 Most articles, except for the one on Fever, demonstrated significant
 correlations with mpox cases at various time lags, with five articles
 (Encephalitis, Herpes simplex, Mpox, Smallpox, and Wart) maintaining a
@@ -1002,6 +1004,8 @@ most complex model, integrating additional pageviews, media, and
 scientific data, performs poorly, with erratic and sometimes negative
 predictions, likely due to overfitting.~
 
+\includegraphics{images/regression-analysis-model-fit-train.png}
+
 When applied to data from a later time period, the models exhibited
 varied accuracy in forecasting actual case trends. The first model fails
 to reflect any significant change in the actual cases, showing a lack of
@@ -1017,20 +1021,7 @@ highlighting possible calibration or variable selection issues. These
 observations underscore the need for careful model optimization to
 improve forecasting accuracy.
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 0\tabcolsep) * \real{1.0000}}@{}}
-\toprule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-Goodness-of-fit statistics for different multivariate regression
-models \\
-Fitting parameter \\
-R² \\
-Adjusted R² \\
-AIC \\
-BIC \\
-\end{longtable}
+\includegraphics{images/regression-analysis-model-fit-test.png}
 
 Overall, none of the models seems to provide a consistently accurate fit
 across the entire timeline, as indicated by the discrepancies between
@@ -1110,7 +1101,10 @@ temporary rise in public interest. Lastly, a surge in pageviews
 percentage tends to peak quickly, followed by a recovery and then
 another decline, potentially due to information saturation. The
 confidence intervals across these graphs underscore the varying degrees
-of certainty regarding these predictions.
+of certainty regarding these
+predictions.\includegraphics{images/Bildschirmfoto 2024-04-29 um 22.50.50.png}
+
+\includegraphics{images/Bildschirmfoto 2024-04-29 um 22.51.35.png}
 
 The Granger-causality test results suggest a predictive relationship
 between Wikipedia pageviews and mpox cases. The pageviews significantly
