@@ -251,5 +251,3 @@ granger_cases <- causality(var_model, cause = "roll_cases")
 
 granger_pageviews 
 granger_cases
-
-

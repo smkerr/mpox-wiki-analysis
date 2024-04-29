@@ -28,8 +28,6 @@ pacman::p_load(
 mpox_df <- read_csv(here("3-data/output/mpox-data.csv"))
 
 # load pageviews data
-#pageviews <- read_csv(here("3-data/wikipedia/pageviews-differential-private.csv"))
-#pageviews_daily <- read_csv(here("3-data/wikipedia/pageviews-daily.csv"))
 pageviews_total <- read_csv(here("3-data/wikipedia/project-views-monthly.csv"))
 
 # load mpox case data
@@ -313,7 +311,7 @@ plot_df |>
   filter(date >= as_date("2022-05-01")) |> 
   ggplot(aes(x = date)) +
   geom_col(aes(y = roll_cases / coeff, fill = "Cases")) +
-  geom_vline(xintercept = vline_dates) + #, linetype = "longdash") +
+  geom_vline(xintercept = vline_dates) + 
   geom_text(data = data.frame(date = vline_dates, label = labels),
             aes(x = date, y = Inf, label = label), angle = 90, vjust = -1, hjust = 1.05, size = 3) +
   geom_line(aes(y = roll_pct_pageviews, color = "Pageviews (%)"), linewidth = 1) +
@@ -479,12 +477,6 @@ ggsave(filename = here("6-figures/spearman-correlation-barplot.png"), width = 10
 
 
 ## Visualize p-values ----------------------------------------------------------
-# Order articles by lag value of min p-value
-# order_by_p.values <- lag_results |> 
-#   reframe(.by = page_title, avg_p.value = mean(p.value, na.rm = TRUE)) |> 
-#   arrange(-avg_p.value) |> 
-#   pull(page_title)
-
 # Plot heatmap of p-values
 lag_results |> 
   mutate(

@@ -163,7 +163,6 @@ gtsave(gt_model_summary_table, here("5-tables/regression-models-summary-table.te
 
 
 # Coefficient Summary
-# TODO: Scale coefficients down to a reasonable scale!!!
 gt_coef_summary_table <- coef_summary_table |>
   mutate(
     term = case_when(
@@ -195,17 +194,12 @@ gt_coef_summary_table <- coef_summary_table |>
   cols_label(
     estimate = "Value",
     std.error = "SE",
-    statistic = "T", ### 
+    statistic = "T", 
     p.value = "p-value"
-    # TODO: Add 95% CI
   ) |>
   tab_header(title = "Multivariate regression models estimating the impact of different predictors") |>
-  #tab_footnote(footnote = "Note: Media coverage ") |> 
   cols_align(align = "center", columns = term:p.value)
 gt_coef_summary_table
 
 # Save the gt table as a LaTeX file
 gtsave(gt_coef_summary_table, filename = here("5-tables/regression-coef-summary-table.tex"))
-
-
-## Test Data -------------------------------------------------------------------
