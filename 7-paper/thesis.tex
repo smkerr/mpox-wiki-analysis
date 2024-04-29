@@ -346,9 +346,15 @@ detail below. For these reasons, the United States represents a
 reasonable case study of the dynamic between mpox cases and Wikipedia
 pageviews.
 
-\begin{center}
-\includegraphics{images/cases-USA-map.png}
-\end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/cases-USA-map.png}
+
+}
+
+\caption{Map of mpox cases by U.S. state}
+
+\end{figure}%
 
 Given the existing literature, this paper aims to fill the research gap
 by investigating whether Wikipedia anonymized country-level pageview
@@ -471,7 +477,7 @@ of March 2024, \url{http://wikipedia.org} ranks as the fifth most
 visited website globally with an estimated 2 billion monthly visitors
 (\citeproc{ref-wikimediafoundation}{Wikimedia Statistics 2024}). In
 total, it offers more than 60 million articles in over 270 languages
-(\citeproc{ref-wikipedi2024}{Wikipedia 2024}). Even while Google draws
+(\citeproc{ref-wikipedi2024}{Wikipedia 2024b}). Even while Google draws
 more site visits, Wikipedia pageviews are arguably a better measure of
 deeper interest in a topic (\citeproc{ref-kuxe4mpf2015}{Kämpf et al.
 2015}). Notable, Wikipedia is often the preferred choice for individuals
@@ -488,10 +494,9 @@ search engine platforms such as Google, Baidu, Yahoo, and Yandex are not
 readily available to the public (\citeproc{ref-generous2014}{Generous et
 al. 2014}). Social media platforms are similarly restrictive. While Meta
 and X both offer APIs to facilitate data access, in the case of the
-former, data is still opaque (\citeproc{ref-getstar}{{``Get Started with
-the Page Insights API,''} n.d.}), while in the case of the latter, even
-anything beyond barebones API privileges require paying fees
-(\citeproc{ref-xapi}{X 2024}, \textbar).
+former, data is still opaque (\citeproc{ref-getstar}{Meta 2022}), while
+in the case of the latter, even anything beyond barebones API privileges
+require paying fees (\citeproc{ref-xapi}{X 2024}).
 
 Second, Wikipedia pageview data is transparent. Whereas GTI data is
 converted to RSVs prior to public release, Wikipedia provides more
@@ -499,7 +504,7 @@ granular pageview statistics that allow for comparability across
 different languages, time periods, and geographic regions. Third,
 Wikipedia data encompasses a wide range of topics--as of April 2024, it
 boasts a collection of nearly 70,000 medical articles alone
-(\citeproc{ref-wikimediafoundation2024}{Wikimedia 2024}). Moreover,
+(\citeproc{ref-wikimediafoundation2024}{Wikipedia 2024a}). Moreover,
 Wikipedia pageview statistics are available at a daily frequency. This
 high level of granularity allows for fine-grained analyses. Fourth,
 Wikipedia data is available at the language project-level and, as of
@@ -568,18 +573,28 @@ additional protective measure, a minimum pageview threshold is applied
 to February 5, 2023, which overlaps with the initial phase of the
 2022-2024 mpox outbreak, an article must have received a minimum of 450
 daily pageviews in order for its pageview data to be eligible for public
-release {[}!!!{]}. From February 6, 2023 onward, the minimum threshold
-is now determined by the level of journalistic safety for each country
-as classified by the Wikimedia Foundation's Country and Territory
-Protection List (\citeproc{ref-pageview}{{``Pageviews Differential
-Privacy {\textemdash} Current,''} n.d.}). While this is not a large
-concern for certain articles which consistently receive above 450
-pageviews, this does limit the number of observations for articles which
-only occasionally exceed this threshold.
+release (\citeproc{ref-pageviewhist}{{``Pageviews Differential Privacy
+{\textemdash} Historical,''} n.d.}). From February 6, 2023 onward, the
+minimum threshold is now determined by the level of journalistic safety
+for each country as classified by the Wikimedia Foundation's Country and
+Territory Protection List (\citeproc{ref-pageview}{{``Pageviews
+Differential Privacy {\textemdash} Current,''} n.d.}). While this is not
+a large concern for certain articles which consistently receive above
+450 pageviews, this does limit the number of observations for articles
+which only occasionally exceed this threshold.
 
-\begin{center}
-\includegraphics{images/wiki-pageview-differential-privacy-pipeline.jpg}
-\end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/wiki-pageview-differential-privacy-pipeline.jpg}
+
+}
+
+\caption{Triedman, Hal. ``Conceptual Steps of the Pageview Differential
+Privacy Pipeline.'' Wikipedia, licensed under CC BY-SA 4.0.
+https://diff.wikimedia.org/2023/06/21/new-dataset-uncovers-wikipedia-browsing-habits-while-protecting-users/screenshot-2023-05-23-at-10-34-18-am/.
+License: https://creativecommons.org/licenses/by-sa/4.0/.}
+
+\end{figure}%
 
 \subsection{Methods}\label{methods}
 
@@ -683,12 +698,19 @@ and healthcare providers identifying and reporting cases to the CDC,
 where figures are then aggregated at the national level prior to public
 release (\citeproc{ref-mcquiston2023}{McQuiston 2023}). As of March 5,
 2024, mpox cases have been reported by all 50 states, the District of
-Columbia, and Puerto Rico {[}!!!{]}. Data is as of March 5, 2024 and
-contains cases reported between 10 May 2022 to 27 February 2024.
+Columbia, and Puerto Rico (\citeproc{ref-cdcmap}{CDC 2024}). Data is as
+of March 5, 2024 and contains cases reported between 10 May 2022 to 27
+February 2024.
 
-\begin{center}
-\includegraphics{images/cases.png}
-\end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/cases.png}
+
+}
+
+\caption{Epidemic curve of U.S. mpox cases}
+
+\end{figure}%
 
 \subsubsection{Wikipedia pageview data}\label{wikipedia-pageview-data}
 
@@ -700,20 +722,37 @@ decision is not anticipated to substantially impact the analysis since
 English-language Wikipedia accounts for approximately 90\% of the United
 States' total pageviews.
 
-\includegraphics{images/wiki-project-views.png}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/wiki-project-views.png}
+
+}
+
+\caption{U.S. Wikipedia pageviews by language}
+
+\end{figure}%
 
 The data collection process involved identifying key Wikipedia articles
 related to mpox, starting with ``Mpox'' and ``Monkeypox virus'' from the
 English-language Wikipedia. Using the Wikimedia Analytics Query Service
-(AQS) REST API via the \texttt{\{WikipediR\}} package, a comprehensive
-list of 451 linked articles was narrowed down through manual review to
-39 directly related to mpox, excluding those primarily documenting the
-2022-2024 outbreak. Additional articles on mpox symptoms like ``Lesion''
-and ``Myalgia'' were also included, informed by WHO guidelines and
-symptomatology reports (\citeproc{ref-mpox_cif}{WHO 2023b},
-\citeproc{ref-whoshiny}{2024}).
+(AQS) REST API via the \texttt{\{WikipediR\}} package
+(\citeproc{ref-wikipedir}{Keyes, Tilber, and Schmid 2024}), a
+comprehensive list of 451 linked articles was narrowed down through
+manual review to 39 directly related to mpox, excluding those primarily
+documenting the 2022-2024 outbreak. Additional articles on mpox symptoms
+like ``Lesion'' and ``Myalgia'' were also included, informed by WHO
+guidelines and symptomatology reports (\citeproc{ref-mpox_cif}{WHO
+2023b}, \citeproc{ref-whoshiny}{2024}).
 
-\includegraphics{images/pageviews-mpox-related.png}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/pageviews-mpox-related.png}
+
+}
+
+\caption{U.S. pageviews by mpox-related Wikipedia article}
+
+\end{figure}%
 
 Daily anonymized pageview statistics for mpox-related Wikipedia articles
 exceeding the Wikimedia Foundation's privacy threshold were obtained and
@@ -745,17 +784,24 @@ toward the total. (\citeproc{ref-whoreco}{WHO 2022c}).
 Data on scientific articles published from January 1, 2022, to February
 27, 2024, related to mpox were retrieved from the PubMed database to
 assess the impact of scientific interest on online attention towards the
-disease. The \texttt{\{rentrez\}} package was used to extract papers
-from PubMed that mentioned ``monkeypox'' or ``mpox'' in their titles,
-descriptions, or Medical Subject Headings (MeSH), with duplicates and
-missing titles removed to maintain data integrity. Where specific
-publication dates were missing, e-publication dates were used, with a
-note that aggregating data on a weekly basis reduces any resulting bias
-in daily publication counts.
+disease. The \texttt{\{rentrez\}} package
+(\citeproc{ref-winter2020}{Winter, Chamberlain, and Guangchun 2020}) was
+used to extract papers from PubMed that mentioned ``monkeypox'' or
+``mpox'' in their titles, descriptions, or Medical Subject Headings
+(MeSH), with duplicates and missing titles removed to maintain data
+integrity. Where specific publication dates were missing, e-publication
+dates were used, with a note that aggregating data on a weekly basis
+reduces any resulting bias in daily publication counts.
 
-\begin{center}
-\includegraphics{images/mpox-studies.png}
-\end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/mpox-studies.png}
+
+}
+
+\caption{Mpox-related scientific publications}
+
+\end{figure}%
 
 \subsection{Methods}\label{methods-1}
 
@@ -769,7 +815,8 @@ et al. 2017}; \citeproc{ref-generous2014}{Generous et al. 2014}).
 Finally, I perform impulse response and Granger-causality tests to
 assess the directionality of the relationship between the mpox cases and
 pageviews (\citeproc{ref-yan2023}{Yan et al. 2023}). All analysis is
-performed using R version 4.3.3 {[}!!!{]}.
+performed using R version 4.3.3 (\citeproc{ref-rformac}{Statistical
+Computing 2024}).
 
 \subsubsection{Lag analysis}\label{lag-analysis}
 
@@ -912,13 +959,25 @@ lead to increased searches for fatigue, but not vice versa. Conversely,
 the Genital herpes article suggested that an increase in pageviews could
 potentially predict subsequent mpox cases.~
 
-\begin{center}
-\includegraphics{images/spearman-correlation-heatmap.png}
-\end{center}
+\begin{figure}[H]
 
-\begin{center}
-\includegraphics{images/spearman-pvalues-heatmap.png}
-\end{center}
+{\centering \includegraphics{images/spearman-correlation-heatmap.png}
+
+}
+
+\caption{Time lag correlation of Wikipedia pageviews and mpox cases}
+
+\end{figure}%%
+\begin{figure}[H]
+
+{\centering \includegraphics{images/spearman-pvalues-heatmap.png}
+
+}
+
+\caption{Significance of time lag correlation of Wikipedia pageviews and
+mpox cases}
+
+\end{figure}%
 
 Articles with substantial correlation with mpox cases were selected for
 inclusion in the next stage of the analysis. Only articles with a
@@ -1028,9 +1087,15 @@ non-normality in the residuals. This non-normality could affect the
 reliability of some statistical inferences drawn from the model, such as
 confidence intervals and hypothesis tests.~
 
-\begin{center}
-\includegraphics{images/impulse-response-function.png}
-\end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics{images/impulse-response-function.png}
+
+}
+
+\caption{Impulse response function results}
+
+\end{figure}%
 
 The IRF analysis reveals the responses of mpox cases and pageviews to
 shocks within each series, demonstrating how changes in one variable
@@ -1138,13 +1203,12 @@ classifications, while of critical importance, does present a challenge
 for implementing a uniform approach to disease modeling across different
 countries. Additionally, it should be noted that country-level data is
 available only from July 2015 onward, thereby limiting the scope for
-retrospective analyses
-{[}\url{https://diff.wikimedia.org/2023/06/21/new-dataset-uncovers-wikipedia-browsing-habits-while-protecting-users/}{]}.
-Lastly, demographic biases in Wikipedia's user base, which tend to be
-younger, more educated, and male, may not accurately reflect the broader
-public's concerns (\citeproc{ref-glott2010}{Glott and Ghosh 2010}). This
-skew could lead to misleading interpretations of public interest in
-health issues.~
+retrospective analyses (\citeproc{ref-triedman2023}{Triedman and Ruiz
+2023}). Lastly, demographic biases in Wikipedia's user base, which tend
+to be younger, more educated, and male, may not accurately reflect the
+broader public's concerns (\citeproc{ref-glott2010}{Glott and Ghosh
+2010}). This skew could lead to misleading interpretations of public
+interest in health issues.~
 
 Methodologically, the study may not capture complex, nonlinear
 interactions between Wikipedia pageviews and epidemiological trends
@@ -1296,6 +1360,10 @@ Butler, Declan. 2013. {``When Google Got Flu Wrong.''} \emph{Nature} 494
 CDC. 2023. {``Mpox in the u.s.''}
 \url{https://www.cdc.gov/poxvirus/mpox/response/2022/mpx-trends.html}.
 
+\bibitem[\citeproctext]{ref-cdcmap}
+---------. 2024. {``2022-2023 u.s. Map \& Case Count.''}
+\url{https://www.cdc.gov/poxvirus/mpox/response/2022/us-map.html}.
+
 \bibitem[\citeproctext]{ref-cervellin2017}
 Cervellin, Gianfranco, Ivan Comelli, and Giuseppe Lippi. 2017. {``Is
 Google Trends a reliable tool for digital epidemiology? Insights from
@@ -1347,10 +1415,6 @@ Gessain, Antoine, Emmanuel Nakoune, and Yazdan Yazdanpanah. 2022.
 {``Monkeypox.''} \emph{New England Journal of Medicine} 387 (19):
 1783--93. \url{https://doi.org/10.1056/NEJMra2208860}.
 
-\bibitem[\citeproctext]{ref-getstar}
-{``Get Started with the Page Insights API.''} n.d.
-\url{https://developers.facebook.com/blog/post/2022/11/08/getting-started-with-page-insights-api/}.
-
 \bibitem[\citeproctext]{ref-ginsberg2009}
 Ginsberg, Jeremy, Matthew H. Mohebbi, Rajan S. Patel, Lynnette Brammer,
 Mark S. Smolinski, and Larry Brilliant. 2009. {``Detecting Influenza
@@ -1396,6 +1460,11 @@ Kämpf, Mirko, Eric Tessenow, Dror Y. Kenett, and Jan W. Kantelhardt.
 2015. {``The Detection of Emerging Trends Using Wikipedia Traffic Data
 and Context Networks.''} \emph{PloS One} 10 (12): e0141892.
 \url{https://doi.org/10.1371/journal.pone.0141892}.
+
+\bibitem[\citeproctext]{ref-wikipedir}
+Keyes, Os, Brock Tilber, and Clemens Schmid. 2024. {``Package
+{`WikipediR'}: A MediaWiki API Wrapper.''}
+\url{https://cran.r-project.org/web/packages/WikipediR/WikipediR.pdf}.
 
 \bibitem[\citeproctext]{ref-kman2012}
 Kman, Nicholas E., and Daniel J. Bachmann. 2012. {``Biosurveillance: a
@@ -1447,6 +1516,10 @@ McQuiston, Jennifer H. 2023. {``The CDC Domestic Mpox Response
 Morbidity and Mortality Weekly Report} 72.
 \url{https://doi.org/10.15585/mmwr.mm7220a2}.
 
+\bibitem[\citeproctext]{ref-getstar}
+Meta. 2022. {``Get Started with the Page Insights API.''}
+\url{https://developers.facebook.com/blog/post/2022/11/08/getting-started-with-page-insights-api/}.
+
 \bibitem[\citeproctext]{ref-munzert}
 Munzert. 2015. {``Using Wikipedia Article Traffic Volume to Measure
 Public Issue Attention - Work in Progress.''}
@@ -1467,6 +1540,10 @@ e1003256. \url{https://doi.org/10.1371/journal.pcbi.1003256}.
 \bibitem[\citeproctext]{ref-pageview}
 {``Pageviews Differential Privacy {\textemdash} Current.''} n.d.
 \url{https://analytics.wikimedia.org/published/datasets/country_project_page/00_README.html}.
+
+\bibitem[\citeproctext]{ref-pageviewhist}
+{``Pageviews Differential Privacy {\textemdash} Historical.''} n.d.
+\url{https://analytics.wikimedia.org/published/datasets/country_project_page_historical/00_README.html}.
 
 \bibitem[\citeproctext]{ref-paul2011}
 Paul, Michael, and Mark Dredze. 2011. {``You Are What You Tweet:
@@ -1502,6 +1579,10 @@ Almeida Fonseca, and Jean Bousquet. 2020. {``Assessment of the Impact of
 Media Coverage on COVID-19{\textendash}Related Google Trends Data:
 Infodemiology Study.''} \emph{Journal of Medical Internet Research} 22
 (8): e19611. \url{https://doi.org/10.2196/19611}.
+
+\bibitem[\citeproctext]{ref-rformac}
+Statistical Computing, R Foundation for. 2024. {``R Version 4.3.3
+(2024-02-29) -- "Angel Food Cake".''} \url{https://cran.r-project.org/}.
 
 \bibitem[\citeproctext]{ref-tausczik2012}
 Tausczik, Yla, Kate Faasse, James W. Pennebaker, and Keith J. Petrie.
@@ -1550,10 +1631,6 @@ Outbreak of Mpox (Monkeypox).''}
 ---------. 2024. {``2022-24 Mpox Outbreak: Global Trends.''}
 \url{https://worldhealthorg.shinyapps.io/mpx_global}.
 
-\bibitem[\citeproctext]{ref-wikimediafoundation2024}
-Wikimedia. 2024. {``WikiProject Medicine.''}
-\url{https://en.wikipedia.org/w/index.php?title=Wikipedia:WikiProject_Medicine&oldid=1209391449}.
-
 \bibitem[\citeproctext]{ref-wikimediafoundation}
 Wikimedia Statistics. 2024. {``Wikimedia Statistics - All Wikipedias.''}
 \url{https://stats.wikimedia.org/\#/all-wikipedia-projects}.
@@ -1563,12 +1640,21 @@ Wikimedia Statistics. 2024. {``Wikimedia Statistics - All Wikipedias.''}
 - Breakdown.''} n.d.
 \url{https://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerLanguageBreakdown.htm}.
 
+\bibitem[\citeproctext]{ref-wikimediafoundation2024}
+Wikipedia. 2024a. {``WikiProject Medicine.''}
+\url{https://en.wikipedia.org/w/index.php?title=Wikipedia:WikiProject_Medicine&oldid=1209391449}.
+
 \bibitem[\citeproctext]{ref-wikipedi2024}
-Wikipedia. 2024. {``Size of Wikipedia.''}
+---------. 2024b. {``Size of Wikipedia.''}
 \url{https://en.wikipedia.org/w/index.php?title=Wikipedia:Size_of_Wikipedia&oldid=1216603163}.
 
+\bibitem[\citeproctext]{ref-winter2020}
+Winter, David, Scott Chamberlain, and Han Guangchun. 2020.
+\emph{Rentrez: 'Entrez' in r}.
+\url{https://cran.r-project.org/web/packages/rentrez/index.html}.
+
 \bibitem[\citeproctext]{ref-xapi}
-X. 2024. {``API \textbar{} Products.''}
+X. 2024. {``API Products.''}
 \url{https://developer.twitter.com/en/products/twitter-api}.
 
 \bibitem[\citeproctext]{ref-yan2023}
