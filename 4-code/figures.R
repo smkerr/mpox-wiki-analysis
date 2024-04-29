@@ -480,10 +480,10 @@ ggsave(filename = here("6-figures/spearman-correlation-barplot.png"), width = 10
 
 ## Visualize p-values ----------------------------------------------------------
 # Order articles by lag value of min p-value
-order_by_p.values <- lag_results |> 
-  reframe(.by = page_title, avg_p.value = mean(p.value, na.rm = TRUE)) |> 
-  arrange(-avg_p.value) |> 
-  pull(page_title)
+# order_by_p.values <- lag_results |> 
+#   reframe(.by = page_title, avg_p.value = mean(p.value, na.rm = TRUE)) |> 
+#   arrange(-avg_p.value) |> 
+#   pull(page_title)
 
 # Plot heatmap of p-values
 lag_results |> 
@@ -494,7 +494,7 @@ lag_results |>
       p.value < 0.05 ~ "<0.05",
       TRUE ~ "Not signif."),
     signif = factor(signif, levels = c("Not signif.", "<0.05", "<0.01", "<0.001")),
-    page_title = factor(page_title, levels = order_by_p.values)
+    page_title = factor(page_title, levels = order_by_coefficients)
   ) |> 
   ggplot(aes(x = lag, y = page_title, fill = signif)) +
   geom_tile(color = "white") +
