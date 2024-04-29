@@ -47,7 +47,7 @@ train_df <- left_join(
     # Fill in missing info
     fill(country, iso2, iso3, project, wikidata_id, page_id, page_title, pageviews_ceil, .direction = "downup") |> 
     mutate(
-      pageviews = ifelse(is.na(pageviews) | pageviews == 0, 0, pageviews), ###
+      pageviews = ifelse(is.na(pageviews) | pageviews == 0, 449, pageviews), 
       pct_pageviews = pageviews / pageviews_ceil,
     ) |> 
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
@@ -210,7 +210,7 @@ test_df <- left_join(
     # Fill in missing info
     fill(country, iso2, iso3, project, wikidata_id, page_id, page_title, pageviews_ceil, .direction = "downup") |> 
     mutate(
-      pageviews = ifelse(is.na(pageviews) | pageviews == 0, 90, pageviews), ###
+      pageviews = ifelse(is.na(pageviews) | pageviews == 0, 89, pageviews),
       pct_pageviews = pageviews / pageviews_ceil,
     ) |>
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
@@ -289,3 +289,4 @@ plot_grid(p1, p2, p3, p4, ncol = 1)
 
 # Save plot
 ggsave(here("6-figures/regression-analysis-model-fit-test.png"), height = 7.75, width = 10)
+

@@ -36,7 +36,7 @@ lag_df <- left_join(
   # calculate 7-day rolling averages for pageviews 
   mpox_df |> 
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |>
-    filter(sum(!is.na(pct_pageviews), na.rm = TRUE) >= 30) |> # remove articles with <30 pageviews
+    filter(sum(!is.na(pct_pageviews), na.rm = TRUE) >= 71) |> # remove articles with <30 pageviews
     mutate(
       pct_pageviews = pageviews / pageviews_ceil,
       roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)

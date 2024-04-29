@@ -11,7 +11,6 @@ pacman::p_load(
   MASS, 
   broom, 
   dplyr,
-  #ggnewscale, ###
   ggplot2,
   glue,
   here,
@@ -25,7 +24,6 @@ pacman::p_load(
   slider, 
   tibble,
   tidyr, 
-  #tseries, ###
   vars,
   install = FALSE
   )
@@ -41,16 +39,16 @@ df <- left_join(
     filter(page_title == "Mpox") |> 
     group_by(country, iso2, iso3, project, wikidata_id, page_id, page_title) |> 
     mutate(
-      pageviews = ifelse(is.na(pageviews), 450, pageviews), # set missing values equal to inclusion threshold
+      pageviews = ifelse(is.na(pageviews), 449, pageviews), # set missing values just below inclusion threshold
       pct_pageviews = pageviews / pageviews_ceil, # normalize data as share of monthly pageviews
-      roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 6)
+      roll_pct_pageviews = slide_dbl(pct_pageviews, ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)
     ) |> 
     ungroup() |> 
     select(-cases:-n_studies),
   # calculate 7-day rolling averages for cases, news articles, & scientific studies
   mpox_df |> 
     distinct(date, cases, n_articles, n_studies) |> 
-    mutate(roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 6)) |> 
+    mutate(roll_cases = slide_dbl(cases, .f = ~mean(.x, na.rm = TRUE), .before = 3, .after = 3)) |> 
     select(date, starts_with("roll")),
   by = join_by(date)
 )
@@ -89,7 +87,7 @@ print(non_stationary1)
 if (nrow(non_stationary1) > 0) {
   # drop first observation
   df1 <- df[-1, ]
-  
+
   # apply first-order differencing to non-stationary vars
   for (var in non_stationary1$var) {
     df1[[var]] <- diff(df[[var]], differences = 1)
@@ -97,8 +95,8 @@ if (nrow(non_stationary1) > 0) {
 }
 
 # Viz check
-df1 |> 
-  pivot_longer(cols = starts_with("roll"), names_to = "var", values_to = "value") |> 
+df1 |>
+  pivot_longer(cols = starts_with("roll"), names_to = "var", values_to = "value") |>
   ggplot(aes(x = date, y = value, color = var)) +
   geom_line() +
   facet_wrap(~var, ncol = 1, scales = "free_y") +
@@ -106,15 +104,15 @@ df1 |>
   labs(title = "Time Series Plot", x = NULL, y = "Value") +
   theme_minimal()
 
-# Check for stationarity 
-adf_results2 <- df1 |> 
-  select(starts_with("roll")) |> 
+# Check for stationarity
+adf_results2 <- df1 |>
+  select(starts_with("roll")) |>
   map(adf.test, alternative = "stationary")
-adf_results2 <- adf_results2[1:2] |> 
-  map_dfr(tidy) |> 
-  mutate(var = names(adf_results2[1:2])) |> 
+adf_results2 <- adf_results2[1:2] |>
+  map_dfr(tidy) |>
+  mutate(var = names(adf_results2[1:2])) |>
   relocate(var, .before = everything())
-non_stationary2 <- adf_results2 |> 
+non_stationary2 <- adf_results2 |>
   filter(p.value > 0.05)
 # The following have a p-value >0.05:
 print(non_stationary2)
@@ -126,7 +124,7 @@ print(non_stationary2)
 # Determine the optimal number of lags based on information criteria (e.g., AIC)
 lag_selection <- df1 |> 
   select(starts_with("roll")) |> 
-  VARselect(lag.max = 35, type = "none") 
+  VARselect(lag.max = 20, type = "none") 
 optimal_lag <- lag_selection$selection["AIC(n)"]
 
 
@@ -182,7 +180,7 @@ cor(var_model$datamat)
 # Impulse Response Analysis ====================================================
 #> An impulse response function (IRF) can help to understand how a shock to one 
 #> variable affects the others in the VAR system over time.
-n_ahead = 35
+n_ahead = 10
 irf_results <- irf(var_model, cumulative = FALSE, n.ahead = n_ahead, boot = TRUE, runs = 100)
 
 # Extracting and preparing data
@@ -219,6 +217,7 @@ irf_df |>
   geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.2) +  # Confidence interval
   geom_line() +  # IRF lines
   facet_wrap(~title, scales = "free_y") +
+  scale_x_continuous(breaks = pretty_breaks()) + 
   scale_y_continuous(labels = label_number()) +
   labs(title = "Impulse Response Function",
        x = "Time lag [Days]",
@@ -252,7 +251,3 @@ granger_cases <- causality(var_model, cause = "roll_cases")
 
 granger_pageviews 
 granger_cases
-
-granger_results_df$`P-value` <- format.pval(granger_results_df$`P-value`, digits = 2)
-
-#> The key aspect of the result to look at is the p-value. If the p-value is less than your significance level (commonly set at 0.05), you can conclude that there is evidence to suggest that the cause variable Granger-causes the other variable(s) in the VAR model
