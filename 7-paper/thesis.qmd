@@ -1,0 +1,299 @@
+---
+title: "From Clicks to Cases: Leveraging Wikipedia Pageviews for Mpox Case Prediction in the United States"
+author: "Steven Miles Kerr"
+date: "today"
+date-format: "D MMMM YYYY"
+format: 
+  pdf:
+    include-in-header:
+      text: |
+        \usepackage{setspace}
+        \doublespacing
+    latex-engine: "lualatex"
+    documentclass: article
+    titlepage: false
+    geometry: "margin=1in"
+    fontsize: "12pt"
+    highlight-style: "github"
+    colorlinks: true
+    keep-tex: true
+filters: [remove_title.lua]
+editor: "visual"
+bibliography: references.bib
+toc: false
+number-sections: false
+link-citations: true
+figure-caption: true
+cap-location: bottom
+
+# more info here: https://quarto.org/docs/reference/formats/pdf.html
+---
+
+```{=latex}
+\begin{titlepage}
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/hertie-school-logo.jpg}
+    \vspace*{\fill}
+    
+    \textbf{From Clicks to Cases: Leveraging Wikipedia Pageviews to Predict Mpox Cases in the United States}
+
+    \vspace{2.5cm}
+
+    Steven Miles Kerr
+
+    \vspace{1cm}
+    
+    Master of Data Science for Public Policy, Class of 2024\\
+    
+    \vspace{0.5cm}
+
+    April 29, 2024\\
+
+    \vspace*{\fill}
+
+    Supervised by Prof. Dr. Simon Munzert
+
+\end{titlepage}
+```
+```{=latex}
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+
+\setcounter{page}{1}
+```
+# Abstract
+
+As the world becomes increasingly interconnected and climate change elevates the risk of zoonotic spillover events, the public becomes ever more susceptible to global-scale outbreaks. Traditional disease surveillance methods are prone to under-reporting and time lags. By contrast, Wikipedia pageviews offer a real-time and cost-effective open source resource for tracking online health-related information-seeking behavior with the potential for enhancing global disease surveillance. This paper investigates the value of anonymized country-level Wikipedia pageviews data for predicting case incidence during the 2022-2024 mpox outbreak in the United States. The methods employed in this study involve a combination of quantitative techniques aimed at increasing understanding of the relationship between online behaviors and disease dynamics. A lag analysis correlating mpox cases and pageviews for mpox-related Wikipedia articles at different time lags was conducted to assess the variation in directionality between pageviews and cases across mpox-related articles. This was followed by a multivariate linear regression analysis aimed at predicting mpox incidence based on pageview data. Finally, impulse response and Granger-causality tests were performed to further analyze the directionality of the relationship between online activity and mpox cases. The study’s findings underscore the potential of Wikipedia traffic as a predictive tool for public health trends, revealing a bidirectional relationship between pageviews and mpox cases that unfolds over time. The predictive models struggled with accuracy, highlighting the need for further model refinement to adequately account for the complexity of online attention and disease dynamics.
+
+# Introduction
+
+As the world becomes increasingly interconnected and climate change elevates the risk of zoonotic spillover events, the public becomes ever more susceptible to global-scale outbreaks [@romanello2021]. While generally accurate, traditional surveillance methods often suffer from under-reporting and significant time lags. In this context, such methods are ill-equipped to provide decision-makers with real-time information on case incidence during public health emergencies. In contrast, the advent of data on internet activity offers an underutilized but valuable tool for tracking health-related information-seeking behaviors. These digital tools help bridge the gap between the occurrence of an outbreak and its reporting, providing a more immediate picture of public health trends and potentially accelerating policy interventions during critical early stages of disease spread.
+
+Google Trends serves as one such tool for analyzing global search patterns, providing insights into public interest across countries. This tool capitalizes on the immense traffic Google receives to evaluate the popularity of specific keywords over time, measured by Relative Search Volumes (RSVs). Its ability to offer real-time data on user search behavior at no cost has made Google Trends a crucial resource in academic research, including in the field of public health. Google Flu Trends is perhaps the most widely recognized use case, demonstrating its ability to produce highly accurate predictions in near real-time [@ginsberg2009]. Although the accuracy of its forecasts were compromised by factors like media influence during particularly severe outbreaks, as seen during the 2009 H1N1 pandemic and the severe 2012-2013 flu season, it succeeded in inspiring others to explore these methods as well [@olson2013; @butler2013]. Researchers have demonstrated its utility in predicting cases of diseases such as COVID-19 [@abbas2021; @effenberger2020; @gong2022], malaria [@ocampo2013], norovirus [@yuan2021], and the West-Nile virus disease [@bragazzi2016] among other diseases, highlighting its potential for early outbreak detection and public health surveillance.
+
+While Google Trends has proven to be a powerful data source for making case predictions, researchers have also investigated alternative data sources including Baidu [@bao2013; @gong2022; @yuan2013; @zhou2010], Reddit [@liu2022], Wikipedia [@gozzi2020; @hickmann2015; @laurent2009; @mciver2014; @tausczik2012], and X (formerly Twitter) [@marques-toledo2017; @paul2011]. Due to its freely accessible and highly-granular pageview data, broad coverage of public health topics, and wide readership, Wikipedia stands out as a high-potential datastream for outbreak detection and case prediction. While researchers have analyzed the effectiveness of Wikipedia pageview data in the context of influenza [@hickmann2015; @mciver2014; @tausczik2012] and COVID-19 [@chrzanowski2021; @gozzi2020] among other diseases, results have been mixed and have been shown to depend on the context to which they are applied. To expand on this work and gain a better understanding of the conditions under which Wikipedia pageview data can be useful for making such case predictions, this paper examines the efficacy of Wikipedia pageview data in the context of the 2022-2024 mpox (formerly known as monkeypox) outbreak.
+
+Mpox is a viral zoonosis—a virus transmitted to humans from animals—with symptoms similar to those observed in smallpox patients though typically less severe [@worldhealthorganization]. The monkeypox virus originates from wild animals like rodents and primates, and is spread through close contact with an infected person or animal, or with contaminated materials [@gessainantoine2022]. Human symptoms of mpox include fever, rash, and swollen lymph nodes [@gessainantoine2022, @beer2019]. Historically, mpox cases have been mainly reported in rural areas of western and central Africa, with the occasional exportation to countries outside the region [@gessainantoine2022].
+
+In May 2022, multiple countries without any history of sustained local mpox transmission reported new cases, marking the onset of a large-scale global outbreak, prompting the World Health Organization (WHO) to declare it a Public Health Emergency of International Concern (PHEIC) on July 23, 2022 [@whodire; @secondm]. As of March 2024, the outbreak has led to 95,226 confirmed cases and 185 deaths across 117 countries, primarily impacting the men who have sex with men (MSM) community [@laurenson-schafer2023]. While the emergency status was officially ended on May 11, 2023, non-endemic countries have continued to report cases [@fifthme].
+
+Although mpox cases have been reported globally, this study specifically examines the mpox outbreak in the United States. There are a few reasons for this. First, the United States has reported, by far, the most mpox cases of any country during the outbreak with a total of 32,063 cases reported as of March 2024, comprising 33.7% of global cases (32,063 / 95,227) [@cdc2023; @whoshiny]. Second, the United States also has the most granular Wikipedia pageview statistics, for reasons which will be discussed in further detail below. For these reasons, the United States represents a reasonable case study of the dynamic between mpox cases and Wikipedia pageviews.
+
+![](images/cases-USA-map.png){fig-align="center"}
+
+Given the existing literature, this paper aims to fill the research gap by investigating whether Wikipedia anonymized country-level pageview data can be predictive of mpox cases during the 2022-2024 outbreak in the United States. While previous studies have evaluated Wikipedia data for COVID-19 and others have utilized Google Trends data for mpox, this thesis represents the first attempt, to my knowledge, to explore the relationship between Wikipedia pageview statistics and mpox cases.
+
+# Literature Review
+
+## Public Attention
+
+While initially conceived outside of the field of epidemiology, Downs’ "issue-attention cycle" can be used when analyzing public attention toward public health emergencies. In this context, the first stage of public attention might involve the emergency of an infectious disease that is not recognized as a significant issue by the public [@downs]. It may be affecting a small subset of the population, and there may be limited awareness outside of health professionals or those directly affected. Then, due to a rapid increase in cases or media coverage, the public becomes highly aware of the disease outbreak. This stage is marked by a surge in media reports and public discussions. Over time, even as the disease continues to pose a threat, public attention starts to decline. This could be due to a variety of factors such as a decrease in new cases that leads to a perception that the situation is improving, or simply desensitization to the threat. Other emerging issues may also start drawing public and media focus away from the outbreak. Finally, the disease may still exist and with flare-ups occasionally occurring, but it no longer occupies substantial public concern [@downs].
+
+## Digital Epidemiological Surveillance
+
+Traditional disease surveillance methods are primarily rooted in collecting data from clinical settings such as hospitals, laboratories, and clinics. This data often includes information on clinical diagnoses, symptoms consistent with specific illnesses, or the number of emergency room visits, school and work absenteeism, and other health-related indicators [@kman2012]. However, while traditional surveillance systems are crucial for accurate disease monitoring, they have inherent limitations such as high operational costs and significant delays in data reporting, which can extend up to two weeks. This latency in data availability can impede timely public health interventions, especially during urgent outbreaks.
+
+Over the past decade, new surveillance techniques that leverage social media and internet search data have become increasingly prominent, offering advantages like cost-effective data collection and real-time analysis that enhance traditional surveillance methods. These methods consist of analyzing digital traces left by individuals discussing health-related topics on social platforms or searching for medical information online [@marques-toledo2017; @generous2014]. As internet usage continues to increase globally, this data source will continue to benefit public health officials seeking to make informed and data-driven policy decisions [@ginsberg2009].
+
+## Google Trends Index
+
+Google Trends is an influential online tool that allows users to examine global search trends, leveraging Google's status as the world's top website [@arora2019; @topwebs]. It offers insights into the popularity of specific keywords over time through Relative Search Volumes (RSVs), where a score of 100 indicates peak popularity. This makes the Google Trends Index (GTI) a valuable resource in epidemiological research and forecasting, such as with Google Flu Trends which, despite its initial success in predicting flu activity in real-time, faced accuracy challenges during major outbreaks like the 2009 H1N1 pandemic due to skewed data from media coverage [@ginsberg2009; @olson2013; @butler2013]. The tool's utility extends beyond influenza, aiding in the forecasting of diseases like COVID-19 [@abbas2021] and norovirus [@yuan2021] by correlating search trends with case data.
+
+However, Google Trends has significant limitations that affect its practical application. It normalizes search data by assigning a score of 100 to the term's peak popularity, complicating comparisons across different regions and times. The data resolution is limited, offering only the most recent 90 days on a daily basis and older data weekly, which restricts detailed long-term analysis. The lack of transparency in Google's normalization methods and the potential for algorithm changes introduces uncertainty and bias, potentially undermining the reliability of longitudinal studies [@lazer2014].
+
+## Alternative Data Sources
+
+In light of Google Trends’ shortcomings, researchers have explored how other more granular data sources might be leveraged. Gong et al. used the Baidu Index to link COVID-19 public attention to new case occurrences [@gong2022], while Bao et al. developed a predictive model for gonorrhea based on Baidu search trends [@bao2013]. Additionally, Zhou et al. utilized Baidu search data to forecast infection rates for diseases like scarlet fever ahead of official statistics [@zhou2010] and Yuan et al. further investigated the use of Baidu data through their prediction of influenza activity in China with a mean absolute percent error under 11% for one-month ahead predictions [@yuan2013]. Using X data on tweets, Marques-Toledo et al. found X data could predict dengue cases up to eight weeks ahead of official statistics [@marques-toledo2017]. Furthermore, Paul and Dredze built a machine learning model that analyzed tweets for health-related topics, finding correlations with CDC’s ILI data [@paul2011]. These studies underscore the potential of alternative internet search engines and social media platforms to serve as real-time surveillance tools for anticipating and responding to public health threats.
+
+## Wikipedia Pageviews
+
+Wikipedia is the most expansive and widely used online encyclopedia. As of March 2024, <http://wikipedia.org> ranks as the fifth most visited website globally with an estimated 2 billion monthly visitors [@wikimediafoundation]. In total, it offers more than 60 million articles in over 270 languages [@wikipedi2024]. Even while Google draws more site visits, Wikipedia pageviews are arguably a better measure of deeper interest in a topic [@kämpf2015]. Notable, Wikipedia is often the preferred choice for individuals seeking health information, being more widely used than the UK National Health Service, WebMD, Mayo Clinic, and WHO websites combined [@james2016; @laurent2009].
+
+Wikipedia pageview data presents several distinct advantages for research and analysis in comparison to search engines and social media platforms which collect similar data. First, the Wikipedia pageview statistics are made freely available. In contrast, detailed data from search engine platforms such as Google, Baidu, Yahoo, and Yandex are not readily available to the public [@generous2014]. Social media platforms are similarly restrictive. While Meta and X both offer APIs to facilitate data access, in the case of the former, data is still opaque [@getstar], while in the case of the latter, even anything beyond barebones API privileges require paying fees [@xapi|].
+
+Second, Wikipedia pageview data is transparent. Whereas GTI data is converted to RSVs prior to public release, Wikipedia provides more granular pageview statistics that allow for comparability across different languages, time periods, and geographic regions. Third, Wikipedia data encompasses a wide range of topics–as of April 2024, it boasts a collection of nearly 70,000 medical articles alone [@wikimediafoundation2024]. Moreover, Wikipedia pageview statistics are available at a daily frequency. This high level of granularity allows for fine-grained analyses. Fourth, Wikipedia data is available at the language project-level and, as of June 2023, at the country-level as well, which is particularly advantageous for tracking public attention in response to disease outbreaks across different languages and geographic areas [@triedman2023]. All of these features contribute toward the potential for models built in this data to not only provide current assessments (nowcasts) but also predict future trends (forecasts), further enhancing their practicality for monitoring online public attention [@generous2014].
+
+In the context of epidemiology, pageviews can help predict disease outbreaks based on increased public interest in medical condition-related articles given that several assumptions are met. First, this approach assumes that the collective pageviews for a given Wikipedia article accurately reflects genuine public attention toward a particular issue [@munzert]. However, several challenges complicate this relationship. Wikipedia users are typically younger, more educated, and more frequently male compared to the general internet population, and therefore may not represent the broader public's concerns accurately [@glott2010]. Furthermore, fluctuations in pageviews might not solely reflect genuine shifts in public interest but could also be influenced by external factors like media coverage or seasonal changes. Therefore, validating these changes as true indicators of public attention requires careful consideration of external data and events to assess their predictive reliability.
+
+In recent years, there have been many examples of researchers exploring the potential of Wikipedia pageviews data to measure and predict epidemiological trends. McIver and Brownstein built Poisson models with LASSO regression capable of accurately forecasting influenza rates in the United States, achieving Pearson correlation coefficients between 0.94 and 0.99 when compared to official CDC data [@brownstein2009]. During the COVID-19 pandemic, Chrzanowski et al. analyzed traffic from nearly 38,000 articles from the English Wikipedia Medicine Project and found that article popularity correlated with the severity of the pandemic, further supporting Wikipedia's utility in epidemiological surveillance [@chrzanowski2021]. Hickmann et al. further underscored Wikipedia's predictive capacity by correlating its pageviews with CDC influenza reports, effectively providing advance warnings of influenza trends [@hickmann2015]. However, Gozzi et al. observed that despite an initial surge in pageviews for COVID-19-related articles, interest rapidly decreased, highlighting the risk posed by attention saturation during prolonged disease outbreaks in impacting predictive models informed by online attention data [@gozzi2020].
+
+In June 2023, the Wikimedia Foundation began publishing anonymized country-level pageview statistics in response to requests from the research community for more granular data [@triedman2023]. The data are subject to a differential privacy scheme, whereby a certain level of artificial noise is injected into the data in order to prevent Wikipedia readers or editors from being identified retroactively through pageview logs [@triedman2023]. As a result, the differential privacy scheme obscures the true number of pageviews received by a given Wikipedia article while preserving the overall trends [@triedman2023]. As an additional protective measure, a minimum pageview threshold is applied [@triedman2023]. From July 1, 2015 to February 5, 2023, which overlaps with the initial phase of the 2022-2024 mpox outbreak, an article must have received a minimum of 450 daily pageviews in order for its pageview data to be eligible for public release \[!!!\]. From February 6, 2023 onward, the minimum threshold is now determined by the level of journalistic safety for each country as classified by the Wikimedia Foundation’s Country and Territory Protection List [@pageview]. While this is not a large concern for certain articles which consistently receive above 450 pageviews, this does limit the number of observations for articles which only occasionally exceed this threshold.
+
+![](images/wiki-pageview-differential-privacy-pipeline.jpg){fig-align="center"}
+
+## Methods
+
+For models built using this data to be effectively utilized by decision-makers, they must accurately estimate the expected number of cases. Since these values are influenced by the model specified and data used, the methods used in this paper draws from prior work to determine how to approach the task. When it comes to assessing the predictive value of online search activity for disease incidence, there are two primary types of methods: (1) lag analysis, which involves lagging either cases or pageviews to detect leading indicators, and (2) statistical forecasting methods, that range in complexity [@generous2014].
+
+While lag analysis has resulted in mixed findings [@cervellin2017; @chrzanowski2021; @polgreen2008; @yang2011], both Du et al. and Yan et al. apply this method to Google Trends Index data in the context of mpox, finding that significant lag-correlation between GTI and daily mpox cases with online search activity preceding cases, showing that the approach may hold some promise [@du2023; @yan2023]. More advanced statistical forecasting methods have also demonstrated impressive results [@abbas2021; @bernardo2013; @brownstein2009; @hickmann2015; @sousa-pinto2020], however, they often rely on large amounts of case data and high volumes of online search activity over longer time periods, particularly when a seasonal trend is present (e.g., COVID-19, influenza).
+
+While statistical forecasting methods are powerful, epidemic parameters are not always known during outbreaks of novel or understudied diseases. As Generous et al. argue, in such instances where epidemic parameters are not well understood or a clear seasonal pattern cannot be established, simpler methods may be more effective [@generous2014]. Building on existing research, I test both approaches to evaluate their efficacy in the context of the 2022-2024 mpox outbreak.
+
+# Research Questions
+
+The primary question that this paper sets out to answer is whether Wikipedia pageviews data can effectively function as a data source for predicting disease incidence during the 2022-2024 mpox outbreak, specifically in the context of the United States. The decision to focus on the United States is driven by the fact that it has reported the most cases of any country, comprising 33.7% of global cases (32,063 / 95,227), with cases continuing to be reported as of early 2024 [@cdc2023; @whoshiny]. This lends itself to time series modeling which benefits where data is available. Moreover, the length of the outbreak enables the initial period to be used to train a predictive model and a subsequent period to be used to test whether the model’s predictive value retains accuracy over time. The United States also generates the highest number of Wikipedia pageviews [@wikimedi]. This high volume of Wikipedia traffic increases the likelihood that mpox-related Wikipedia articles will consistently receive pageviews above the required threshold imposed by the Wikimedia Foundation in order to be eligible for inclusion in the anonymized country-level dataset. 
+
+Supporting this central question are several sub-questions that delve into specifics. First, I identify which mpox-related articles on Wikipedia are most closely aligned with fluctuations in mpox case numbers, potentially acting as indicators of disease spread. Additionally, the paper seeks to determine the optimal time lag between observed pageviews and reported mpox cases, which could help in predicting future outbreaks more accurately. Moreover, the research examines the adequacy of the predictive model being used—how well it fits data from the initial period and whether it can be effectively applied to later periods. A critical aspect of this analysis involves distinguishing the influence of actual disease cases on Wikipedia pageviews from other potential drivers like media coverage or scientific interest. Understanding these dynamics is crucial for improving the model's predictive power and reliability.
+
+# Data and Methods
+
+## Data Sources
+
+To investigate the predictive value of Wikipedia pageviews toward mpox case incidence during the 2022-2024 outbreak in the United States, this paper primarily relies on daily confirmed case data from the U.S. CDC and daily U.S. Wikipedia pageviews for mpox-related articles. Additionally, it incorporates data on media coverage from GNews and scientific publications from PubMed to consider other significant factors influencing online public attention [@adawi2017].
+
+### Mpox case data
+
+Data on daily number of mpox cases are obtained directly from the U.S. CDC website [@cdc2023]. Case data are compiled through a reporting chain that involves state public health officials and healthcare providers identifying and reporting cases to the CDC, where figures are then aggregated at the national level prior to public release [@mcquiston2023]. As of March 5, 2024, mpox cases have been reported by all 50 states, the District of Columbia, and Puerto Rico \[!!!\]. Data is as of March 5, 2024 and contains cases reported between 10 May 2022 to 27 February 2024.
+
+![](images/cases.png){fig-align="center"}
+
+### Wikipedia pageview data
+
+Daily anonymized statistics for mpox-related English-language Wikipedia pageviews from the United States were sourced from the Wikimedia Foundation. English-language articles are used since data on U.S. pageviews for other Wikipedia language projects are limited. This decision is not anticipated to substantially impact the analysis since English-language Wikipedia accounts for approximately 90% of the United States’ total pageviews.
+
+![](images/wiki-project-views.png)
+
+The data collection process involved identifying key Wikipedia articles related to mpox, starting with "Mpox" and "Monkeypox virus" from the English-language Wikipedia. Using the Wikimedia Analytics Query Service (AQS) REST API via the `{WikipediR}` package \[!!!\], a comprehensive list of 451 linked articles was narrowed down through manual review to 39 directly related to mpox, excluding those primarily documenting the 2022-2024 outbreak. Additional articles on mpox symptoms like “Lesion” and “Myalgia” were also included, informed by WHO guidelines and symptomatology reports [@mpox_cif; @whoshiny].
+
+![](images/pageviews-mpox-related.png)
+
+Daily anonymized pageview statistics for mpox-related Wikipedia articles exceeding the Wikimedia Foundation's privacy threshold were obtained and subsequently normalized by dividing daily views per article by total monthly pageviews of English-language Wikipedia from the U.S. which were accessed via the Wikimedia AQS REST API.
+
+![](images/cases-&-pageviews-rolling-avg.png)\
+
+### Media coverage data
+
+In order to account for the impact of media coverage on public attention toward mpox, data on the daily number of mpox-related articles published during the study period are obtained from GNews API [@gnewsap]. The GNews database contains tens of millions of articles from over 60,000 sources [@gnewsap]. Articles including “monkeypox” in the title or description from May 1, 2022 to November 27, 2022 are counted. Following WHO’s recommendation on November 28, 2022 that monkeypox be renamed to “mpox,” articles including either “monkeypox” or “mpox” in the title or description are then counted toward the total. [@whoreco].
+
+![](images/mpox-news.png)\
+
+### Scientific interest data
+
+Data on scientific articles published from January 1, 2022, to February 27, 2024, related to mpox were retrieved from the PubMed database to assess the impact of scientific interest on online attention towards the disease. The `{rentrez}` package \[!!!\] was used to extract papers from PubMed that mentioned "monkeypox" or "mpox" in their titles, descriptions, or Medical Subject Headings (MeSH), with duplicates and missing titles removed to maintain data integrity. Where specific publication dates were missing, e-publication dates were used, with a note that aggregating data on a weekly basis reduces any resulting bias in daily publication counts.
+
+![](images/mpox-studies.png){fig-align="center"}
+
+## Methods
+
+My proposed approach involves implementing several quantitative methods. First, I perform a lag analysis, taking inspiration from the work of Yan et al. and Du et al  [@yan2023; @du2023]. Next, I construct a multivariate regression model and test its ability to accurately predict mpox cases, drawing inspiration from various sources [@adawi2017; @generous2014]. Finally, I perform impulse response and Granger-causality tests to assess the directionality of the relationship between the mpox cases and pageviews [@yan2023]. All analysis is performed using R version 4.3.3 \[!!!\].
+
+### Lag analysis
+
+In the first stage of the analysis, a lag analysis was conducted to investigate the relationship between mpox incidence and online public attention as indicated by Wikipedia pageviews, using 7-day rolling averages of both mpox cases and normalized pageviews to smooth the data. To capture both immediate and delayed reactions, the 7-day rolling averages of mpox cases were iteratively lagged from -35 to 35 days, where a positive lag indicates future cases relative to pageviews, and a negative lag looks at past cases. Spearman correlation coefficients were used to measure the strength and direction of association due to the data's non-normal distribution [@schober2020]. This analysis was carried out individually for each mpox-related article within the dataset to identify patterns specific to different content types. The entire study period from May 10, 2022, to February 27, 2024, was analyzed, matching the availability of mpox case data.
+
+### Predictive model
+
+In the next stage, I model the relationship between Wikipedia pageviews and the incidence of mpox using multivariate linear regression to assess how well simple models can fit to mpox case numbers. Four distinct models were formulated using the 7-day rolling average of mpox cases as the dependent variable and different configurations of independent variables. The first model is based only on a 7-day rolling average of cumulative normalized pageviews for “Mpox” and “Monkeypox virus” articles. 
+
+$$
+cases_t = \beta_0 + \beta_1 \times pageviews_{mpox, t}+ \epsilon_t
+$$
+
+Taking inspiration from Generous et al., the second model incorporates the 7-day rolling averages of normalized pageviews for mpox-related articles that were estimated to have an absolute Spearman correlation greater than 0.5 based on the lag analysis [@generous2014]. 
+
+$$
+cases_t = \beta_0 + \sum \beta_i \times pageviews_{i, t}+ \epsilon_t
+$$
+
+The third model combines the 7-day rolling average of cumulative normalized pageviews for “Mpox” and “Monkeypox virus” articles with key covariates, namely the 7-day rolling averages for news articles and scientific publications that mention “mpox” or “monkeypox.” 
+
+\
+$$
+cases_t = \beta_0 + \beta_1 \times media_t + \beta_2 \times academia_t + \beta_3 \times   pageviews_{mpox, t}+ \epsilon_t
+$$\
+
+The final model uses pageviews from the included mpox-related articles along with the same covariates for media coverage and scientific interest.
+
+$$
+cases_t = \beta_0 + \beta_1 \times media_t + \beta_2 \times academia_t + \sum \beta_i \times pageviews_{i, t}+ \epsilon_t
+$$\
+
+The models were then fit to data from May 10, 2022 to September 19, 2023. This period ranges from the date of the United States’ first reported mpox case to the date on which the Wikimedia Foundation altered its approach to publicly releasing pageview statistics. Using the fit models, predictions are generated for the period from September 20, 2023 to February 27, 2024 to assess the accuracy of these simple models when applied to future data. To address missing values pageviews series, values were imputed to be 449 for the initial period and 89 for the later period. These values are just below the minimum pageview threshold corresponding with their respective periods.
+
+### Granger causality
+
+In the final stage of the analysis, the strength and directionality of the relationship between mpox cases and pageviews is explored using impulse response and Granger-causality tests. The 7-day rolling average of mpox cases and the 7-day rolling average of cumulative normalized pageviews of the "Mpox" and "Monkeypox virus" Wikipedia articles are used. The focus on these two articles is due to their specific relevance to mpox and the relative completeness of their pageview data throughout the study period. However, some data gaps exist due to internal Wikipedia database issues or because some pageviews fell below the minimum public release threshold. To address this and maintain the continuity required for time series analysis, missing values were imputed with a value of 449, which is just below the minimum inclusion threshold for publication. While this approach slightly obscures trends below this threshold, it ensures that the overall analysis remains robust and unaffected by these minimal data losses.
+
+A key assumption of this analysis is the stationarity of the time series, which is verified using the Augmented Dickey-Fuller (ADF) test. If a series is found to be non-stationary, it is first-order differenced, a common technique that involves subtracting the previous observation from the current one, before the ADF test is re-applied. This differencing process may be repeated up to three times or until both series achieve stationarity. Upon confirming stationarity, the data is modeled using Vector autoregression (VAR), which captures the temporal dynamics and potential feedback mechanisms between mpox-related Wikipedia pageviews and mpox cases.
+
+The interdependencies captured by the VAR model are further analyzed using an impulse response function (IRF), projected over a 10-day horizon with bootstrapping to establish confidence intervals. This analysis helps with understanding the impact of a one-time shock in one variable on the other over time. Additionally, Granger-causality tests are conducted to determine if changes in one series can predict changes in the other, and to check for any instantaneous causality between the series. These steps help assess the dynamic interplay and predictive power of mpox-related Wikipedia pageviews and mpox cases. This analysis was performed using the entire study period from May 10, 2022 to February 05, 2023, which corresponds with the time period for which the pageviews data is largely complete in order to limit the amount of imputation required to perform the time series analysis.
+
+# Results
+
+## Lag Analysis
+
+Of the 39 articles initially identified as relevant to mpox, only 14 contained enough data to be included in the lag analysis. For this analysis, a minimum of 71 days of pageview data was required, matching the 71 time lags used for calculating Spearman correlation. The lag analysis distinguished between negative lags, suggesting mpox cases influenced subsequent pageviews, and positive lags, indicating that pageviews may have predicted later mpox cases.
+
+Most articles, except for the one on Fever, demonstrated significant correlations with mpox cases at various time lags, with five articles (Encephalitis, Herpes simplex, Mpox, Smallpox, and Wart) maintaining a positive correlation across all lag periods, and three articles (Genital wart, Herpes simplex virus, and Sore throat) showing a consistent negative correlation. Interestingly, some articles exhibited changes in the direction of their correlation depending on the lag. For example, the article on Fatigue displayed a positive correlation when mpox cases preceded pageviews (negative lags) and a negative correlation for the opposite scenario (positive lags), suggesting that mpox cases typically lead to increased searches for fatigue, but not vice versa. Conversely, the Genital herpes article suggested that an increase in pageviews could potentially predict subsequent mpox cases. 
+
+![](images/spearman-correlation-heatmap.png){fig-align="center"}
+
+![](images/spearman-pvalues-heatmap.png){fig-align="center"}
+
+Articles with substantial correlation with mpox cases were selected for inclusion in the next stage of the analysis. Only articles with a Spearman correlation coefficient with an absolute value greater than 0.5 and at least 7 lag periods in which they were significantly correlated with mpox cases were included. Statistical significance is defined as `p` \< 0.05. As a result, the following articles were selected: Fatigue, Genital wart, Herpangina, Herpes, Herpes simplex, Mpox, Orthopoxvirus, Shingles, and Smallpox. 
+
+## Predictive Model
+
+The four models developed to predict mpox cases using Wikipedia pageview data show varied results. When fit to the training data from the initial period, the simplest model, tracking only mpox pageviews, closely mirrors actual case peaks but underestimates the decline. The second model, encompassing a wider range of related articles, captures the peak but similarly falters post-peak. The third model, which also accounts for media coverage and scientific interest slightly improves overall fit, suggesting these factors enhance model accuracy. In contrast, the most complex model, integrating additional pageviews, media, and scientific data, performs poorly, with erratic and sometimes negative predictions, likely due to overfitting. 
+
+When applied to data from a later time period, the models exhibited varied accuracy in forecasting actual case trends. The first model fails to reflect any significant change in the actual cases, showing a lack of responsiveness. The second model, analyzing a wider range of Mpox-related pageviews, presents erratic predictions that swing dramatically, suggesting overfitting and a disconnect from real-world data. Incorporating media coverage and scientific interest into the third model results in a prediction line with reduced volatility but still misaligned with actual trends, suggesting that these additions do not necessarily enhance predictive precision. Lastly, the fourth model aligns better with the actual case pattern but tends to overpredict, highlighting possible calibration or variable selection issues. These observations underscore the need for careful model optimization to improve forecasting accuracy.
+
+|                                                                         |
+|------------------------------------------------------------------------|
+| Goodness-of-fit statistics for different multivariate regression models |
+| Fitting parameter                                                       |
+| R²                                                                      |
+| Adjusted R²                                                             |
+| AIC                                                                     |
+| BIC                                                                     |
+
+Overall, none of the models seems to provide a consistently accurate fit across the entire timeline, as indicated by the discrepancies between the predicted and actual case counts. All models particularly struggle with capturing the peaks and troughs accurately, which could be due to missing explanatory variables, overfitting, or inappropriate model specifications for the complexity of the data. The substantial variability in predictions compared to actual cases suggests that further model refinement is needed, possibly including additional data preprocessing, feature engineering, or exploring alternative modeling approaches.
+
+## Granger Causality
+
+In the final stage of the analysis, a VAR model is utilized to further examine the relationship between Wikipedia pageviews and mpox case numbers, incorporating data lagged up to 20 days. The optimal number of lags was determined by evaluating various lag lengths and selecting the one with the lowest Akaike Information Criterion (AIC) value. Upon initial inspection, the 7-day rolling average of normalized mpox pageviews displayed non-stationarity, as indicated by a p-value above the 0.05 threshold from the Augmented Dickey-Fuller (ADF) test. To address this, first-order differencing was applied to the pageviews series, which effectively achieved stationarity in all variables, confirmed by subsequent ADF tests showing p-values below 0.05. This transformation is crucial for the validity of subsequent analyses, ensuring that the VAR model would not yield misleading inferences due to non-stationary data. This also impacts the interpretation, as following first-order differencing, the pageviews series now reflects changes in pageviews rather than the pageviews themselves.
+
+Following this, a VAR model was fit. Significant lags in both pageviews and mpox cases indicate that past values indeed have predictive power over current conditions. Specifically, several coefficients across various lags turned out to be statistically significant, underscoring periods where past data significantly influenced current values. The model fitting results further reinforce these findings. Equations for both pageviews and mpox cases demonstrated strong model fits, with high R-squared values suggesting that a substantial proportion of the variability in the dependent variables could be explained by the models.
+
+The VAR model underwent various validation checks to ensure its robustness and reliability. These included testing for autocorrelation in residuals using the Ljung-Box test, which confirmed the absence of significant autocorrelation, suggesting that the model effectively captured the dynamics within the data. Moreover, a robustness check varying the number of lags (optimal lag ± 1) confirmed that these findings were not overly sensitive to the specific choice of lag length. This sensitivity analysis, crucial for validating the stability of the model, supported the consistency of the model's performance across different specifications. However, despite these positive indicators, the normality tests such as the Jarque-Bera test revealed significant non-normality in the residuals. This non-normality could affect the reliability of some statistical inferences drawn from the model, such as confidence intervals and hypothesis tests. 
+
+![](images/impulse-response-function.png){fig-align="center"}
+
+The IRF analysis reveals the responses of mpox cases and pageviews to shocks within each series, demonstrating how changes in one variable affect the other over time. As observed from the plots, an initial shock in mpox cases predicts a continual increase in subsequent cases over ten days, indicating a potential compounding effect of cases on themselves. Conversely, a shock in pageviews percentage forecasts a decreasing trend in mpox cases over time, though with much uncertainty. The pageviews percentage itself responds positively to a shock in mpox cases for about eight days before declining, implying that case increases prompt a temporary rise in public interest. Lastly, a surge in pageviews percentage tends to peak quickly, followed by a recovery and then another decline, potentially due to information saturation. The confidence intervals across these graphs underscore the varying degrees of certainty regarding these predictions.
+
+The Granger-causality test results suggest a predictive relationship between Wikipedia pageviews and mpox cases. The pageviews significantly Granger-cause the number of cases (F-Test = 3.275, p-value \< 0.001), indicating that changes in Wikipedia traffic can predict future case numbers. Conversely, mpox cases also significantly Granger-cause changes in pageviews (F-Test = 8.299, p-value \< 0.001), suggesting that the occurrence of cases can forecast subsequent online search behavior. However, for both relationships, there is no evidence of instantaneous causality, as indicated by the non-significant Chi-squared statistic of 0.223 with a p-value of 0.637, implying that neither variable instantaneously predicts changes in the other within the same time frame.
+
+# Discussion
+
+## Key Findings
+
+There are several key findings from this analysis. First, the lag analysis identifies several articles with significant Spearman time-lag correlation for lags in which pageviews precede mpox cases, indicating the potential predictive value of such articles. Furthermore, the analysis reveals that the direction of correlation (positive or negative) can vary depending on the time lag. This variability in correlation suggests that the timing of information-seeking behavior on Wikipedia is relevant and can both reflect and potentially anticipate the rise or fall in mpox cases. Lastly, the different correlations observed across articles emphasize the complexity of the relationship between public information-seeking behavior and disease incidence. While some search behaviors on Wikipedia follow the occurrence of cases, others may serve as precursors, underscoring the bidirectional nature of this relationship.
+
+With regard to predictive modeling, none of the models provide a consistently accurate representation across the entire timeline, with difficulties in accurately capturing the peaks and troughs of outbreaks and generalizing later time periods. This implies that while digital traces like Wikipedia pageviews have potential in monitoring health trends, there is a clear need for further refinement of predictive models to ensure they are robust, generalizable, and accurate in diverse scenarios. Furthermore, the inclusion of media coverage and scientific interest appears to add some value to the models, providing a more nuanced view of public interest and potentially improving predictions. However, the enhancement is not substantial enough to align closely with actual case trends, suggesting these factors alone are not sufficient for accurate forecasts.
+
+Utilizing a VAR model, there is evidence of a predictive relationship between Wikipedia pageviews and mpox cases. The lagged data, which accounted for up to 20 days prior, significantly influenced current values, indicating that past data on pageviews and cases can inform predictions of future trends. The IRF analysis demonstrated the dynamic effect of shocks in one variable on the other. Shocks in mpox cases predicted an increase in subsequent cases, while shocks in pageviews indicated a potential decrease in future cases. Pageviews responded positively to shocks in case numbers initially but settled back, highlighting public attention patterns during health events. The Granger-causality tests confirmed that Wikipedia pageviews and mpox cases have a bidirectional predictive relationship, suggesting that mpox-related pageviews can predict future case numbers and vice versa. However, there was no evidence of instantaneous causality between the two variables, suggesting the relationship unfolds over time rather than simultaneously.
+
+Overall, the analysis suggests that Wikipedia traffic can serve as a valuable digital trace for monitoring and possibly forecasting public health trends. However, the model's limitations, particularly concerning the non-normality of residuals, serve as a reminder of the complexities involved in using digital platforms for epidemiological surveillance and the need for cautious interpretation of such models.
+
+## Limitations
+
+This paper identifies several limitations that could affect the interpretation of the results and the generalizability of the findings. While country-level Wikipedia pageview data provide several distinct advantages, the dataset nevertheless comes with its own limitations. Notably, the Wikimedia Foundation’s approach to differential privacy often results in significant data missingness, obscuring trends below minimum pageview thresholds. Moreover, the data is  disaggregated by Wikipedia language version before the minimum pageview threshold is applied, resulting in limited availability of pageview data for linguistic minorities. While this is not a large concern in the context of the United States where English represents approximately 90% of Wikipedia pageviews, this may not hold true in other contexts with greater linguistic diversity, thereby limiting generalizability. On a related note, the different minimum pageview thresholds applied to countries depending on their Country and Territory Protection List classifications, while of critical importance, does present a challenge for implementing a uniform approach to disease modeling across different countries. Additionally, it should be noted that country-level data is available only from July 2015 onward, thereby limiting the scope for retrospective analyses [@triedman2023]. Lastly, demographic biases in Wikipedia’s user base, which tend to be younger, more educated, and male, may not accurately reflect the broader public's concerns [@glott2010]. This skew could lead to misleading interpretations of public interest in health issues. 
+
+Methodologically, the study may not capture complex, nonlinear interactions between Wikipedia pageviews and epidemiological trends adequately. There's a notable risk of overfitting to specific case studies like the 2022-2024 mpox outbreak, which could undermine the findings' applicability to other diseases or contexts. Moreover, the influence of exogenous factors such as media coverage and scientific interest can significantly affect online search behaviors, complicating the interpretation of online behavior as a direct reflection of public health concerns  [@eysenbach2011]. Additionally, the article selection process could also have been expanded to include a broader range of health-related articles to potentially identify other relevant articles for analysis.
+
+## Future Research
+
+Moving forward, there is considerable scope for refining these methods to address these challenges. With regard to modeling, future work should explore different combinations of predictors, employ regularization techniques to prevent overfitting, and experiment with more sophisticated statistical models that are better suited to non-linear data or machine learning approaches. While this analysis specifically examines the 2022-2024 mpox outbreak in the U.S. context, different epidemiological events and time periods should be investigated to explore the reliability and generalizability of findings across various contexts. To account for the missingness common to country-level Wikipedia pageview data, various imputation strategies should be explored to better mitigate the impact of missing data as well as bias potentially introduced by imputed values. Future work could also quantify the extent to which different minimum pageview thresholds impact the accuracy of predictive models when using county-level Wikipedia pageview data. Finally, efforts should be made to de-noise the data by more thoroughly investigating the impact that external influences like media coverage and scientific interest have on pageviews. This is important to address considering these factors often skew public attention and complicate the interpretation of online information-seeking behaviors, especially when driven by an “epidemic of fear” [@eysenbach2011].
+
+## Policy Recommendations
+
+Based on the findings of this research, several actionable policy recommendations can enhance public health strategies using open source platforms such as Wikipedia. To improve the utility of the Wikimedia Foundation's data for research and policymaking, it is suggested that data release thresholds, which currently rely solely on a country's classification under the Country and Territory Protection List, be refined. Factors such as population size and internet usage rates should be incorporated to allow for more detailed data availability, without compromising privacy protections. To address concerns that lowering this threshold could impact language minorities in countries, the Wikimedia Foundation could aggregate pageviews by Wikidata ID. This is a unique identifier that links different language versions of the same article. This would have the potential to strengthen existing privacy protections, while also potentially increasing the number of articles with pageviews that exceed the minimum threshold. 
+
+Public health officials should explore adopting these digital epidemiological surveillance methods, incorporating them into existing surveillance systems. It should be emphasized that these methods should not replace traditional surveillance methods but rather supplement them. While this paper specifically investigates the efficacy of Wikipedia, other data sources should continue to be explored and used in conjunction with one another, so as to achieve a more comprehensive view of online health-related information-seeking behavior. By integrating these methods into early warning systems against disease, more nuanced public health interventions can be formulated, backed by empirical data to mitigate the impacts of future outbreaks.
+
+## Conclusion
+
+While leveraging digital traces of online health-related information-seeking behavior to make case predictions is a difficult endeavor, the elevated risk of widespread infectious disease outbreaks driven by an increasingly interconnected global society and climate change necessitates a careful examination of the digital tools available. Harnessing internet-based data for disease surveillance has the potential to enhance the speed and accuracy of public health responses. By integrating real-time digital analytics into traditional surveillance frameworks, public health agencies could significantly improve their ability to predict and respond to emerging health threats. Ultimately, this could lead to more proactive, rather than reactive, approaches in managing public health crises, potentially saving countless lives in the process.
+
+# References
