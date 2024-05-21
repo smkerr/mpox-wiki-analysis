@@ -239,7 +239,7 @@ Articles with substantial correlation with mpox cases were selected for inclusio
 
 The four models developed to predict mpox cases using Wikipedia pageview data show varied results. When fit to the training data from the initial period, the simplest model, tracking only mpox pageviews, closely mirrors actual case peaks but underestimates the decline. The second model, encompassing a wider range of related articles, captures the peak but similarly falters post-peak. The third model, which also accounts for media coverage and scientific interest slightly improves overall fit, suggesting these factors enhance model accuracy. In contrast, the most complex model, integrating additional pageviews, media, and scientific data, performs poorly, with erratic and sometimes negative predictions, likely due to overfitting. 
 
-![](images/Bildschirmfoto 2024-04-29 um 22.58.42.png)
+![](images/Bildschirmfoto%202024-04-29%20um%2022.58.42.png)
 
 ![](images/regression-analysis-model-fit-train.png)
 
@@ -261,9 +261,9 @@ The VAR model underwent various validation checks to ensure its robustness and r
 
 The IRF analysis reveals the responses of mpox cases and pageviews to shocks within each series, demonstrating how changes in one variable affect the other over time. As observed from the plots, an initial shock in mpox cases predicts a continual increase in subsequent cases over ten days, indicating a potential compounding effect of cases on themselves. Conversely, a shock in pageviews percentage forecasts a decreasing trend in mpox cases over time, though with much uncertainty. The pageviews percentage itself responds positively to a shock in mpox cases for about eight days before declining, implying that case increases prompt a temporary rise in public interest. Lastly, a surge in pageviews percentage tends to peak quickly, followed by a recovery and then another decline, potentially due to information saturation. The confidence intervals across these graphs underscore the varying degrees of certainty regarding these predictions.
 
-![](images/Bildschirmfoto 2024-04-29 um 22.50.50.png)
+![](images/Bildschirmfoto%202024-04-29%20um%2022.50.50.png)
 
-![](images/Bildschirmfoto 2024-04-29 um 22.51.35.png)
+![](images/Bildschirmfoto%202024-04-29%20um%2022.51.35.png)
 
 The Granger-causality test results suggest a predictive relationship between Wikipedia pageviews and mpox cases. The pageviews significantly Granger-cause the number of cases (F-Test = 3.275, p-value \< 0.001), indicating that changes in Wikipedia traffic can predict future case numbers. Conversely, mpox cases also significantly Granger-cause changes in pageviews (F-Test = 8.299, p-value \< 0.001), suggesting that the occurrence of cases can forecast subsequent online search behavior. However, for both relationships, there is no evidence of instantaneous causality, as indicated by the non-significant Chi-squared statistic of 0.223 with a p-value of 0.637, implying that neither variable instantaneously predicts changes in the other within the same time frame.
 

@@ -20,6 +20,7 @@ pacman::p_load(
   scales,
   slider,
   spData,
+  stringr,
   tidyr,
   tmap,
   install = FALSE
