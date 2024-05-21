@@ -8,6 +8,8 @@ As the world becomes increasingly interconnected and climate change elevates the
 
 [➡️ Read the paper](https://raw.githubusercontent.com/smkerr/mpox-wiki-analysis/main/7-paper/thesis.pdf)
 
+[➡️ View the poster](https://raw.githubusercontent.com/smkerr/mpox-wiki-analysis/main/8-poster/poster.pdf)
+
 ## Repository structure
 
     .
